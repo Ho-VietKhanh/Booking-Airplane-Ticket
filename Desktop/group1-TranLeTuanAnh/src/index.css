@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Hiệu ứng chuyển động gradient đẹp hơn */
+@keyframes gradientMove {
+    0% {
+      background-position: 0% 50%;
+    }
+    25% {
+      background-position: 50% 100%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    75% {
+      background-position: 50% 0%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  
+  .bg-animated-gradient {
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1, #fbc2eb, #fad0c4, #ff9a9e);
+    background-size: 300% 300%;
+    animation: gradientMove 8s ease infinite;
+  }

@@ -1,0 +1,45 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Eclipse
+.project
+.classpath
+.settings/
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.loadpath
+
+# VS Code
+.vscode/
+
+# Lombok
+.apt_generated
+
+# Logs
+*.log
+
+# Hệ điều hành Mac
+.DS_Store
+
+# Hệ điều hành Windows
+Thumbs.db
+node_modules/
+

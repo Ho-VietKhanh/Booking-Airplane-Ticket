@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -36,6 +37,6 @@ public class PaymentEntity {
     @JoinColumn(name = "payment_method_id", nullable = false)
     private PaymentMethodEntity paymentMethod;
 
-    @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BookingEntity> bookings;
+    @OneToMany(mappedBy = "payment")
+    private List<BookingEntity> bookings = new ArrayList<>();
 }

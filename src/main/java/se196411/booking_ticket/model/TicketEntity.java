@@ -14,23 +14,23 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class TicketEntity {
     @Id
-    @Column (name = "ticket_id", nullable = false)
+    @Column(name = "ticket_id", nullable = false)
     private String ticketId;
-    @Column (name = "price", nullable = false)
+    @Column(name = "price", nullable = false)
     private BigDecimal price;
-    @Column (name = "status", nullable = false)
+    @Column(name = "status", nullable = false)
     private String status;
 
     // Relationships
     @ManyToOne
-    @JoinColumn (name = "flight_id", nullable = false)
+    @JoinColumn(name = "flight_id", nullable = false)
     private FlightsEntity flight;
 
     @ManyToOne
-    @JoinColumn (name = "booking", nullable = false)
+    @JoinColumn(name = "booking", nullable = false)
     private BookingEntity booking;
 
-    //@ManyToOne
-    //@Column (name = "seat", nullable = false)
-    //private SeatEntity seat;
+    @ManyToOne
+    @JoinColumn(name = "seat_id", nullable = false)
+    private SeatEntity seat;
 }

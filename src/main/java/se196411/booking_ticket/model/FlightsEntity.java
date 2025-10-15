@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name="flight")
@@ -32,4 +33,8 @@ public class FlightsEntity {
     private LocalDateTime endedTime;
     @Column(name = "status", nullable = false)
     private String status;
+
+    // Relationships
+    @OneToMany(mappedBy = "flight")
+    private List<TicketEntity> tickets;
 }

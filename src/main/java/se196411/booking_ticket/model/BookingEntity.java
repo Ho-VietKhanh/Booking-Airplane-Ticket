@@ -16,8 +16,8 @@ import java.util.List;
 @AllArgsConstructor
 public class BookingEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    @Column(name = "booking_id", nullable = false)
+    private String bookingId;
     @Column (name = "booking_time", nullable = false)
     private LocalDateTime bookingTime;
     @Column (name = "total_amount", nullable = false)

@@ -34,7 +34,7 @@ public class PaymentEntity {
 
     //Relationships
     @ManyToOne
-    @JoinColumn(name = "payment_method_id", nullable = false)
+    @JoinColumn(name = "payment_method_id", nullable = false) 
     private PaymentMethodEntity paymentMethod;
 
     @OneToMany(mappedBy = "payment")

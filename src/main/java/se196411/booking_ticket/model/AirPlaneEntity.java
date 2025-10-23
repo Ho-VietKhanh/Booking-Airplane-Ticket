@@ -20,7 +20,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AirPlaneEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "airplane_id", nullable = false)
     private String airplaneId;
 
@@ -35,5 +34,8 @@ public class AirPlaneEntity {
 
     @OneToMany(mappedBy = "airplane")
     private List<SeatEntity> seats;
+
+    @OneToMany(mappedBy = "airplane")
+    private List<FlightsEntity> flights;
 
 }

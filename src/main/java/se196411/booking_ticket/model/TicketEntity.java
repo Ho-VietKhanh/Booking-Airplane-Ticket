@@ -27,7 +27,7 @@ public class TicketEntity {
     private FlightsEntity flight;
 
     @ManyToOne
-    @JoinColumn(name = "booking", nullable = false)
+    @JoinColumn(name = "booking_id", nullable = false)
     private BookingEntity booking;
 
     @ManyToOne

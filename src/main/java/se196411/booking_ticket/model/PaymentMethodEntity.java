@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PaymentMethodEntity {
+public class      PaymentMethodEntity {
     @Id
     @Column(name = "payment_method_id", nullable = false, unique = true, length = 36)
     private String paymentMethodId;

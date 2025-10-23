@@ -1,16 +1,18 @@
 package se196411.booking_ticket.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
-import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.catalina.User;
 
-@Getter
-@Setter
+import java.util.List;
+
 @Entity
 @Table(name = "roles")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class RoleEntity {
     @Id
     @Column(name = "role_id", nullable = false, unique = true)
@@ -21,5 +23,8 @@ public class RoleEntity {
 
     @Column(name = "description")
     private String description;
+
+    @OneToMany(mappedBy = "role")
+    private List<UserEntity> users;
 
 }

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "flight")
@@ -17,13 +18,12 @@ public class FlightsEntity {
     @Id
     @Column(name = "flight_id", nullable = false)
     String flightId;
-    // @ManyToOne
-    // @JoinColumn(name = "airplane_id", nullable = false)
-    // private AirplaneEntity airplaneEntity
+    @ManyToOne
+    @JoinColumn(name = "airplane_id", nullable = false)
+    private AirPlaneEntity airplane;
     @ManyToOne
     @JoinColumn(name = "flight_routes_id", nullable = false)
     private FlightRoutesEntity flightRoute;
-
     @Column(name = "base_price", nullable = false)
     private BigDecimal basePrice;
     @Column(name = "started_time", nullable = false)
@@ -32,4 +32,7 @@ public class FlightsEntity {
     private LocalDateTime endedTime;
     @Column(name = "status", nullable = false)
     private String status;
+
+    @OneToMany(mappedBy = "flight")
+    private List<TicketEntity> tickets;
 }

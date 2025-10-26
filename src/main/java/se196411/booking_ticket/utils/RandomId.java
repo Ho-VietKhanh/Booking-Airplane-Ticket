@@ -7,7 +7,7 @@ public class RandomId {
     public static String    generateRandomId(int characterLength, int numberLength) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < characterLength; i++) {
-            char letter = (char) ('A' + RANDOM.nextInt(26));
+            char letter = (char) ('A' + RANDOM.nextInt(26)); // 'A' + 0 = 'A', 'A' + 25 = 'Z'
             sb.append(letter);
         }
         for (int i = 0; i < numberLength; i++) {

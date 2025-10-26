@@ -20,8 +20,8 @@ public class AirportsEntity {
     private String code;
     @Column(name = "name", nullable = false)
     private String name;
-    @Column(name = "country", nullable = false)
-    private String country;
+    @Column(name = "place", nullable = false)
+    private String place;
 
     @OneToMany(mappedBy = "startedAirport")
     List<FlightRoutesEntity> startedFlightRoutes;

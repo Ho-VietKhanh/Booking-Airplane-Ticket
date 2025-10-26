@@ -6,4 +6,5 @@ import se196411.booking_ticket.model.AirPlaneEntity;
 
 @Repository
 public interface AirplaneRepository extends JpaRepository<AirPlaneEntity, String> {
+    boolean existsByAirplaneCode(String airplaneCode);
 }

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .booking-info {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .info-row {
+            margin: 10px 0;
+        }
+        .label {
+            font-weight: bold;
+            display: inline-block;
+            width: 150px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 10px 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background-color: #2196F3;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Booking Details</h1>
+        <button class="btn" onclick="window.location.href='/booking/bookinglist.html'">Back to List</button>
+
+        <div class="booking-info" id="bookingInfo"></div>
+
+        <h2>Tickets</h2>
+        <table id="ticketTable">
+            <thead>
+                <tr>
+                    <th>Ticket ID</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Flight ID</th>
+                    <th>Seat ID</th>
+                </tr>
+            </thead>
+            <tbody id="ticketTableBody">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookingId = urlParams.get('bookingId');
+
+        async function loadBookingDetails() {
+            try {
+                const response = await fetch(`/api/booking/getBookingById/${bookingId}`);
+                const booking = await response.json();
+
+                const bookingInfoDiv = document.getElementById('bookingInfo');
+                bookingInfoDiv.innerHTML = `
+                    <div class="info-row"><span class="label">Booking ID:</span> ${booking.bookingId}</div>
+                    <div class="info-row"><span class="label">Booking Time:</span> ${new Date(booking.bookingTime).toLocaleString()}</div>
+                    <div class="info-row"><span class="label">Total Amount:</span> $${booking.totalAmount.toFixed(2)}</div>
+                    <div class="info-row"><span class="label">Status:</span> ${booking.status}</div>
+                    <div class="info-row"><span class="label">Payment ID:</span> ${booking.paymentId}</div>
+                    <div class="info-row"><span class="label">User ID:</span> ${booking.userId}</div>
+                `;
+
+                loadTickets();
+            } catch (error) {
+                console.error('Error loading booking details:', error);
+            }
+        }
+
+        async function loadTickets() {
+            try {
+                const response = await fetch(`/api/booking/getTicketsByBooking/${bookingId}`);
+                const tickets = await response.json();
+                const tableBody = document.getElementById('ticketTableBody');
+                tableBody.innerHTML = '';
+
+                tickets.forEach(ticket => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${ticket.ticketId}</td>
+                        <td>$${ticket.price.toFixed(2)}</td>
+                        <td>${ticket.status}</td>
+                        <td>${ticket.flightId}</td>
+                        <td>${ticket.seatId}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading tickets:', error);
+            }
+        }
+
+        window.onload = loadBookingDetails;
+    </script>
+</body>
+</html>

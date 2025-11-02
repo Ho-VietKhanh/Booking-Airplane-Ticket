@@ -1,9 +1,8 @@
 package se196411.booking_ticket.service;
 
-import se196411.booking_ticket.model.TicketEntity;
+import se196411.booking_ticket.model.entity.TicketEntity;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface TicketService {
     TicketEntity create(TicketEntity ticket);

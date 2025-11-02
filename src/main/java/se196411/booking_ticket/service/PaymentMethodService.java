@@ -1,7 +1,7 @@
 package se196411.booking_ticket.service;
 
 import org.springframework.stereotype.Service;
-import se196411.booking_ticket.model.PaymentMethodEntity;
+import se196411.booking_ticket.model.entity.PaymentMethodEntity;
 
 import java.util.List;
 import java.util.Optional;

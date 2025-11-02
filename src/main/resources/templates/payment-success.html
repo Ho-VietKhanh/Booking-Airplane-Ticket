@@ -1,0 +1,35 @@
+<!-- language: html -->
+<!-- src/main/resources/templates/payment-success.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Success</title>
+    <style>
+        body{font-family:Arial, sans-serif;background:#f5f5f5;}
+        .box{max-width:800px;margin:80px auto;background:#fff;padding:28px;border-radius:8px;text-align:left;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+        .ok{color:#00693E;font-weight:bold;}
+    </style>
+</head>
+<body>
+<div class="box">
+    <h2 class="ok">Payment completed successfully</h2>
+
+    <div th:if="${payment != null}">
+        <p>Payment ID: <strong th:text="${payment.paymentId}">-</strong></p>
+        <p>Amount: <strong th:text="${#numbers.formatDecimal(payment.amount,0,'COMMA',0,'POINT')} + ' VND'">0 VND</strong></p>
+        <p>Method: <strong th:text="${payment.paymentMethod.paymentMethodName}">-</strong></p>
+        <p>Paid at: <strong th:text="${payment.paidAt}">-</strong></p>
+    </div>
+
+    <div th:if="${booking != null}" style="margin-top:12px;">
+        <p>Booking ID: <strong th:text="${booking.bookingId}">-</strong></p>
+        <p>Status: <strong th:text="${booking.status}">-</strong></p>
+    </div>
+
+    <div style="margin-top:18px;">
+        <a th:href="@{/}" style="color:#00693E">Back to home</a>
+    </div>
+</div>
+</body>
+</html>

@@ -8,7 +8,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import se196411.booking_ticket.model.RoleEntity;
 import se196411.booking_ticket.model.UserEntity;
-import se196411.booking_ticket.repository.UserRepository;
 
 import java.util.Collection;
 import java.util.stream.Collectors;

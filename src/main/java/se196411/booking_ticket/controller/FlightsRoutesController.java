@@ -57,7 +57,7 @@ public class FlightsRoutesController {
     }
 
     @GetMapping("/getRoutesByAirport")
-    ResponseEntity<List<FlightsRoutesResponseDTO>> getRoutesByAirport(@RequestBody FlightsRoutesRequestDTO request) {
+    ResponseEntity<List<FlightsRoutesResponseDTO>> getRoutesByAirport(@RequestParam FlightsRoutesRequestDTO request) {
         List<FlightsRoutesResponseDTO> flightsRoutesResponseDTOList =
             flightsRoutesService.getFlightRoutesByAirportId(request.getStartedAirportId(), request.getEndedAirportId());
         if(flightsRoutesResponseDTOList == null || flightsRoutesResponseDTOList.isEmpty()) {

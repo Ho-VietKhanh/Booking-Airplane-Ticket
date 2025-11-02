@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Điền Thông Tin Hành Khách - Booking Ticket</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .flight-info {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .flight-info h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .flight-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .flight-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .flight-item label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .flight-item span {
+            color: #333;
+            font-size: 16px;
+        }
+
+        .form-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .form-section h2 {
+            color: #667eea;
+            margin-bottom: 25px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-section h2::before {
+            content: '✈';
+            font-size: 24px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .form-group label .required {
+            color: #e74c3c;
+            margin-left: 3px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background-color: #fafafa;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #aaa;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 8px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .radio-option label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .passenger-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            background: #fafafa;
+        }
+
+        .passenger-card h3 {
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .note-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .note-box p {
+            font-size: 14px;
+            color: #856404;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .price-summary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+        }
+
+        .price-summary h3 {
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .price-total {
+            border-top: 2px solid rgba(255,255,255,0.3);
+            margin-top: 15px;
+            padding-top: 15px;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        .checkbox-group {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .checkbox-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #667eea;
+            margin-top: 3px;
+        }
+
+        .checkbox-option label {
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>✈️ ĐIỀN THÔNG TIN HÀNH KHÁCH</h1>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Flight Information -->
+        <div class="flight-info">
+            <h2>Thông Tin Chuyến Bay</h2>
+            <div class="flight-details">
+                <div class="flight-item">
+                    <label>Mã chuyến bay:</label>
+                    <span id="flightCode">VJ123</span>
+                </div>
+                <div class="flight-item">
+                    <label>Hành trình:</label>
+                    <span id="route">Hà Nội → TP. Hồ Chí Minh</span>
+                </div>
+                <div class="flight-item">
+                    <label>Ngày bay:</label>
+                    <span id="flightDate">02/11/2025</span>
+                </div>
+                <div class="flight-item">
+                    <label>Giờ khởi hành:</label>
+                    <span id="departureTime">14:30</span>
+                </div>
+            </div>
+        </div>
+
+        <form id="bookingForm" action="/api/booking/submit" method="POST">
+            <!-- Contact Information -->
+            <div class="form-section">
+                <h2>Thông Tin Liên Hệ</h2>
+                <div class="note-box">
+                    <p>📧 Thông tin đặt chỗ sẽ được gửi đến email và số điện thoại dưới đây</p>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email <span class="required">*</span></label>
+                        <input type="email" name="email" placeholder="vd: nguyenvana@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Số điện thoại <span class="required">*</span></label>
+                        <input type="tel" name="phone" placeholder="vd: 0912345678" pattern="[0-9]{10,11}" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Passenger 1 Information -->
+            <div class="form-section">
+                <h2>Thông Tin Hành Khách</h2>
+
+                <div class="passenger-card">
+                    <h3>👤 Hành khách 1 (Người lớn)</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Danh xưng <span class="required">*</span></label>
+                            <select name="passenger1_title" required>
+                                <option value="">-- Chọn danh xưng --</option>
+                                <option value="Mr">Ông (Mr.)</option>
+                                <option value="Mrs">Bà (Mrs.)</option>
+                                <option value="Ms">Cô/Chị (Ms.)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Họ và tên đệm <span class="required">*</span></label>
+                            <input type="text" name="passenger1_lastName" placeholder="vd: NGUYEN VAN" required pattern="[A-Za-z\s]+" title="Chỉ nhập chữ cái">
+                        </div>
+                        <div class="form-group">
+                            <label>Tên <span class="required">*</span></label>
+                            <input type="text" name="passenger1_firstName" placeholder="vd: A" required pattern="[A-Za-z\s]+" title="Chỉ nhập chữ cái">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Ngày sinh <span class="required">*</span></label>
+                            <input type="date" name="passenger1_dob" required max="2024-11-02">
+                        </div>
+                        <div class="form-group">
+                            <label>Giới tính <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="p1_male" name="passenger1_gender" value="male" required>
+                                    <label for="p1_male">Nam</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="p1_female" name="passenger1_gender" value="female">
+                                    <label for="p1_female">Nữ</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Số CMND/CCCD/Hộ chiếu</label>
+                            <input type="text" name="passenger1_idCard" placeholder="vd: 001234567890">
+                        </div>
+                        <div class="form-group">
+                            <label>Quốc tịch</label>
+                            <select name="passenger1_nationality">
+                                <option value="VN" selected>Việt Nam</option>
+                                <option value="US">Hoa Kỳ</option>
+                                <option value="UK">Anh</option>
+                                <option value="JP">Nhật Bản</option>
+                                <option value="KR">Hàn Quốc</option>
+                                <option value="CN">Trung Quốc</option>
+                                <option value="TH">Thái Lan</option>
+                                <option value="SG">Singapore</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add more passengers button -->
+                <div style="text-align: center; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="addPassenger()">
+                        ➕ Thêm hành khách
+                    </button>
+                </div>
+            </div>
+
+            <!-- Additional Services -->
+            <div class="form-section">
+                <h2>Dịch Vụ Bổ Sung</h2>
+                <div class="checkbox-group">
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="baggage" name="services" value="baggage">
+                        <label for="baggage">
+                            <strong>Hành lý ký gửi</strong> (+200,000 VNĐ/20kg)<br>
+                            Thêm hành lý ký gửi cho chuyến bay của bạn
+                        </label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="meal" name="services" value="meal">
+                        <label for="meal">
+                            <strong>Suất ăn trên máy bay</strong> (+100,000 VNĐ)<br>
+                            Đặt trước suất ăn ngon miệng
+                        </label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="insurance" name="services" value="insurance">
+                        <label for="insurance">
+                            <strong>Bảo hiểm hành trình</strong> (+50,000 VNĐ)<br>
+                            Bảo vệ chuyến đi của bạn với bảo hiểm du lịch
+                        </label>
+                    </div>
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="seat" name="services" value="seat">
+                        <label for="seat">
+                            <strong>Chọn chỗ ngồi trước</strong> (+150,000 VNĐ)<br>
+                            Lựa chọn chỗ ngồi yêu thích của bạn
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price Summary -->
+            <div class="price-summary">
+                <h3>💰 Tổng Thanh Toán</h3>
+                <div class="price-item">
+                    <span>Vé máy bay (1 người lớn):</span>
+                    <span>1,500,000 VNĐ</span>
+                </div>
+                <div class="price-item">
+                    <span>Thuế và phí:</span>
+                    <span>300,000 VNĐ</span>
+                </div>
+                <div class="price-item">
+                    <span>Dịch vụ bổ sung:</span>
+                    <span id="servicesTotal">0 VNĐ</span>
+                </div>
+                <div class="price-total">
+                    <span>Tổng cộng:</span>
+                    <span id="totalPrice">1,800,000 VNĐ</span>
+                </div>
+            </div>
+
+            <!-- Terms and Conditions -->
+            <div class="form-section">
+                <div class="checkbox-option">
+                    <input type="checkbox" id="terms" name="terms" required>
+                    <label for="terms">
+                        Tôi đã đọc và đồng ý với <a href="#" style="color: #667eea; text-decoration: underline;">Điều khoản và Điều kiện</a> cũng như <a href="#" style="color: #667eea; text-decoration: underline;">Chính sách Bảo mật</a> của công ty <span class="required">*</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button type="button" class="btn btn-secondary" onclick="history.back()">
+                    ⬅ Quay lại
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    Tiếp tục thanh toán ➡
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Calculate total price based on selected services
+        const servicePrices = {
+            baggage: 200000,
+            meal: 100000,
+            insurance: 50000,
+            seat: 150000
+        };
+
+        const basePrice = 1800000;
+        let passengerCount = 1;
+
+        document.querySelectorAll('input[name="services"]').forEach(checkbox => {
+            checkbox.addEventListener('change', updatePrice);
+        });
+
+        function updatePrice() {
+            let servicesTotal = 0;
+            document.querySelectorAll('input[name="services"]:checked').forEach(checkbox => {
+                servicesTotal += servicePrices[checkbox.value];
+            });
+
+            document.getElementById('servicesTotal').textContent =
+                servicesTotal.toLocaleString('vi-VN') + ' VNĐ';
+
+            const totalPrice = basePrice + servicesTotal;
+            document.getElementById('totalPrice').textContent =
+                totalPrice.toLocaleString('vi-VN') + ' VNĐ';
+        }
+
+        function addPassenger() {
+            passengerCount++;
+            const passengerHTML = `
+                <div class="passenger-card" id="passenger${passengerCount}">
+                    <h3>👤 Hành khách ${passengerCount} (Người lớn)
+                        <button type="button" onclick="removePassenger(${passengerCount})"
+                                style="float: right; background: #e74c3c; color: white; border: none;
+                                       padding: 5px 15px; border-radius: 5px; cursor: pointer;">
+                            ✕ Xóa
+                        </button>
+                    </h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Danh xưng <span class="required">*</span></label>
+                            <select name="passenger${passengerCount}_title" required>
+                                <option value="">-- Chọn danh xưng --</option>
+                                <option value="Mr">Ông (Mr.)</option>
+                                <option value="Mrs">Bà (Mrs.)</option>
+                                <option value="Ms">Cô/Chị (Ms.)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Họ và tên đệm <span class="required">*</span></label>
+                            <input type="text" name="passenger${passengerCount}_lastName" placeholder="vd: NGUYEN VAN" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tên <span class="required">*</span></label>
+                            <input type="text" name="passenger${passengerCount}_firstName" placeholder="vd: A" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Ngày sinh <span class="required">*</span></label>
+                            <input type="date" name="passenger${passengerCount}_dob" required max="2024-11-02">
+                        </div>
+                        <div class="form-group">
+                            <label>Giới tính <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="p${passengerCount}_male" name="passenger${passengerCount}_gender" value="male" required>
+                                    <label for="p${passengerCount}_male">Nam</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="p${passengerCount}_female" name="passenger${passengerCount}_gender" value="female">
+                                    <label for="p${passengerCount}_female">Nữ</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Số CMND/CCCD/Hộ chiếu</label>
+                            <input type="text" name="passenger${passengerCount}_idCard" placeholder="vd: 001234567890">
+                        </div>
+                        <div class="form-group">
+                            <label>Quốc tịch</label>
+                            <select name="passenger${passengerCount}_nationality">
+                                <option value="VN" selected>Việt Nam</option>
+                                <option value="US">Hoa Kỳ</option>
+                                <option value="UK">Anh</option>
+                                <option value="JP">Nhật Bản</option>
+                                <option value="KR">Hàn Quốc</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const lastPassengerCard = document.querySelector('.passenger-card:last-of-type');
+            lastPassengerCard.insertAdjacentHTML('afterend', passengerHTML);
+        }
+
+        function removePassenger(id) {
+            const passenger = document.getElementById(`passenger${id}`);
+            if (passenger) {
+                passenger.remove();
+            }
+        }
+
+        // Form validation before submit
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Validate all required fields
+            const requiredFields = this.querySelectorAll('[required]');
+            let isValid = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value) {
+                    isValid = false;
+                    field.style.borderColor = '#e74c3c';
+                } else {
+                    field.style.borderColor = '#e0e0e0';
+                }
+            });
+
+            if (!isValid) {
+                alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+                return;
+            }
+
+            if (!document.getElementById('terms').checked) {
+                alert('Vui lòng đồng ý với điều khoản và điều kiện!');
+                return;
+            }
+
+            // If all validations pass
+            alert('Thông tin đã được gửi! Chuyển đến trang thanh toán...');
+            // Uncomment below to actually submit the form
+            // this.submit();
+        });
+
+        // Format phone input
+        document.querySelector('input[name="phone"]').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // Convert name to uppercase
+        document.querySelectorAll('input[name*="_lastName"], input[name*="_firstName"]').forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        });
+    </script>
+</body>
+</html>

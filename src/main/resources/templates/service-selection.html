@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lựa chọn dịch vụ - Bamboo Airways</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            background-color: #fff;
+            padding: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00693E;
+        }
+
+        .flight-info {
+            background-color: #fff;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .title p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .service-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .service-card {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            border-color: #00693E;
+        }
+
+        .service-icon {
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .service-card h3 {
+            color: #333;
+            font-size: 22px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .service-card p {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: #00693E;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #005030;
+        }
+
+        .btn-secondary {
+            background-color: #fff;
+            color: #00693E;
+            border: 2px solid #00693E;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">🛫 BAMBOO AIRWAYS</div>
+            <div>Đặt chỗ của bạn</div>
+        </div>
+    </div>
+
+    <div class="flight-info">
+        <h3>Thông tin chuyến bay</h3>
+        <p>Mã chuyến bay: <strong th:text="${flightId}">FL001</strong></p>
+        <p>Số hành khách: <strong th:text="${passengerCount}">1</strong></p>
+    </div>
+
+    <div class="container">
+        <div class="title">
+            <h1>Lựa chọn món</h1>
+            <p>Vui lòng chọn các dịch vụ bổ sung cho chuyến bay của bạn</p>
+        </div>
+
+        <div class="service-cards">
+            <div class="service-card" onclick="goToSeatSelection()">
+                <div class="service-icon">💺</div>
+                <h3>Chọn Chỗ Ngồi</h3>
+                <p>Chọn vị trí ngồi yêu thích của bạn trên máy bay. Ghế ngồi cạnh cửa sổ, lối đi hoặc ghế có khoảng duỗi chân rộng.</p>
+            </div>
+
+            <div class="service-card" onclick="goToBaggageSelection()">
+                <div class="service-icon">🧳</div>
+                <h3>Hành Lý Ký Gửi</h3>
+                <p>Thêm hành lý ký gửi với nhiều mức cân nặng khác nhau. Tiết kiệm hơn khi đặt trước.</p>
+            </div>
+
+            <div class="service-card" onclick="goToMealSelection()">
+                <div class="service-icon">🍱</div>
+                <h3>Suất Ăn</h3>
+                <p>Đặt trước suất ăn ngon miệng với nhiều lựa chọn phong phú phù hợp khẩu vị của bạn.</p>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="#" class="btn btn-secondary">Quay lại</a>
+            <a href="#" class="btn btn-primary" onclick="skipServices()">Bỏ qua và tiếp tục</a>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const flightId = /*[[${flightId}]]*/ 'FL001';
+        const passengerCount = /*[[${passengerCount}]]*/ 1;
+
+        function goToSeatSelection() {
+            window.location.href = `/booking/services/seats?flightId=${flightId}&passengers=${passengerCount}`;
+        }
+
+        function goToBaggageSelection() {
+            window.location.href = `/booking/services/extras?flightId=${flightId}&passengers=${passengerCount}`;
+        }
+
+        function goToMealSelection() {
+            window.location.href = `/booking/services/extras?flightId=${flightId}&passengers=${passengerCount}`;
+        }
+
+        function skipServices() {
+            // Navigate to payment or next step
+            alert('Chuyển đến bước thanh toán');
+        }
+    </script>
+</body>
+</html>
+

@@ -20,7 +20,7 @@ public class FlightsEntity {
     String flightId;
     @ManyToOne
     @JoinColumn(name = "airplane_id", nullable = false)
-    private AirplaneEntity airplane;
+    private AirPlaneEntity airplane;
     @ManyToOne
     @JoinColumn(name = "flight_routes_id", nullable = false)
     private FlightRoutesEntity flightRoute;

@@ -2,7 +2,7 @@ package se196411.booking_ticket.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import se196411.booking_ticket.model.AirPlaneEntity;
+import se196411.booking_ticket.model.AirplaneEntity;
 import se196411.booking_ticket.model.FlightRoutesEntity;
 import se196411.booking_ticket.model.FlightsEntity;
 import se196411.booking_ticket.model.dto.FlightsRequestDTO;
@@ -41,7 +41,7 @@ public class FlightsServiceImpl implements FlightsService {
         if (flightsRequestDTO == null) {
             return false;
         }
-        AirPlaneEntity airPlane = airplaneRepository.findById(flightsRequestDTO.getAirplaneId()).orElse(null);
+        AirplaneEntity airPlane = airplaneRepository.findById(flightsRequestDTO.getAirplaneId()).orElse(null);
         if(airPlane == null) {
             return false;
         }
@@ -68,7 +68,7 @@ public class FlightsServiceImpl implements FlightsService {
         if(flightsEntity == null) {
             return false;
         }
-        AirPlaneEntity airPlane = airplaneRepository.findById(flightsRequestDTO.getAirplaneId()).orElse(null);
+        AirplaneEntity airPlane = airplaneRepository.findById(flightsRequestDTO.getAirplaneId()).orElse(null);
         if(airPlane == null) {
             return false;
         }
@@ -105,6 +105,7 @@ public class FlightsServiceImpl implements FlightsService {
             throw new RuntimeException("Not found FlightsEntity");
         }
         FlightsResponseDTO flightsResponseDTO = new FlightsResponseDTO();
+        flightsResponseDTO.setFlightId(flightsEntity.getFlightId());
         flightsResponseDTO.setFlightRouteId(flightsEntity.getFlightId());
         flightsResponseDTO.setAirplaneId(flightsEntity.getFlightId());
         flightsResponseDTO.setBasePrice(flightsEntity.getBasePrice());

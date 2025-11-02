@@ -10,5 +10,4 @@ import java.util.List;
 @Repository
 public interface AirplaneRepository extends JpaRepository<AirplaneEntity, String> {
     List<SeatEntity> findSeatsByAirplaneId(String airplaneId);
-    boolean existsByAirplaneCode(String airplaneCode);
 }

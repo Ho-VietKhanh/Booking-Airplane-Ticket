@@ -106,8 +106,8 @@ public class FlightsServiceImpl implements FlightsService {
         }
         FlightsResponseDTO flightsResponseDTO = new FlightsResponseDTO();
         flightsResponseDTO.setFlightId(flightsEntity.getFlightId());
-        flightsResponseDTO.setFlightRouteId(flightsEntity.getFlightId());
-        flightsResponseDTO.setAirplaneId(flightsEntity.getFlightId());
+        flightsResponseDTO.setFlightRouteId(flightsEntity.getFlightRoute().getFlightRoutesId());
+        flightsResponseDTO.setAirplaneId(flightsEntity.getAirplane().getAirplaneId());
         flightsResponseDTO.setBasePrice(flightsEntity.getBasePrice());
         flightsResponseDTO.setStartedTime(flightsEntity.getStartedTime());
         flightsResponseDTO.setEndedTime(flightsEntity.getEndedTime());

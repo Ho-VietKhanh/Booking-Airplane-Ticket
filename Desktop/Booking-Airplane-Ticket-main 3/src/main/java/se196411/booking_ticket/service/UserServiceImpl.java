@@ -5,8 +5,6 @@ import org.springframework.stereotype.Service;
 import se196411.booking_ticket.model.dto.UserDto;
 import se196411.booking_ticket.model.RoleEntity;
 import se196411.booking_ticket.model.UserEntity;
-import se196411.booking_ticket.repository.RoleRepository;
-import se196411.booking_ticket.repository.UserRepository;
 import se196411.booking_ticket.service.UserService;
 
 import java.util.Arrays;

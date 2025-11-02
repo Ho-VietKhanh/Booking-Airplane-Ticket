@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chọn chỗ ngồi - Bamboo Airways</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            background-color: #fff;
+            padding: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00693E;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .info-section {
+            background-color: #E8F5F1;
+            border-left: 4px solid #00693E;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .info-section h3 {
+            color: #00693E;
+            margin-bottom: 10px;
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .seat-legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            border: 2px solid #ddd;
+        }
+
+        .legend-available {
+            background-color: #FFD700;
+        }
+
+        .legend-selected {
+            background-color: #00693E;
+        }
+
+        .legend-occupied {
+            background-color: #B0B0B0;
+        }
+
+        .legend-standard {
+            background-color: #87CEEB;
+        }
+
+        .legend-exit {
+            background-color: #90EE90;
+        }
+
+        .seat-map-container {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 40px 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .seat-map {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .seat-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .row-number {
+            width: 40px;
+            text-align: center;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .seats-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .aisle {
+            width: 40px;
+        }
+
+        .seat {
+            width: 45px;
+            height: 45px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .seat:hover:not(.occupied):not(.selected) {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .seat.available {
+            background-color: #FFD700;
+            color: #333;
+        }
+
+        .seat.occupied {
+            background-color: #B0B0B0;
+            color: #fff;
+            cursor: not-allowed;
+        }
+
+        .seat.selected {
+            background-color: #00693E;
+            color: #fff;
+            border-color: #00693E;
+        }
+
+        .seat.economy {
+            background-color: #87CEEB;
+        }
+
+        .seat.business {
+            background-color: #FFD700;
+        }
+
+        .column-labels {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .column-label {
+            width: 45px;
+            text-align: center;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .selected-seats-info {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .selected-seats-info h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .selected-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .selected-seat-tag {
+            background-color: #00693E;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .remove-seat {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: #00693E;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #005030;
+        }
+
+        .btn-primary:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background-color: #fff;
+            color: #00693E;
+            border: 2px solid #00693E;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">🛫 BAMBOO AIRWAYS</div>
+            <div>Chọn chỗ ngồi của Quý khách</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="info-section">
+            <h3>📋 Cách chọn chỗ ngồi</h3>
+            <ul style="list-style-position: inside; color: #333;">
+                <li>Chọn <span th:text="${passengerCount}">1</span> hành khách và chọn 1 ghế</li>
+                <li>Hiểu chi tiết hướng dẫn sơ đồ chỗ</li>
+            </ul>
+        </div>
+
+        <div class="title">
+            <h1>Chọn chỗ ngồi của Quý khách</h1>
+            <p th:text="'TP. Hồ Chí Minh - Hà Nội'">TP. Hồ Chí Minh - Hà Nội</p>
+        </div>
+
+        <div class="seat-legend">
+            <div class="legend-item">
+                <div class="legend-box legend-available"></div>
+                <span>Ghế ngồi: Ua chích</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box legend-standard"></div>
+                <span>Ghế ngồi: Ưu Đích</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box legend-exit"></div>
+                <span>Ghế-Đệu: Chuẩn</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box legend-occupied"></div>
+                <span>Không còn trống</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box legend-selected"></div>
+                <span>Ghế đang chọn</span>
+            </div>
+        </div>
+
+        <div class="selected-seats-info" id="selectedSeatsInfo" style="display: none;">
+            <h3>Ghế đã chọn:</h3>
+            <div class="selected-list" id="selectedSeatsList"></div>
+        </div>
+
+        <div class="seat-map-container">
+            <div class="seat-map">
+                <div class="column-labels">
+                    <div class="row-number" style="width: 40px;"></div>
+                    <div class="column-label">A</div>
+                    <div class="column-label">B</div>
+                    <div class="column-label">C</div>
+                    <div class="aisle"></div>
+                    <div class="column-label">D</div>
+                    <div class="column-label">E</div>
+                    <div class="column-label">F</div>
+                </div>
+
+                <div id="seatMapRows">
+                    <!-- Seats will be dynamically generated here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a th:href="@{/booking/services/select(flightId=${flightId},passengers=${passengerCount})}"
+               class="btn btn-secondary">Quay lại</a>
+            <button class="btn btn-primary" id="confirmBtn" onclick="confirmSeats()" disabled>
+                Xác nhận chọn chỗ
+            </button>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const flightId = /*[[${flightId}]]*/ 'FL001';
+        const passengerCount = /*[[${passengerCount}]]*/ 1;
+        const seatsData = /*[[${seats}]]*/ [];
+
+        let selectedSeats = [];
+        const maxSeats = passengerCount;
+
+        function initializeSeatMap() {
+            const seatMapRows = document.getElementById('seatMapRows');
+
+            // Group seats by row
+            const seatsByRow = {};
+            seatsData.forEach(seat => {
+                if (!seatsByRow[seat.row]) {
+                    seatsByRow[seat.row] = {};
+                }
+                seatsByRow[seat.row][seat.column] = seat;
+            });
+
+            // Generate rows
+            const rows = Object.keys(seatsByRow).sort((a, b) => a - b);
+            rows.forEach(rowNum => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'seat-row';
+
+                // Row number
+                const rowLabel = document.createElement('div');
+                rowLabel.className = 'row-number';
+                rowLabel.textContent = rowNum;
+                rowDiv.appendChild(rowLabel);
+
+                // Left seats (A, B, C)
+                const leftGroup = document.createElement('div');
+                leftGroup.className = 'seats-group';
+                ['A', 'B', 'C'].forEach(col => {
+                    const seat = seatsByRow[rowNum][col];
+                    leftGroup.appendChild(createSeatElement(seat, rowNum, col));
+                });
+                rowDiv.appendChild(leftGroup);
+
+                // Aisle
+                const aisle = document.createElement('div');
+                aisle.className = 'aisle';
+                rowDiv.appendChild(aisle);
+
+                // Right seats (D, E, F)
+                const rightGroup = document.createElement('div');
+                rightGroup.className = 'seats-group';
+                ['D', 'E', 'F'].forEach(col => {
+                    const seat = seatsByRow[rowNum][col];
+                    rightGroup.appendChild(createSeatElement(seat, rowNum, col));
+                });
+                rowDiv.appendChild(rightGroup);
+
+                seatMapRows.appendChild(rowDiv);
+            });
+        }
+
+        function createSeatElement(seat, row, col) {
+            const seatDiv = document.createElement('div');
+            seatDiv.className = 'seat';
+
+            if (seat) {
+                seatDiv.textContent = seat.seatNumber;
+                seatDiv.dataset.seatId = seat.seatId;
+                seatDiv.dataset.seatNumber = seat.seatNumber;
+
+                if (seat.available) {
+                    seatDiv.classList.add('available');
+                    if (seat.seatClass === 'Economy') {
+                        seatDiv.classList.add('economy');
+                    } else if (seat.seatClass === 'Business') {
+                        seatDiv.classList.add('business');
+                    }
+                    seatDiv.onclick = () => toggleSeat(seat.seatId, seat.seatNumber);
+                } else {
+                    seatDiv.classList.add('occupied');
+                }
+            } else {
+                // Empty seat placeholder
+                seatDiv.textContent = row + col;
+                seatDiv.classList.add('occupied');
+            }
+
+            return seatDiv;
+        }
+
+        function toggleSeat(seatId, seatNumber) {
+            const index = selectedSeats.findIndex(s => s.id === seatId);
+
+            if (index > -1) {
+                // Deselect
+                selectedSeats.splice(index, 1);
+                document.querySelector(`[data-seat-id="${seatId}"]`).classList.remove('selected');
+            } else {
+                // Select
+                if (selectedSeats.length >= maxSeats) {
+                    alert(`Bạn chỉ có thể chọn tối đa ${maxSeats} ghế`);
+                    return;
+                }
+                selectedSeats.push({ id: seatId, number: seatNumber });
+                document.querySelector(`[data-seat-id="${seatId}"]`).classList.add('selected');
+            }
+
+            updateSelectedSeatsDisplay();
+            updateConfirmButton();
+        }
+
+        function updateSelectedSeatsDisplay() {
+            const infoDiv = document.getElementById('selectedSeatsInfo');
+            const listDiv = document.getElementById('selectedSeatsList');
+
+            if (selectedSeats.length > 0) {
+                infoDiv.style.display = 'block';
+                listDiv.innerHTML = '';
+                selectedSeats.forEach(seat => {
+                    const tag = document.createElement('div');
+                    tag.className = 'selected-seat-tag';
+                    tag.innerHTML = `
+                        ${seat.number}
+                        <span class="remove-seat" onclick="toggleSeat('${seat.id}', '${seat.number}')">✕</span>
+                    `;
+                    listDiv.appendChild(tag);
+                });
+            } else {
+                infoDiv.style.display = 'none';
+            }
+        }
+
+        function updateConfirmButton() {
+            const confirmBtn = document.getElementById('confirmBtn');
+            confirmBtn.disabled = selectedSeats.length === 0;
+        }
+
+        function confirmSeats() {
+            if (selectedSeats.length === 0) {
+                alert('Vui lòng chọn ít nhất một ghế');
+                return;
+            }
+
+            const seatIds = selectedSeats.map(s => s.id).join(',');
+            const seatNumbers = selectedSeats.map(s => s.number).join(',');
+
+            // Navigate to extras selection
+            window.location.href = `/booking/services/extras?flightId=${flightId}&passengers=${passengerCount}&selectedSeats=${seatNumbers}`;
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initializeSeatMap);
+    </script>
+</body>
+</html>
+

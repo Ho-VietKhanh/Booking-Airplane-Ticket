@@ -2,9 +2,10 @@ package se196411.booking_ticket.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import se196411.booking_ticket.model.AirplaneEntity;
+import se196411.booking_ticket.model.AirPlaneEntity;
 import se196411.booking_ticket.model.SeatEntity;
 import se196411.booking_ticket.repository.AirplaneRepository;
+import se196411.booking_ticket.repository.SeatRepository;
 import se196411.booking_ticket.utils.RandomId;
 
 import java.util.List;
@@ -15,15 +16,18 @@ public class AirplaneServiceImpl implements AirplaneService {
     @Autowired
     AirplaneRepository airplaneRepository;
 
+    @Autowired
+    SeatRepository seatRepository;
+
     @Override
-    public AirplaneEntity createAirplane(AirplaneEntity airplane) {
+    public AirPlaneEntity createAirplane(AirPlaneEntity airplane) {
         String id = RandomId.generateRandomId(3, 4);
         airplane.setAirplaneId(id);
         return this.airplaneRepository.save(airplane);
     }
 
     @Override
-    public AirplaneEntity findById(String id) {
+    public AirPlaneEntity findById(String id) {
         return this.airplaneRepository.findById(id).orElse(null);
     }
 
@@ -33,13 +37,13 @@ public class AirplaneServiceImpl implements AirplaneService {
     }
 
     @Override
-    public List<AirplaneEntity> findAll() {
+    public List<AirPlaneEntity> findAll() {
         return this.airplaneRepository.findAll();
     }
 
     @Override
-    public AirplaneEntity updateById(String id, AirplaneEntity airplane) {
-        AirplaneEntity existAirplane = this.airplaneRepository.findById(id).orElse(null);
+    public AirPlaneEntity updateById(String id, AirPlaneEntity airplane) {
+        AirPlaneEntity existAirplane = this.airplaneRepository.findById(id).orElse(null);
         if(existAirplane == null) {
             throw new IllegalArgumentException("Airplane not found: " + id);
         } else {
@@ -54,6 +58,6 @@ public class AirplaneServiceImpl implements AirplaneService {
 
     @Override
     public List<SeatEntity> findSeatsByAirplaneId(String airplaneId) {
-        return this.airplaneRepository.findSeatsByAirplaneId(airplaneId);
+        return this.seatRepository.findSeatsByAirplaneId(airplaneId);
     }
 }

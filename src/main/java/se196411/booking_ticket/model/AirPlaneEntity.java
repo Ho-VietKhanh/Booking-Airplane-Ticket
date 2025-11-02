@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AirplaneEntity {
+public class AirPlaneEntity {
     @Id
     @Column(name = "airplane_id", nullable = false)
     private String airplaneId;

@@ -34,7 +34,7 @@ public class  SeatEntity {
 
     @ManyToOne
     @JoinColumn(name = "airplane_id", nullable = false)
-    private AirplaneEntity airplane;
+    private AirPlaneEntity airplane;
 
     @OneToMany(mappedBy = "seat")
     private List<TicketEntity> tickets;

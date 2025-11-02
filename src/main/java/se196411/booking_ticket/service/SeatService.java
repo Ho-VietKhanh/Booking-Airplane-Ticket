@@ -10,5 +10,5 @@ public interface SeatService {
     SeatEntity updateById(String id, SeatEntity seat);
     void deleteById(String id);
     List<SeatEntity> findAll();
-    List<SeatEntity> findAvailableSeatsByAirplaneId(String airplaneId, String status);
+    List<SeatEntity> findAvailableSeatsByAirplaneId(String airplaneId, boolean isAvailable);
 }

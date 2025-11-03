@@ -33,7 +33,6 @@ public class BookingController {
     @Autowired
     private PaymentService paymentService;
 
-    // ===================== LIST ALL BOOKINGS =====================
     @GetMapping("/list")
     public ModelAndView listBookings(HttpSession session) {
         // Add authentication check if needed
@@ -43,7 +42,6 @@ public class BookingController {
         return mv;
     }
 
-    // ===================== VIEW BOOKING DETAILS =====================
     @GetMapping("/detail/{bookingId}")
     public ModelAndView viewBookingDetails(@PathVariable String bookingId) {
         BookingResponseDTO booking = bookingService.getBookingByBookingId(bookingId);
@@ -58,7 +56,6 @@ public class BookingController {
         return mv;
     }
 
-    // ===================== ADD BOOKING =====================
     @GetMapping("/add")
     public ModelAndView showAddBookingForm(HttpSession session) {
         ModelAndView mv = new ModelAndView("booking/addbooking");
@@ -84,7 +81,6 @@ public class BookingController {
         return "redirect:/booking/list";
     }
 
-    // ===================== UPDATE BOOKING =====================
     @GetMapping("/update/{bookingId}")
     public ModelAndView showUpdateBookingForm(@PathVariable String bookingId) {
         BookingResponseDTO booking = bookingService.getBookingByBookingId(bookingId);
@@ -116,7 +112,6 @@ public class BookingController {
         return "redirect:/booking/list";
     }
 
-    // ===================== DELETE BOOKING =====================
     @GetMapping("/delete/{bookingId}")
     public String deleteBooking(@PathVariable String bookingId) {
         BookingResponseDTO booking = bookingService.getBookingByBookingId(bookingId);
@@ -128,7 +123,6 @@ public class BookingController {
         return "redirect:/booking/list";
     }
 
-    // ===================== GET BOOKINGS BY USER =====================
     @GetMapping("/user/{userId}")
     public ModelAndView getBookingsByUser(@PathVariable String userId) {
         List<BookingResponseDTO> bookings = bookingService.getAllBookingsByUserId(userId);

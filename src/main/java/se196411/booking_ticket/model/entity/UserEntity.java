@@ -37,8 +37,11 @@ public class UserEntity {
     @Column(name = "create_at", updatable = false)
     private LocalDateTime createAt;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id", nullable = false, referencedColumnName = "role_id")
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private RoleEntity role;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

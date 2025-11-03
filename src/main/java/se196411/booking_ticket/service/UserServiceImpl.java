@@ -42,6 +42,7 @@ public class UserServiceImpl implements UserService {
         user.setUserId(RandomId.generateRandomId(2, 3)); // Tạo ID ngẫu nhiên cho user
         user.setFullName(userDto.getFullName());
         user.setEmail(userDto.getEmail());
+        user.setPhone(userDto.getPhone());
 
         // **QUAN TRỌNG: Mã hóa mật khẩu**
         // Không bao giờ được lưu mật khẩu gốc (plain text)
@@ -56,7 +57,6 @@ public class UserServiceImpl implements UserService {
         }
 
         // Gán role này cho user
-        // Dùng Arrays.asList() vì trường 'roles' của UserEntity là List<RoleEntity>
         user.setRole(role);
 
         // Lưu user vào CSDL

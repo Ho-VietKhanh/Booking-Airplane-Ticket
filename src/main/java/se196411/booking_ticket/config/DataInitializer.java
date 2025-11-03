@@ -8,11 +8,7 @@ import se196411.booking_ticket.model.entity.FlightRoutesEntity;
 import se196411.booking_ticket.model.entity.FlightsEntity;
 import se196411.booking_ticket.model.entity.AirportsEntity;
 import se196411.booking_ticket.model.entity.SeatEntity;
-import se196411.booking_ticket.repository.AirplaneRepository;
-import se196411.booking_ticket.repository.FlightsRepository;
-import se196411.booking_ticket.repository.SeatRepository;
-import se196411.booking_ticket.repository.AirportsRepository;
-import se196411.booking_ticket.repository.FlightsRoutesRepository;
+import se196411.booking_ticket.repository.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

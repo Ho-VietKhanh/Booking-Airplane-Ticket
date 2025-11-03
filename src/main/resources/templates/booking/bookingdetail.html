@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,12 +8,19 @@
 <body>
     <div class="container">
         <h1>Booking Details</h1>
-        <button class="btn" onclick="window.location.href='/booking/bookinglist.html'">Back to List</button>
+        <button class="btn" onclick="window.location.href='/booking/list'">Back to List</button>
 
-        <div class="booking-info" id="bookingInfo"></div>
+        <div class="booking-info">
+            <div class="info-row"><span class="label">Booking ID:</span> <span th:text="${booking.bookingId}"></span></div>
+            <div class="info-row"><span class="label">Booking Time:</span> <span th:text="${#temporals.format(booking.bookingTime, 'yyyy-MM-dd HH:mm:ss')}"></span></div>
+            <div class="info-row"><span class="label">Total Amount:</span> <span th:text="${'$' + #numbers.formatDecimal(booking.totalAmount, 1, 2)}"></span></div>
+            <div class="info-row"><span class="label">Status:</span> <span th:text="${booking.status}"></span></div>
+            <div class="info-row"><span class="label">Payment ID:</span> <span th:text="${booking.paymentId}"></span></div>
+            <div class="info-row"><span class="label">User ID:</span> <span th:text="${booking.userId}"></span></div>
+        </div>
 
         <h2>Tickets</h2>
-        <table id="ticketTable">
+        <table>
             <thead>
                 <tr>
                     <th>Ticket ID</th>
@@ -23,60 +30,16 @@
                     <th>Seat ID</th>
                 </tr>
             </thead>
-            <tbody id="ticketTableBody">
+            <tbody>
+                <tr th:each="ticket : ${tickets}">
+                    <td th:text="${ticket.ticketId}"></td>
+                    <td th:text="${'$' + #numbers.formatDecimal(ticket.price, 1, 2)}"></td>
+                    <td th:text="${ticket.status}"></td>
+                    <td th:text="${ticket.flightId}"></td>
+                    <td th:text="${ticket.seatId}"></td>
+                </tr>
             </tbody>
         </table>
     </div>
-
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const bookingId = urlParams.get('bookingId');
-
-        async function loadBookingDetails() {
-            try {
-                const response = await fetch(`/api/booking/getBookingById/${bookingId}`);
-                const booking = await response.json();
-
-                const bookingInfoDiv = document.getElementById('bookingInfo');
-                bookingInfoDiv.innerHTML = `
-                    <div class="info-row"><span class="label">Booking ID:</span> ${booking.bookingId}</div>
-                    <div class="info-row"><span class="label">Booking Time:</span> ${new Date(booking.bookingTime).toLocaleString()}</div>
-                    <div class="info-row"><span class="label">Total Amount:</span> $${booking.totalAmount.toFixed(2)}</div>
-                    <div class="info-row"><span class="label">Status:</span> ${booking.status}</div>
-                    <div class="info-row"><span class="label">Payment ID:</span> ${booking.paymentId}</div>
-                    <div class="info-row"><span class="label">User ID:</span> ${booking.userId}</div>
-                `;
-
-                loadTickets();
-            } catch (error) {
-                console.error('Error loading booking details:', error);
-            }
-        }
-
-        async function loadTickets() {
-            try {
-                const response = await fetch(`/api/booking/getTicketsByBooking/${bookingId}`);
-                const tickets = await response.json();
-                const tableBody = document.getElementById('ticketTableBody');
-                tableBody.innerHTML = '';
-
-                tickets.forEach(ticket => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${ticket.ticketId}</td>
-                        <td>$${ticket.price.toFixed(2)}</td>
-                        <td>${ticket.status}</td>
-                        <td>${ticket.flightId}</td>
-                        <td>${ticket.seatId}</td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            } catch (error) {
-                console.error('Error loading tickets:', error);
-            }
-        }
-
-        window.onload = loadBookingDetails;
-    </script>
 </body>
 </html>

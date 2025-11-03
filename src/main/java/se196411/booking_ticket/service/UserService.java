@@ -21,4 +21,6 @@ public interface UserService {
      */
     UserEntity findByEmail(String email);
     UserEntity createUser(UserEntity newUser);
+
+    Object getAllUsers();
 }

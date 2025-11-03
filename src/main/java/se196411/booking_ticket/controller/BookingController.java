@@ -1,18 +1,25 @@
 package se196411.booking_ticket.controller;
 
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 import se196411.booking_ticket.model.dto.BookingRequestDTO;
 import se196411.booking_ticket.model.dto.BookingResponseDTO;
 import se196411.booking_ticket.model.dto.TicketResponseDTO;
 import se196411.booking_ticket.service.BookingService;
 import se196411.booking_ticket.service.TicketService;
+import se196411.booking_ticket.service.UserService;
+import se196411.booking_ticket.service.PaymentService;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/booking")
+@Controller
+@RequestMapping("/booking")
 public class BookingController {
     @Autowired
     private BookingService bookingService;
@@ -20,68 +27,113 @@ public class BookingController {
     @Autowired
     private TicketService ticketService;
 
-    @PostMapping("/create")
-    ResponseEntity<String> insertBooking(@RequestBody BookingRequestDTO bookingRequestDTO) {
-        if (bookingRequestDTO == null) {
-            return ResponseEntity.badRequest().build();
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private PaymentService paymentService;
+
+    // ===================== LIST ALL BOOKINGS =====================
+    @GetMapping("/list")
+    public ModelAndView listBookings(HttpSession session) {
+        // Add authentication check if needed
+        List<BookingResponseDTO> bookings = bookingService.getAllBookings();
+        ModelAndView mv = new ModelAndView("booking/bookinglist");
+        mv.addObject("bookings", bookings);
+        return mv;
+    }
+
+    // ===================== VIEW BOOKING DETAILS =====================
+    @GetMapping("/detail/{bookingId}")
+    public ModelAndView viewBookingDetails(@PathVariable String bookingId) {
+        BookingResponseDTO booking = bookingService.getBookingByBookingId(bookingId);
+        if (booking == null) {
+            return new ModelAndView("redirect:/booking/list");
         }
+
+        List<TicketResponseDTO> tickets = ticketService.getAllTicketsByBookingId(bookingId);
+        ModelAndView mv = new ModelAndView("booking/bookingdetail");
+        mv.addObject("booking", booking);
+        mv.addObject("tickets", tickets);
+        return mv;
+    }
+
+    // ===================== ADD BOOKING =====================
+    @GetMapping("/add")
+    public ModelAndView showAddBookingForm(HttpSession session) {
+        ModelAndView mv = new ModelAndView("booking/addbooking");
+        mv.addObject("bookingRequest", new BookingRequestDTO());
+        mv.addObject("users", userService.getAllUsers());
+        mv.addObject("payments", paymentService.getAllPayments());
+        return mv;
+    }
+
+    @PostMapping("/add")
+    public String addBooking(
+            @Valid @ModelAttribute("bookingRequest") BookingRequestDTO bookingRequestDTO,
+            BindingResult result,
+            Model model
+    ) {
+        if (result.hasErrors()) {
+            model.addAttribute("users", userService.getAllUsers());
+            model.addAttribute("payments", paymentService.getAllPayments());
+            return "booking/addbooking";
+        }
+
         bookingService.insertBooking(bookingRequestDTO);
-        return ResponseEntity.ok().build();
+        return "redirect:/booking/list";
     }
 
-    @PutMapping("/update/{bookingId}")
-    ResponseEntity<String> updateBooking(@PathVariable String bookingId, @RequestBody BookingRequestDTO bookingRequestDTO) {
-        BookingResponseDTO findBooking = bookingService.getBookingByBookingId(bookingId);
-        if (findBooking == null) {
-            return ResponseEntity.badRequest().build();
+    // ===================== UPDATE BOOKING =====================
+    @GetMapping("/update/{bookingId}")
+    public ModelAndView showUpdateBookingForm(@PathVariable String bookingId) {
+        BookingResponseDTO booking = bookingService.getBookingByBookingId(bookingId);
+        if (booking == null) {
+            return new ModelAndView("redirect:/booking/list");
         }
+
+        ModelAndView mv = new ModelAndView("booking/updatebooking");
+        mv.addObject("booking", booking);
+        mv.addObject("users", userService.getAllUsers());
+        mv.addObject("payments", paymentService.getAllPayments());
+        return mv;
+    }
+
+    @PostMapping("/update/{bookingId}")
+    public String updateBooking(
+            @PathVariable String bookingId,
+            @Valid @ModelAttribute("bookingRequest") BookingRequestDTO bookingRequestDTO,
+            BindingResult result,
+            Model model
+    ) {
+        if (result.hasErrors()) {
+            model.addAttribute("users", userService.getAllUsers());
+            model.addAttribute("payments", paymentService.getAllPayments());
+            return "booking/updatebooking";
+        }
+
         bookingService.updateBookingByBookingId(bookingId, bookingRequestDTO);
-        return ResponseEntity.ok().build();
+        return "redirect:/booking/list";
     }
 
-    @DeleteMapping("/delete/{bookingId}")
-    ResponseEntity<String> deleteBooking(@PathVariable String bookingId) {
-        BookingResponseDTO bookingResponseDTO = bookingService.getBookingByBookingId(bookingId);
-        if (bookingResponseDTO == null) {
-            return ResponseEntity.badRequest().build();
+    // ===================== DELETE BOOKING =====================
+    @GetMapping("/delete/{bookingId}")
+    public String deleteBooking(@PathVariable String bookingId) {
+        BookingResponseDTO booking = bookingService.getBookingByBookingId(bookingId);
+        if (booking == null) {
+            return "redirect:/booking/list";
         }
+
         bookingService.deleteBookingByBookingId(bookingId);
-        return ResponseEntity.ok().build();
+        return "redirect:/booking/list";
     }
 
-    @GetMapping("/getBookingById/{bookingId}")
-    ResponseEntity<BookingResponseDTO> getBookingById(@PathVariable String bookingId) {
-        BookingResponseDTO bookingResponseDTO = bookingService.getBookingByBookingId(bookingId);
-        if (bookingResponseDTO == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.ok().body(bookingResponseDTO);
-    }
-
-    @GetMapping("/getBookingByUser/{userId}")
-    ResponseEntity<List<BookingResponseDTO>> getBookingByUser(@PathVariable String userId) {
-        List<BookingResponseDTO> bookingResponseDTOList = bookingService.getAllBookingsByUserId(userId);
-        if (bookingResponseDTOList == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.ok().body(bookingResponseDTOList);
-    }
-
-    @GetMapping("/getAllBooking")
-    ResponseEntity<List<BookingResponseDTO>> getAllBookings() {
-        List<BookingResponseDTO> bookingResponseDTOList = bookingService.getAllBookings();
-        if (bookingResponseDTOList == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.ok().body(bookingResponseDTOList);
-    }
-
-    @GetMapping("/getTicketsByBooking/{bookingId}")
-    ResponseEntity<List<TicketResponseDTO>> getTicketsByBooking(@PathVariable String bookingId) {
-        List<TicketResponseDTO> ticketResponseDTOList = ticketService.getAllTicketsByBookingId(bookingId);
-        if (ticketResponseDTOList == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.ok().body(ticketResponseDTOList);
+    // ===================== GET BOOKINGS BY USER =====================
+    @GetMapping("/user/{userId}")
+    public ModelAndView getBookingsByUser(@PathVariable String userId) {
+        List<BookingResponseDTO> bookings = bookingService.getAllBookingsByUserId(userId);
+        ModelAndView mv = new ModelAndView("booking/bookinglist");
+        mv.addObject("bookings", bookings);
+        return mv;
     }
 }

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Booking</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Add New Booking</h1>
+        <form th:action="@{/booking/add}" th:object="${bookingRequest}" method="post">
+            <div class="form-group">
+                <label for="bookingId">Booking ID:</label>
+                <input type="text" id="bookingId" th:field="*{bookingId}" required/>
+                <span class="error" th:if="${#fields.hasErrors('bookingId')}" th:errors="*{bookingId}"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="totalAmount">Total Amount:</label>
+                <input type="number" step="0.01" id="totalAmount" th:field="*{totalAmount}" required/>
+                <span class="error" th:if="${#fields.hasErrors('totalAmount')}" th:errors="*{totalAmount}"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="status">Status:</label>
+                <select id="status" th:field="*{status}" required>
+                    <option value="">Select Status</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="CONFIRMED">Confirmed</option>
+                    <option value="CANCELLED">Cancelled</option>
+                </select>
+                <span class="error" th:if="${#fields.hasErrors('status')}" th:errors="*{status}"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="userId">User:</label>
+                <select id="userId" th:field="*{userId}" required>
+                    <option value="">Select User</option>
+                    <option th:each="user : ${users}"
+                            th:value="${user.userId}"
+                            th:text="${user.userId + ' - ' + user.email}"></option>
+                </select>
+                <span class="error" th:if="${#fields.hasErrors('userId')}" th:errors="*{userId}"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="paymentId">Payment:</label>
+                <select id="paymentId" th:field="*{paymentId}" required>
+                    <option value="">Select Payment</option>
+                    <option th:each="payment : ${payments}"
+                            th:value="${payment.paymentId}"
+                            th:text="${payment.paymentId + ' - ' + payment.method}"></option>
+                </select>
+                <span class="error" th:if="${#fields.hasErrors('paymentId')}" th:errors="*{paymentId}"></span>
+            </div>
+
+            <button type="submit" class="btn btn-submit">Add Booking</button>
+            <button type="button" class="btn btn-cancel" onclick="window.location.href='/booking/list'">Cancel</button>
+        </form>
+    </div>
+</body>
+</html>

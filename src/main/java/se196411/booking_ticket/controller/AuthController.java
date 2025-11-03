@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import se196411.booking_ticket.model.dto.UserDto;
-import se196411.booking_ticket.model.UserEntity;
+import se196411.booking_ticket.model.entity.UserEntity;
 import se196411.booking_ticket.service.UserService;
 
 @Controller // Đánh dấu đây là một Controller

@@ -1,6 +1,5 @@
 package se196411.booking_ticket.service;
 
-import se196411.booking_ticket.model.FlightsEntity;
 import se196411.booking_ticket.model.dto.FlightsRequestDTO;
 import se196411.booking_ticket.model.dto.FlightsResponseDTO;
 

@@ -1,9 +1,12 @@
 package se196411.booking_ticket.service;
 
 import se196411.booking_ticket.model.dto.UserDto;
-import se196411.booking_ticket.model.UserEntity;
+import se196411.booking_ticket.model.entity.UserEntity;
+
+import java.util.List;
 
 public interface UserService {
+    List<UserEntity> findAll();
 
     /**
      * Xử lý logic đăng ký user mới
@@ -17,4 +20,5 @@ public interface UserService {
      * @return UserEntity hoặc null nếu không tìm thấy
      */
     UserEntity findByEmail(String email);
+    UserEntity createUser(UserEntity newUser);
 }

@@ -1,4 +1,4 @@
-package se196411.booking_ticket.model;
+package se196411.booking_ticket.model.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class      PaymentMethodEntity {
+public class PaymentMethodEntity {
     @Id
     @Column(name = "payment_method_id", nullable = false, unique = true, length = 36)
     private String paymentMethodId;

@@ -1,4 +1,4 @@
-package se196411.booking_ticket.model;
+package se196411.booking_ticket.model.entity;
 
 import java.util.List;
 

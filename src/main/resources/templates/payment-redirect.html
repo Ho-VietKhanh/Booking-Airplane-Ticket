@@ -1,0 +1,27 @@
+<!-- language: html -->
+<!-- src/main/resources/templates/payment-redirect.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecting to Provider</title>
+    <style>
+        body{font-family:Arial, sans-serif; background:#f5f5f5;}
+        .box{max-width:600px;margin:80px auto;background:#fff;padding:24px;border-radius:8px;text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+        .btn{background:#00693E;color:#fff;padding:10px 16px;border-radius:6px;border:none;cursor:pointer;}
+        .small{color:#666;margin-top:8px;}
+    </style>
+</head>
+<body>
+<div class="box">
+    <h3>Redirecting to payment provider...</h3>
+    <p class="small">This is a simulated external payment provider screen.</p>
+
+    <div style="margin-top:18px;">
+        <a th:href="@{|/booking/payment/complete?paymentId=${paymentId}|}" class="btn">Simulate Complete Payment</a>
+    </div>
+
+    <p style="margin-top:12px;color:#888">Payment ID: <span th:text="${paymentId}">-</span></p>
+</div>
+</body>
+</html>

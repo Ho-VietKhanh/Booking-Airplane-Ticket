@@ -3,7 +3,6 @@ package se196411.booking_ticket.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import se196411.booking_ticket.model.FlightsEntity;
 import se196411.booking_ticket.model.dto.FlightsRequestDTO;
 import se196411.booking_ticket.model.dto.FlightsResponseDTO;
 import se196411.booking_ticket.service.FlightsService;

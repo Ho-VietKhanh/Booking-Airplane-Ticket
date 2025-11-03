@@ -1,15 +1,15 @@
 package se196411.booking_ticket.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import se196411.booking_ticket.model.entity.RoleEntity;
+import se196411.booking_ticket.utils.DateTimeUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -36,6 +36,7 @@ public class UserEntity {
     private String phone;
 
     @Column(name = "create_at", updatable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime createAt;
 
 
@@ -52,9 +53,8 @@ public class UserEntity {
 
     @PrePersist
     public void prePersist() {
-
         if (this.createAt == null) {
-            this.createAt = LocalDateTime.now();
+            this.createAt = DateTimeUtils.now();
         }
     }
 }

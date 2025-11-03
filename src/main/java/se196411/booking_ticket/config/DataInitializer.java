@@ -11,6 +11,9 @@ import se196411.booking_ticket.repository.SeatRepository;
 import se196411.booking_ticket.repository.AirportsRepository;
 import se196411.booking_ticket.repository.FlightsRoutesRepository;
 import se196411.booking_ticket.service.*;
+import se196411.booking_ticket.utils.DateTimeUtils;
+import se196411.booking_ticket.utils.DateTimeUtils;
+import se196411.booking_ticket.utils.DateTimeUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -119,8 +122,8 @@ public class DataInitializer implements CommandLineRunner {
             flight.setAirplane(airplane);
             flight.setFlightRoute(flightsRoutesRepository.findById("FR-001").orElseThrow());
             flight.setBasePrice(new BigDecimal("100"));
-            flight.setStartedTime(LocalDateTime.now().plusDays(1));
-            flight.setEndedTime(LocalDateTime.now().plusDays(1).plusHours(2));
+            flight.setStartedTime(DateTimeUtils.now().plusDays(1));
+            flight.setEndedTime(DateTimeUtils.now().plusDays(1).plusHours(2));
             flight.setStatus("SCHEDULED");
             flightsRepository.save(flight);
         }
@@ -148,9 +151,7 @@ public class DataInitializer implements CommandLineRunner {
 
         RoleEntity roleEntity = this.roleService.findAllRoles().stream().findFirst().orElseGet(() -> {
             RoleEntity role = new RoleEntity();
-            role.setRoleId("role-user");
-            role.setRoleName("USER");
-            role.setDescription("Default role for users");
+            role.setName("role-user");
             return this.roleService.createRole(role);
         });
 
@@ -161,7 +162,7 @@ public class DataInitializer implements CommandLineRunner {
             newUser.setEmail("user@gmail.com");
             newUser.setPassword("password");
             newUser.setPhone("0123456789");
-            newUser.setRole(roleEntity);
+            newUser.setCreateAt(DateTimeUtils.now());
             newUser.setCreateAt(LocalDateTime.now());
             return this.userService.createUser(newUser);
         });
@@ -191,7 +192,7 @@ public class DataInitializer implements CommandLineRunner {
         if (existing.isEmpty()) {
             PaymentEntity p = new PaymentEntity();
             p.setPaymentId("pay-0001");
-            p.setCreatedAt(LocalDateTime.now());
+            p.setCreatedAt(DateTimeUtils.now());
             p.setPaidAt(null);
             p.setStatus("PENDING");
             p.setAmount(new BigDecimal("8008000.00"));
@@ -206,7 +207,7 @@ public class DataInitializer implements CommandLineRunner {
         if (bOpt.isEmpty()) {
             BookingEntity b = new BookingEntity();
             b.setBookingId("bk-0001");
-            b.setBookingTime(LocalDateTime.now());
+            b.setBookingTime(DateTimeUtils.now());
             b.setTotalAmount(new BigDecimal("8008000.00"));
             b.setStatus("PENDING_PAYMENT");
             // set payment relation

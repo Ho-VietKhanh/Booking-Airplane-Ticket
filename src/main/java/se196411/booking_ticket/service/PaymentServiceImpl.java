@@ -10,12 +10,11 @@ import se196411.booking_ticket.repository.BookingRepository;
 import se196411.booking_ticket.repository.PaymentRepository;
 import se196411.booking_ticket.repository.SeatRepository;
 import se196411.booking_ticket.repository.TicketRepository;
+import se196411.booking_ticket.utils.DateTimeUtils;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 @Service
 @Transactional
 public class PaymentServiceImpl implements PaymentService {
@@ -40,7 +39,7 @@ public class PaymentServiceImpl implements PaymentService {
         if (payment.getPaymentId() == null || payment.getPaymentId().isBlank()) {
             payment.setPaymentId(UUID.randomUUID().toString());
         }
-        payment.setCreatedAt(LocalDateTime.now());
+        payment.setCreatedAt(DateTimeUtils.now());
         return paymentRepository.save(payment);
     }
 
@@ -82,7 +81,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         // Update payment status
         payment.setStatus("PAID");
-        payment.setPaidAt(LocalDateTime.now());
+        payment.setPaidAt(DateTimeUtils.now());
         PaymentEntity savedPayment = paymentRepository.save(payment);
 
         // ✅ Update associated bookings to CONFIRMED

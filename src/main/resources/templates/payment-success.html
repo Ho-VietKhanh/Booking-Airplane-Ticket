@@ -19,7 +19,7 @@
         <p>Payment ID: <strong th:text="${payment.paymentId}">-</strong></p>
         <p>Amount: <strong th:text="${#numbers.formatDecimal(payment.amount,0,'COMMA',0,'POINT')} + ' VND'">0 VND</strong></p>
         <p>Method: <strong th:text="${payment.paymentMethod.paymentMethodName}">-</strong></p>
-        <p>Paid at: <strong th:text="${payment.paidAt}">-</strong></p>
+        <p>Paid at: <strong th:text="${#temporals.format(payment.paidAt, 'yyyy-MM-dd HH:mm:ss')}">-</strong></p>
     </div>
 
     <div th:if="${booking != null}" style="margin-top:12px;">

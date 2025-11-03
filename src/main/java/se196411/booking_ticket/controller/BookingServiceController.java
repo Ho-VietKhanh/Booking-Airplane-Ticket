@@ -8,6 +8,7 @@ import se196411.booking_ticket.model.dto.BookingSessionDTO;
 import se196411.booking_ticket.model.dto.PassengerInfoDTO;
 import se196411.booking_ticket.model.entity.*;
 import se196411.booking_ticket.service.*;
+import se196411.booking_ticket.utils.DateTimeUtils;
 
 import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
@@ -348,7 +349,7 @@ public class BookingServiceController {
 
             // Create a pending payment first (required for booking)
             PaymentEntity payment = new PaymentEntity();
-            payment.setPaymentId(UUID.randomUUID().toString());
+            payment.setCreatedAt(DateTimeUtils.now());
             payment.setCreatedAt(LocalDateTime.now());
             payment.setStatus("PENDING");
             payment.setAmount(BigDecimal.ZERO); // Will be updated later
@@ -369,8 +370,8 @@ public class BookingServiceController {
 
             // Create booking without user (guest booking)
             BookingEntity booking = new BookingEntity();
-            booking.setBookingId(UUID.randomUUID().toString());
-            booking.setBookingTime(LocalDateTime.now());
+            booking.setBookingId(UUID.randomUUID().toString()); // ✅ SET BOOKING ID
+            booking.setBookingTime(DateTimeUtils.now());
             booking.setStatus("PENDING_PAYMENT");
             booking.setUser(null); // Guest booking, no user required
             booking.setPayment(savedPayment); // Link to payment

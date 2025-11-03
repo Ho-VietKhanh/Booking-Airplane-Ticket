@@ -1,5 +1,6 @@
 package se196411.booking_ticket.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,11 +19,15 @@ public class BookingEntity {
     @Id
     @Column(name = "booking_id", nullable = false)
     private String bookingId;
-    @Column (name = "booking_time", nullable = false)
+
+    @Column(name = "booking_time", nullable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime bookingTime;
-    @Column (name = "total_amount", nullable = false)
+
+    @Column(name = "total_amount", nullable = false)
     private BigDecimal totalAmount;
-    @Column (name = "status", nullable = false)
+
+    @Column(name = "status", nullable = false)
     private String status;
 
     // Relationships

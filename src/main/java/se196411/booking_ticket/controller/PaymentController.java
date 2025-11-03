@@ -13,6 +13,7 @@ import se196411.booking_ticket.model.entity.PaymentMethodEntity;
 import se196411.booking_ticket.service.BookingService;
 import se196411.booking_ticket.service.PaymentMethodService;
 import se196411.booking_ticket.service.PaymentService;
+import se196411.booking_ticket.utils.DateTimeUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -75,7 +76,7 @@ public class PaymentController {
         }
 
         PaymentEntity payment = new PaymentEntity();
-        payment.setPaymentId(UUID.randomUUID().toString());
+        payment.setCreatedAt(DateTimeUtils.now());
         payment.setCreatedAt(LocalDateTime.now());
         payment.setStatus("PENDING");
         payment.setAmount(booking.getTotalAmount() != null ? booking.getTotalAmount() : BigDecimal.ZERO);

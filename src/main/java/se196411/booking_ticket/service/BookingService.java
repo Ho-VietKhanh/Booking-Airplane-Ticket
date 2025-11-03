@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface BookingService {
     BookingEntity create(BookingEntity booking);
-    BookingEntity findById(String bookingId);
+    Optional<BookingEntity> findById(String bookingId);
     List<BookingEntity> findAll();
     BookingEntity update(String bookingId, BookingEntity booking);
     void deleteById(String bookingId);

@@ -20,8 +20,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingEntity findById(String bookingId) {
-        return bookingRepository.findById(bookingId).orElse(null);
+    public Optional<BookingEntity> findById(String bookingId) {
+        return bookingRepository.findById(bookingId);
     }
 
     @Override

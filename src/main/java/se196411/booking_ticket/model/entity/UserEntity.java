@@ -19,8 +19,8 @@ import java.util.List;
 public class UserEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Đổi sang Long ID tự tăng
+    @Column(name = "user_id", nullable = false)
+    private String userId;
 
     @Column(name = "full_name", nullable = false)
     private String fullName;
@@ -37,16 +37,9 @@ public class UserEntity {
     @Column(name = "create_at", updatable = false)
     private LocalDateTime createAt;
 
-
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "users_roles",
-            joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
-            inverseJoinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "id")}
-    )
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private List<RoleEntity> roles = new ArrayList<>();
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", nullable = false, referencedColumnName = "role_id")
+    private RoleEntity role;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @ToString.Exclude

@@ -9,6 +9,7 @@ import se196411.booking_ticket.repository.RoleRepository;
 import se196411.booking_ticket.repository.UserRepository;
 import se196411.booking_ticket.model.dto.UserDto;
 import se196411.booking_ticket.service.UserService;
+import se196411.booking_ticket.utils.RandomId;
 
 import java.util.List;
 import java.util.Arrays;
@@ -38,6 +39,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void saveUser(UserDto userDto) {
         UserEntity user = new UserEntity();
+        user.setUserId(RandomId.generateRandomId(2, 3)); // Tạo ID ngẫu nhiên cho user
         user.setFullName(userDto.getFullName());
         user.setEmail(userDto.getEmail());
 
@@ -55,7 +57,7 @@ public class UserServiceImpl implements UserService {
 
         // Gán role này cho user
         // Dùng Arrays.asList() vì trường 'roles' của UserEntity là List<RoleEntity>
-        user.setRoles(Arrays.asList(role));
+        user.setRole(role);
 
         // Lưu user vào CSDL
         userRepository.save(user);

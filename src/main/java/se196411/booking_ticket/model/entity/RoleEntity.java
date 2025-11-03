@@ -14,34 +14,19 @@ import java.util.List;
 @Table(name = "roles") // Tên bảng trong CSDL
 public class RoleEntity {
 
-    /**
-     * Dùng ID kiểu Long và để CSDL tự động tăng (IDENTITY)
-     * sẽ đơn giản và hiệu quả hơn là tự tạo ID ngẫu nhiên.
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "role_id", nullable = false)
+    private Integer roleId;
 
-    /**
-     * Tên của role, BẮT BUỘC phải có tiền tố "ROLE_"
-     * Ví dụ: "ROLE_USER", "ROLE_ADMIN"
-     * Spring Security sẽ tự động nhận diện tiền tố này.
-     */
+
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    /**
-     * Sử dụng quan hệ @ManyToMany
-     * mappedBy = "roles" chỉ ra rằng:
-     * "Trong class UserEntity, có một trường tên là 'roles' quản lý quan hệ này."
-     */
-    @ManyToMany(mappedBy = "roles")
+    @OneToMany(mappedBy = "role")
     private List<UserEntity> users;
 
-    /**
-     * Constructor này hữu ích để tạo nhanh đối tượng Role
-     * ví dụ: new RoleEntity("ROLE_USER")
-     */
+
     public RoleEntity(String name) {
         this.name = name;
     }

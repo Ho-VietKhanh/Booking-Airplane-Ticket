@@ -386,7 +386,7 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Ngày sinh <span class="required">*</span></label>
-                            <input type="date" name="passenger1_dob" required max="2024-11-02">
+                            <input type="date" name="passenger1_dob" required max="2025-11-03">
                         </div>
                         <div class="form-group">
                             <label>Giới tính <span class="required">*</span></label>
@@ -426,7 +426,7 @@
 
                 <!-- Add more passengers button -->
                 <div style="text-align: center; margin-top: 20px;">
-                    <button type="button" class="btn btn-secondary" onclick="addPassenger()">
+                    <button type="button" class="btn btn-secondary" onclick="addPassenger(); return false;" style="cursor: pointer;">
                         ➕ Thêm hành khách
                     </button>
                 </div>
@@ -455,11 +455,48 @@
     </div>
 
     <script>
-        let passengerCount = 1;
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing form');
 
-        function addPassenger() {
-            passengerCount++;
-            const passengerHTML = `
+            let passengerCount = 1;
+
+            // Make addPassenger global so onclick can access it
+            window.addPassenger = function() {
+                console.log('addPassenger called, current count:', passengerCount);
+                passengerCount++;
+
+                // Try multiple ways to find the container
+                let container = document.querySelector('.passenger-card:last-of-type');
+
+                if (!container) {
+                    // Fallback: find all passenger-card elements
+                    const allCards = document.querySelectorAll('.passenger-card');
+                    console.log('Found passenger cards:', allCards.length);
+                    if (allCards.length > 0) {
+                        container = allCards[allCards.length - 1];
+                    }
+                }
+
+                if (!container) {
+                    // Final fallback: insert after the last h3 containing "Hành khách"
+                    const h3Elements = document.querySelectorAll('h3');
+                    for (let i = h3Elements.length - 1; i >= 0; i--) {
+                        if (h3Elements[i].textContent.includes('Hành khách')) {
+                            container = h3Elements[i].closest('.passenger-card') || h3Elements[i].parentElement;
+                            break;
+                        }
+                    }
+                }
+
+                console.log('Found container:', container);
+
+                if (!container) {
+                    alert('Không tìm thấy passenger card! Vui lòng liên hệ hỗ trợ.');
+                    console.error('Cannot find passenger card container');
+                    return;
+                }
+
+                const passengerHTML = `
                 <div class="passenger-card" id="passenger${passengerCount}">
                     <h3>👤 Hành khách ${passengerCount} (Người lớn)
                         <button type="button" onclick="removePassenger(${passengerCount})"
@@ -495,7 +532,7 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Ngày sinh <span class="required">*</span></label>
-                            <input type="date" name="passenger${passengerCount}_dob" required max="2024-11-02">
+                            <input type="date" name="passenger${passengerCount}_dob" required max="2025-11-03">
                         </div>
                         <div class="form-group">
                             <label>Giới tính <span class="required">*</span></label>
@@ -525,20 +562,33 @@
                                 <option value="UK">Anh</option>
                                 <option value="JP">Nhật Bản</option>
                                 <option value="KR">Hàn Quốc</option>
+                                <option value="CN">Trung Quốc</option>
+                                <option value="TH">Thái Lan</option>
+                                <option value="SG">Singapore</option>
                             </select>
                         </div>
                     </div>
                 </div>
             `;
 
-            const lastPassengerCard = document.querySelector('.passenger-card:last-of-type');
-            lastPassengerCard.insertAdjacentHTML('afterend', passengerHTML);
+            container.insertAdjacentHTML('afterend', passengerHTML);
+
+            // Apply uppercase formatting to new name inputs
+            document.querySelectorAll(`[name="passenger${passengerCount}_lastName"], [name="passenger${passengerCount}_firstName"]`).forEach(input => {
+                input.addEventListener('input', function() {
+                    this.value = this.value.toUpperCase();
+                });
+            });
+
+            console.log('Added passenger ' + passengerCount);
+            alert('Đã thêm hành khách ' + passengerCount);
         }
 
-        function removePassenger(id) {
+        window.removePassenger = function(id) {
             const passenger = document.getElementById(`passenger${id}`);
             if (passenger) {
                 passenger.remove();
+                console.log('Removed passenger ' + id);
             }
         }
 
@@ -587,6 +637,8 @@
                 this.value = this.value.toUpperCase();
             });
         });
+
+        }); // End of DOMContentLoaded
     </script>
 </body>
 </html>

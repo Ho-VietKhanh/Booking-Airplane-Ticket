@@ -3,7 +3,7 @@ package se196411.booking_ticket.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import se196411.booking_ticket.model.*;
+import se196411.booking_ticket.model.entity.*;
 import se196411.booking_ticket.service.*;
 
 import java.math.BigDecimal;

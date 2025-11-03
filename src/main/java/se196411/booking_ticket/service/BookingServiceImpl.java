@@ -11,6 +11,7 @@ import se196411.booking_ticket.repository.BookingRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingServiceImpl implements BookingService {
@@ -132,6 +133,18 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingResponseDTO> getAllBookings() {
-        return bookingRepository.findAllBookings();
+        List<BookingEntity> bookings = bookingRepository.findAll();
+        return bookings.stream()
+                .map(booking -> {
+                    BookingResponseDTO dto = new BookingResponseDTO();
+                    dto.setBookingId(booking.getBookingId());
+                    dto.setBookingTime(booking.getBookingTime());
+                    dto.setTotalAmount(booking.getTotalAmount());
+                    dto.setStatus(booking.getStatus());
+                    dto.setPaymentId(booking.getPayment().getPaymentId());
+                    dto.setUserId(booking.getUser().getUserId());
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 }

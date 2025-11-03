@@ -49,8 +49,8 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public List<SeatEntity> findAvailableSeatsByAirplaneId(String airplaneId, String status) {
-        return this.seatRepository.findSeatsByAirplaneIdAndStatus(airplaneId, status);
+    public List<SeatEntity> findAvailableSeatsByAirplaneId(String airplaneId, boolean isAvailable) {
+        return this.seatRepository.findSeatsByAirplaneAirplaneIdAndIsAvailable(airplaneId, isAvailable);
     }
 
 

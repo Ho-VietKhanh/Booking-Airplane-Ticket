@@ -20,7 +20,7 @@ public class AirportController {
     @PostMapping("/create")
     ResponseEntity<String> insertAirport(@RequestBody AirportRequestDTO airportRequestDTO) {
         if (airportRequestDTO == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
         airportService.insertAirport(airportRequestDTO);
         return ResponseEntity.ok().build();
@@ -30,7 +30,7 @@ public class AirportController {
     ResponseEntity<String> updateAirports(@PathVariable String airportId, @RequestBody AirportRequestDTO  airportRequestDTO) {
         AirportResponseDTO airport = airportService.getAirportByAirportId(airportId);
         if(airport == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
         airportService.updateAirportByAirportId(airportId, airportRequestDTO);
         return ResponseEntity.ok().build();
@@ -40,7 +40,7 @@ public class AirportController {
     ResponseEntity<String> deleteAirport(@PathVariable String airportId) {
         AirportResponseDTO airport = airportService.getAirportByAirportId(airportId);
         if(airport == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
         airportService.deleteAirportByAirportId(airportId);
         return ResponseEntity.ok().build();
@@ -50,7 +50,7 @@ public class AirportController {
     ResponseEntity<AirportResponseDTO> getAirportById(@PathVariable String airportId) {
         AirportResponseDTO airport = airportService.getAirportByAirportId(airportId);
         if(airport == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok().body(airport);
     }
@@ -59,7 +59,7 @@ public class AirportController {
     ResponseEntity<AirportResponseDTO> getAirportByName(@RequestBody AirportRequestDTO request) {
         AirportResponseDTO airport = airportService.getAirportByAirportName(request.getName());
         if(airport == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok().body(airport);
     }
@@ -68,7 +68,7 @@ public class AirportController {
     ResponseEntity<AirportResponseDTO> getAirportByPlace(@RequestBody AirportRequestDTO request) {
         AirportResponseDTO airport = airportService.getAirportByAirportPlace(request.getPlace());
         if(airport == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok().body(airport);
     }
@@ -77,7 +77,7 @@ public class AirportController {
     ResponseEntity<List<AirportResponseDTO>> getAllAirport(){
         List<AirportResponseDTO> airport = airportService.getAllAirports();
         if(airport == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok().body(airport);
     }

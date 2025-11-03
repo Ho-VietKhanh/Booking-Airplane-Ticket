@@ -88,9 +88,23 @@
             border-bottom: 2px solid #00693E;
         }
 
+        .passenger-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .passenger-label {
+            color: #00693E;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
         .service-items {
             display: grid;
-            gap: 20px;
+            gap: 15px;
         }
 
         .service-item {
@@ -98,6 +112,8 @@
             border-radius: 8px;
             padding: 20px;
             transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
         }
 
         .service-item:hover {
@@ -105,119 +121,82 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
-        .service-item.selected {
+        .service-item input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .service-item input[type="radio"]:checked + .service-content {
+            border-left: 4px solid #00693E;
+            padding-left: 16px;
+        }
+
+        .service-item input[type="radio"]:checked ~ .radio-indicator {
+            background-color: #00693E;
             border-color: #00693E;
-            background-color: #E8F5F1;
+        }
+
+        .service-item input[type="radio"]:checked ~ .radio-indicator::after {
+            display: block;
+        }
+
+        .service-content {
+            padding-left: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .radio-indicator {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            background-color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .radio-indicator::after {
+            content: '';
+            position: absolute;
+            display: none;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #fff;
         }
 
         .service-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .service-name {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #333;
         }
 
         .service-price {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #00693E;
         }
 
         .service-description {
             color: #666;
-            margin-bottom: 15px;
-        }
-
-        .service-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .quantity-control {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .quantity-btn {
-            width: 40px;
-            height: 40px;
-            border: 2px solid #00693E;
-            background-color: #fff;
-            color: #00693E;
-            border-radius: 4px;
-            font-size: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .quantity-btn:hover {
-            background-color: #00693E;
-            color: #fff;
-        }
-
-        .quantity-btn:disabled {
-            border-color: #ccc;
-            color: #ccc;
-            cursor: not-allowed;
-        }
-
-        .quantity-btn:disabled:hover {
-            background-color: #fff;
-            color: #ccc;
-        }
-
-        .quantity-display {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            min-width: 40px;
-            text-align: center;
-        }
-
-        .add-service-btn {
-            padding: 10px 25px;
-            background-color: #00693E;
-            color: white;
-            border: none;
-            border-radius: 20px;
             font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
         }
 
-        .add-service-btn:hover {
-            background-color: #005030;
-        }
-
-        .price-summary {
-            background-color: #E8F5F1;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-
-        .price-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #ccc;
-        }
-
-        .price-row:last-child {
-            border-bottom: none;
-            font-size: 20px;
-            font-weight: bold;
-            color: #00693E;
-            padding-top: 15px;
+        .no-service-option {
+            background-color: #f0f0f0;
         }
 
         .action-buttons {
@@ -256,225 +235,132 @@
         .btn-secondary:hover {
             background-color: #f0f0f0;
         }
-
-        .passenger-label {
-            color: #00693E;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="header-content">
             <div class="logo">🛫 BAMBOO AIRWAYS</div>
-            <div>Lựa chọn món</div>
+            <div>Lựa chọn dịch vụ bổ sung</div>
         </div>
     </div>
 
     <div class="container">
         <div class="flight-info">
             <h3>Thông tin chuyến bay</h3>
-            <p>Mã chuyến bay: <strong th:text="${flightId}">FL001</strong></p>
+            <p>Mã chuyến bay: <strong th:text="${flightId}">FL-001</strong></p>
             <p>Số hành khách: <strong th:text="${passengerCount}">1</strong></p>
-            <p th:if="${selectedSeats != null and !selectedSeats.isEmpty()}">
-                Ghế đã chọn: <strong th:text="${selectedSeats}">-</strong>
-            </p>
         </div>
 
         <div class="title">
-            <h1>Lựa chọn món</h1>
-            <p>Suất ăn: TP. Hồ Chí Minh - Hà Nội</p>
+            <h1>Lựa chọn dịch vụ bổ sung</h1>
+            <p>Chọn hành lý và suất ăn cho từng hành khách</p>
         </div>
 
-        <!-- Baggage Section -->
-        <div class="section">
-            <h2 class="section-title">🧳 Hành Lý Ký Gửi</h2>
-            <div class="passenger-label" th:text="'Ông Nguyen Bao (' + ${passengerCount} + ' hành khách)'">
-                Ông Nguyen Bao
-            </div>
-            <div class="service-items">
-                <div class="service-item" th:each="baggage : ${baggageOptions}"
-                     th:data-id="${baggage.id}"
-                     th:data-price="${baggage.price}"
-                     th:data-type="baggage">
-                    <div class="service-header">
-                        <div class="service-name" th:text="${baggage.name}">Hành Lý 15kg</div>
-                        <div class="service-price">
-                            <span th:text="${#numbers.formatDecimal(baggage.price, 0, 'COMMA', 0, 'POINT')}">200,000</span> VND
+        <form th:action="@{/booking/services/extras/submit}" method="post">
+            <input type="hidden" name="flightId" th:value="${flightId}" />
+
+            <!-- Loop through passengers from session -->
+            <div th:if="${session.bookingSession != null and session.bookingSession.passengers != null}">
+                <div th:each="passenger, iterStat : ${session.bookingSession.passengers}" class="passenger-section">
+                    <div class="passenger-label">
+                        Hành khách [[${iterStat.index + 1}]]:
+                        <span th:text="${passenger.title + ' ' + passenger.firstName + ' ' + passenger.lastName}">Mr. Nguyen Van A</span>
+                    </div>
+
+                    <!-- Luggage Selection -->
+                    <div class="section">
+                        <h3 class="section-title">🧳 Hành Lý Ký Gửi</h3>
+                        <div class="service-items">
+                            <!-- No luggage option -->
+                            <label class="service-item no-service-option">
+                                <input type="radio"
+                                       th:name="'passenger_' + ${iterStat.index} + '_luggage'"
+                                       value=""
+                                       checked />
+                                <div class="radio-indicator"></div>
+                                <div class="service-content">
+                                    <div class="service-header">
+                                        <div class="service-name">Không chọn hành lý</div>
+                                        <div class="service-price">0 VND</div>
+                                    </div>
+                                    <div class="service-description">Chỉ mang theo hành lý xách tay</div>
+                                </div>
+                            </label>
+
+                            <!-- Luggage options from database -->
+                            <label class="service-item" th:each="luggage : ${baggageOptions}">
+                                <input type="radio"
+                                       th:name="'passenger_' + ${iterStat.index} + '_luggage'"
+                                       th:value="${luggage.id}" />
+                                <div class="radio-indicator"></div>
+                                <div class="service-content">
+                                    <div class="service-header">
+                                        <div class="service-name" th:text="${luggage.name}">Hành Lý 15kg</div>
+                                        <div class="service-price">
+                                            <span th:text="${#numbers.formatDecimal(luggage.price, 0, 'COMMA', 0, 'POINT')}">200,000</span> VND
+                                        </div>
+                                    </div>
+                                    <div class="service-description" th:text="${luggage.description}">
+                                        Hành lý ký gửi 15kg
+                                    </div>
+                                </div>
+                            </label>
                         </div>
                     </div>
-                    <div class="service-description" th:text="${baggage.description}">
-                        Hành lý ký gửi 15kg
-                    </div>
-                    <div class="service-actions">
-                        <div class="quantity-control">
-                            <button class="quantity-btn" onclick="decreaseQuantity(this)">−</button>
-                            <div class="quantity-display">0</div>
-                            <button class="quantity-btn" onclick="increaseQuantity(this)">+</button>
-                        </div>
-                        <div class="add-service-btn" style="visibility: hidden;">
-                            Thêm một dịch vụ nữa cho <span th:text="${#numbers.formatDecimal(baggage.price, 0, 'COMMA', 0, 'POINT')}">80,000</span> VND
+
+                    <!-- Meal Selection -->
+                    <div class="section">
+                        <h3 class="section-title">🍱 Suất Ăn</h3>
+                        <div class="service-items">
+                            <!-- No meal option -->
+                            <label class="service-item no-service-option">
+                                <input type="radio"
+                                       th:name="'passenger_' + ${iterStat.index} + '_meal'"
+                                       value=""
+                                       checked />
+                                <div class="radio-indicator"></div>
+                                <div class="service-content">
+                                    <div class="service-header">
+                                        <div class="service-name">Không chọn suất ăn</div>
+                                        <div class="service-price">0 VND</div>
+                                    </div>
+                                    <div class="service-description">Không đặt suất ăn trên chuyến bay</div>
+                                </div>
+                            </label>
+
+                            <!-- Meal options from database -->
+                            <label class="service-item" th:each="meal : ${mealOptions}">
+                                <input type="radio"
+                                       th:name="'passenger_' + ${iterStat.index} + '_meal'"
+                                       th:value="${meal.id}" />
+                                <div class="radio-indicator"></div>
+                                <div class="service-content">
+                                    <div class="service-header">
+                                        <div class="service-name" th:text="${meal.name}">Xôi Thịt Kho Trứng</div>
+                                        <div class="service-price">
+                                            <span th:text="${#numbers.formatDecimal(meal.price, 0, 'COMMA', 0, 'POINT')}">80,000</span> VND
+                                        </div>
+                                    </div>
+                                    <div class="service-description" th:text="${meal.description}">
+                                        Xôi thịt kho trứng truyền thống
+                                    </div>
+                                </div>
+                            </label>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Meal Section -->
-        <div class="section">
-            <h2 class="section-title">🍱 Suất Ăn</h2>
-            <div class="passenger-label" th:text="'Ông Nguyen Bao (' + ${passengerCount} + ' hành khách)'">
-                Ông Nguyen Bao
+            <div class="action-buttons">
+                <a th:href="@{/booking/services/seats(flightId=${flightId})}"
+                   class="btn btn-secondary">Quay lại</a>
+                <button type="submit" class="btn btn-primary">
+                    Xác nhận và tiếp tục
+                </button>
             </div>
-            <div class="service-items">
-                <div class="service-item" th:each="meal : ${mealOptions}"
-                     th:data-id="${meal.id}"
-                     th:data-price="${meal.price}"
-                     th:data-type="meal">
-                    <div class="service-header">
-                        <div class="service-name" th:text="${meal.name}">Xôi Thịt Kho Trứng</div>
-                        <div class="service-price">
-                            1 dịch vụ <span th:text="${#numbers.formatDecimal(meal.price, 0, 'COMMA', 0, 'POINT')}">80,000</span> VND
-                        </div>
-                    </div>
-                    <div class="service-description" th:text="${meal.description}">
-                        Xôi thịt kho trứng truyền thống
-                    </div>
-                    <div class="service-actions">
-                        <div class="quantity-control">
-                            <button class="quantity-btn" onclick="decreaseQuantity(this)">−</button>
-                            <div class="quantity-display">0</div>
-                            <button class="quantity-btn" onclick="increaseQuantity(this)">+</button>
-                        </div>
-                        <div class="add-service-btn" style="visibility: hidden;">
-                            Thêm một dịch vụ nữa cho <span th:text="${#numbers.formatDecimal(meal.price, 0, 'COMMA', 0, 'POINT')}">80,000</span> VND
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Price Summary -->
-        <div class="price-summary">
-            <div class="price-row">
-                <span>Tổng tiền dịch vụ bổ sung:</span>
-                <span id="servicesTotal">0 VND</span>
-            </div>
-            <div class="price-row">
-                <span>Tổng cộng:</span>
-                <span id="grandTotal">0 VND</span>
-            </div>
-        </div>
-
-        <div class="action-buttons">
-            <a th:href="@{/booking/services/seats(flightId=${flightId},passengers=${passengerCount})}"
-               class="btn btn-secondary">Quay lại</a>
-            <button class="btn btn-primary" onclick="confirmSelection()">
-                Xác nhận và tiếp tục
-            </button>
-        </div>
+        </form>
     </div>
-
-    <script th:inline="javascript">
-        const flightId = /*[[${flightId}]]*/ 'FL001';
-        const passengerCount = /*[[${passengerCount}]]*/ 1;
-        const selectedSeats = /*[[${selectedSeats}]]*/ '';
-
-        function increaseQuantity(btn) {
-            const item = btn.closest('.service-item');
-            const display = item.querySelector('.quantity-display');
-            let quantity = parseInt(display.textContent);
-
-            if (quantity < passengerCount) {
-                quantity++;
-                display.textContent = quantity;
-
-                if (quantity > 0) {
-                    item.classList.add('selected');
-                    const addBtn = item.querySelector('.add-service-btn');
-                    if (quantity < passengerCount) {
-                        addBtn.style.visibility = 'visible';
-                    } else {
-                        addBtn.style.visibility = 'hidden';
-                    }
-                }
-
-                updatePricing();
-            }
-        }
-
-        function decreaseQuantity(btn) {
-            const item = btn.closest('.service-item');
-            const display = item.querySelector('.quantity-display');
-            let quantity = parseInt(display.textContent);
-
-            if (quantity > 0) {
-                quantity--;
-                display.textContent = quantity;
-
-                if (quantity === 0) {
-                    item.classList.remove('selected');
-                    item.querySelector('.add-service-btn').style.visibility = 'hidden';
-                } else {
-                    item.querySelector('.add-service-btn').style.visibility = 'visible';
-                }
-
-                updatePricing();
-            }
-        }
-
-        function updatePricing() {
-            let total = 0;
-
-            document.querySelectorAll('.service-item').forEach(item => {
-                const quantity = parseInt(item.querySelector('.quantity-display').textContent);
-                const price = parseFloat(item.dataset.price);
-                total += quantity * price;
-            });
-
-            document.getElementById('servicesTotal').textContent =
-                formatCurrency(total) + ' VND';
-            document.getElementById('grandTotal').textContent =
-                formatCurrency(total) + ' VND';
-        }
-
-        function formatCurrency(amount) {
-            return amount.toLocaleString('vi-VN');
-        }
-
-        function confirmSelection() {
-            const selectedItems = [];
-
-            document.querySelectorAll('.service-item').forEach(item => {
-                const quantity = parseInt(item.querySelector('.quantity-display').textContent);
-                if (quantity > 0) {
-                    selectedItems.push({
-                        id: item.dataset.id,
-                        type: item.dataset.type,
-                        quantity: quantity,
-                        price: parseFloat(item.dataset.price)
-                    });
-                }
-            });
-
-            if (selectedItems.length === 0) {
-                if (confirm('Bạn chưa chọn dịch vụ nào. Bạn có muốn tiếp tục không?')) {
-                    alert('Chuyển đến trang thanh toán');
-                    // window.location.href = '/booking/payment?flightId=' + flightId;
-                }
-            } else {
-                console.log('Selected services:', selectedItems);
-                alert('Đã chọn ' + selectedItems.length + ' dịch vụ. Chuyển đến trang thanh toán.');
-                // window.location.href = '/booking/payment?flightId=' + flightId + '&services=' + JSON.stringify(selectedItems);
-            }
-        }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            updatePricing();
-        });
-    </script>
 </body>
 </html>
 

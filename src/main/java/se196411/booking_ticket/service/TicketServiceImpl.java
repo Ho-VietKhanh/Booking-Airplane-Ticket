@@ -40,10 +40,21 @@ public class TicketServiceImpl implements TicketService {
         TicketEntity t = existing.get();
         // update fields except id
         t.setPrice(ticket.getPrice());
+        t.setCccd(ticket.getCccd());
+        t.setFirstName(ticket.getFirstName());
+        t.setSdt(ticket.getSdt());
+        t.setLastName(ticket.getLastName());
+        t.setNationality(ticket.getNationality());
+        t.setTitle(ticket.getTitle());
+        t.setGender(ticket.getGender());
+        t.setBirthDate(ticket.getBirthDate());
+        t.setEmail(ticket.getEmail());
         t.setStatus(ticket.getStatus());
         t.setFlight(ticket.getFlight());
         t.setBooking(ticket.getBooking());
         t.setSeat(ticket.getSeat());
+        t.setMeal(ticket.getMeal());
+        t.setLuggage(ticket.getLuggage());
         return ticketRepository.save(t);
     }
 

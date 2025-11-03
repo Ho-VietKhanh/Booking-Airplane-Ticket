@@ -8,7 +8,6 @@ import se196411.booking_ticket.model.entity.UserEntity;
 import se196411.booking_ticket.repository.RoleRepository;
 import se196411.booking_ticket.repository.UserRepository;
 import se196411.booking_ticket.model.dto.UserDto;
-import se196411.booking_ticket.service.UserService;
 import se196411.booking_ticket.utils.RandomId;
 
 import java.util.List;

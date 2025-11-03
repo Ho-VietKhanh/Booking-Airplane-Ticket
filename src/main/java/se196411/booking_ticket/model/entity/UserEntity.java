@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import se196411.booking_ticket.model.entity.RoleEntity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

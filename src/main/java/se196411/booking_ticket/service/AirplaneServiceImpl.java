@@ -2,8 +2,8 @@ package se196411.booking_ticket.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import se196411.booking_ticket.model.AirPlaneEntity;
-import se196411.booking_ticket.model.SeatEntity;
+import se196411.booking_ticket.model.entity.AirPlaneEntity;
+import se196411.booking_ticket.model.entity.SeatEntity;
 import se196411.booking_ticket.repository.AirplaneRepository;
 import se196411.booking_ticket.repository.SeatRepository;
 import se196411.booking_ticket.utils.RandomId;

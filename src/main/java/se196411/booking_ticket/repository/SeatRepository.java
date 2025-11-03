@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import se196411.booking_ticket.model.SeatEntity;
+import se196411.booking_ticket.model.entity.SeatEntity;
 
 import java.util.List;
 

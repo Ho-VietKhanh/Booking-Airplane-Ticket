@@ -1,10 +1,9 @@
-package se196411.booking_ticket.model;
+package se196411.booking_ticket.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.catalina.User;
 
 import java.util.List;
 

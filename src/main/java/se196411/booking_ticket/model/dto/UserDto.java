@@ -25,6 +25,9 @@ public class UserDto {
     @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự")
     private String password;
 
-    // Chúng ta không cần các trường khác như phone, createAt, roles... ở đây
+    @NotEmpty(message = "Số điện thoại không được để trống")
+    private String phone;
+
+    // Chúng ta không cần các trường khác như createAt, roles... ở đây
     // Đây là dữ liệu CHỈ dành cho form đăng ký.
 }

@@ -30,12 +30,7 @@ public class RoleEntity {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    /**
-     * Sử dụng quan hệ @ManyToMany
-     * mappedBy = "roles" chỉ ra rằng:
-     * "Trong class UserEntity, có một trường tên là 'roles' quản lý quan hệ này."
-     */
-    @ManyToMany(mappedBy = "roles")
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<UserEntity> users;
 
     /**

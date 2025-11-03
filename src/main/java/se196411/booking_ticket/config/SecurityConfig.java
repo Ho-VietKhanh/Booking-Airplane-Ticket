@@ -2,8 +2,10 @@ package se196411.booking_ticket.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -11,6 +13,12 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration // Đánh dấu đây là file Cấu hình
 @EnableWebSecurity // Bật tính năng Spring Security
 public class SecurityConfig {
+
+    private final UserDetailsService userDetailsService;
+
+    public SecurityConfig(UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
 
     /**
      * Bean này dùng để mã hóa mật khẩu.
@@ -59,9 +67,6 @@ public class SecurityConfig {
                                 // URL điều hướng sau khi login thành công
                                 .defaultSuccessUrl("/dashboard", true)
 
-                                // URL điều hướng nếu login thất bại
-                                .failureUrl("/login?error=true")
-
                                 // Cho phép mọi người truy cập trang login
                                 .permitAll()
                 )
@@ -77,5 +82,9 @@ public class SecurityConfig {
 
         // Xây dựng và trả về cấu hình
         return http.build();
+    }
+
+    public void configure(AuthenticationManagerBuilder builder) throws Exception {
+        builder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
     }
 }

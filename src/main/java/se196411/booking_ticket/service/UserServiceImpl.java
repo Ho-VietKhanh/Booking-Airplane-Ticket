@@ -9,8 +9,6 @@ import se196411.booking_ticket.repository.RoleRepository;
 import se196411.booking_ticket.repository.UserRepository;
 import se196411.booking_ticket.service.UserService;
 
-import java.util.Arrays;
-
 @Service // Đánh dấu đây là một Service Bean
 public class UserServiceImpl implements UserService {
 
@@ -33,6 +31,7 @@ public class UserServiceImpl implements UserService {
         UserEntity user = new UserEntity();
         user.setFullName(userDto.getFullName());
         user.setEmail(userDto.getEmail());
+        user.setPhone(userDto.getPhone());
 
         // **QUAN TRỌNG: Mã hóa mật khẩu**
         // Không bao giờ được lưu mật khẩu gốc (plain text)
@@ -47,8 +46,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // Gán role này cho user
-        // Dùng Arrays.asList() vì trường 'roles' của UserEntity là List<RoleEntity>
-        user.setRoles(Arrays.asList(role));
+        user.setRole(role);
 
         // Lưu user vào CSDL
         userRepository.save(user);

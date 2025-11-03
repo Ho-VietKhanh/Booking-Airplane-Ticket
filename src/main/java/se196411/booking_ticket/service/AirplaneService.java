@@ -1,7 +1,7 @@
 package se196411.booking_ticket.service;
 
-import se196411.booking_ticket.model.AirPlaneEntity;
-import se196411.booking_ticket.model.SeatEntity;
+import se196411.booking_ticket.model.entity.AirPlaneEntity;
+import se196411.booking_ticket.model.entity.SeatEntity;
 
 import java.util.List;
 

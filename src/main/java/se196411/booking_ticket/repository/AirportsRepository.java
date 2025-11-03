@@ -2,9 +2,7 @@ package se196411.booking_ticket.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import se196411.booking_ticket.model.AirportsEntity;
-
-import java.util.List;
+import se196411.booking_ticket.model.entity.AirportsEntity;
 
 @Repository
 public interface AirportsRepository extends JpaRepository<AirportsEntity, String> {

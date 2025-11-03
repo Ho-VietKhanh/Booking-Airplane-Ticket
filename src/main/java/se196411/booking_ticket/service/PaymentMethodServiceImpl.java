@@ -2,9 +2,8 @@ package se196411.booking_ticket.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import se196411.booking_ticket.model.PaymentMethodEntity;
+import se196411.booking_ticket.model.entity.PaymentMethodEntity;
 import se196411.booking_ticket.repository.PaymentMethodRepository;
-import se196411.booking_ticket.service.PaymentMethodService;
 
 import java.util.List;
 import java.util.Optional;

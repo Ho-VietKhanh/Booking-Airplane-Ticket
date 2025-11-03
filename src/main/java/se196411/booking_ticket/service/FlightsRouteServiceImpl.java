@@ -2,8 +2,8 @@ package se196411.booking_ticket.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import se196411.booking_ticket.model.AirportsEntity;
-import se196411.booking_ticket.model.FlightRoutesEntity;
+import se196411.booking_ticket.model.entity.AirportsEntity;
+import se196411.booking_ticket.model.entity.FlightRoutesEntity;
 import se196411.booking_ticket.model.dto.FlightsRoutesRequestDTO;
 import se196411.booking_ticket.model.dto.FlightsRoutesResponseDTO;
 import se196411.booking_ticket.repository.AirportsRepository;

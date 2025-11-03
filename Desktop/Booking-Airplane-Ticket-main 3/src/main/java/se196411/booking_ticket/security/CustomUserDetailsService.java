@@ -6,7 +6,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import se196411.booking_ticket.model.RoleEntity;
 import se196411.booking_ticket.model.UserEntity;
 
 import java.util.Collection;

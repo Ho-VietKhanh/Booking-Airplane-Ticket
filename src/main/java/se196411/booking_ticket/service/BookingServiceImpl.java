@@ -9,6 +9,7 @@ import se196411.booking_ticket.model.entity.PaymentEntity;
 import se196411.booking_ticket.model.entity.UserEntity;
 import se196411.booking_ticket.repository.BookingRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -60,7 +61,7 @@ public class BookingServiceImpl implements BookingService {
     public void insertBooking(BookingRequestDTO bookingRequestDTO) {
         BookingEntity bookingEntity = new BookingEntity();
         bookingEntity.setBookingId(bookingRequestDTO.getBookingId());
-        bookingEntity.setBookingTime(bookingRequestDTO.getBookingTime());
+        bookingEntity.setBookingTime(LocalDateTime.now()); // Changed this line
         bookingEntity.setTotalAmount(bookingRequestDTO.getTotalAmount());
         bookingEntity.setStatus(bookingRequestDTO.getStatus());
 

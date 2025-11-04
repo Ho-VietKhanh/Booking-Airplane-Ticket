@@ -49,7 +49,7 @@
                     <option value="">Select Payment</option>
                     <option th:each="payment : ${payments}"
                             th:value="${payment.paymentId}"
-                            th:text="${payment.paymentId + ' - ' + payment.method}"></option>
+                            th:text="${payment.paymentId + ' - ' + payment.paymentMethod.paymentMethodName}"></option>
                 </select>
                 <span class="error" th:if="${#fields.hasErrors('paymentId')}" th:errors="*{paymentId}"></span>
             </div>

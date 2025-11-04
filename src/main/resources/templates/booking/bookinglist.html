@@ -28,11 +28,29 @@
                 <td th:text="${booking.status}"></td>
                 <td th:text="${booking.userId}"></td>
                 <td>
-                    <button class="btn btn-view" th:onclick="|window.location.href='/booking/detail/${booking.bookingId}'|">View Details</button>
-                    <button class="btn btn-delete" th:onclick="|if(confirm('Are you sure?')) window.location.href='/booking/delete/${booking.bookingId}'|">Delete</button>
+                    <button class="btn btn-view" th:data-booking-id="${booking.bookingId}">View Details</button>
+                    <button class="btn btn-delete" th:data-booking-id="${booking.bookingId}">Delete</button>
                 </td>
             </tr>
         </tbody>
     </table>
+
+    <script>
+        document.querySelectorAll('.btn-view').forEach(button => {
+            button.addEventListener('click', function() {
+                const bookingId = this.getAttribute('data-booking-id');
+                window.location.href = '/booking/detail/' + bookingId;
+            });
+        });
+
+        document.querySelectorAll('.btn-delete').forEach(button => {
+            button.addEventListener('click', function() {
+                const bookingId = this.getAttribute('data-booking-id');
+                if (confirm('Are you sure?')) {
+                    window.location.href = '/booking/delete/' + bookingId;
+                }
+            });
+        });
+    </script>
 </body>
 </html>

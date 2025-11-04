@@ -11,10 +11,14 @@ import org.springframework.web.servlet.ModelAndView;
 import se196411.booking_ticket.model.dto.BookingRequestDTO;
 import se196411.booking_ticket.model.dto.BookingResponseDTO;
 import se196411.booking_ticket.model.dto.TicketResponseDTO;
+import se196411.booking_ticket.model.entity.UserEntity;
 import se196411.booking_ticket.service.BookingService;
 import se196411.booking_ticket.service.TicketService;
 import se196411.booking_ticket.service.UserService;
 import se196411.booking_ticket.service.PaymentService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 
 import java.util.List;
 
@@ -35,8 +39,24 @@ public class BookingController {
 
     @GetMapping("/list")
     public ModelAndView listBookings(HttpSession session) {
-        // Add authentication check if needed
-        List<BookingResponseDTO> bookings = bookingService.getAllBookings();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserEmail = authentication.getName();
+
+        UserEntity currentUser = userService.findByEmail(currentUserEmail);
+        List<BookingResponseDTO> bookings;
+
+        // Check if user has ADMIN role
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+
+        if (isAdmin) {
+            // Admin can see all bookings
+            bookings = bookingService.getAllBookings();
+        } else {
+            // Regular users can only see their own bookings
+            bookings = bookingService.getAllBookingsByUserId(currentUser.getUserId());
+        }
+
         ModelAndView mv = new ModelAndView("booking/bookinglist");
         mv.addObject("bookings", bookings);
         return mv;

@@ -90,7 +90,7 @@ public class DataInitializer implements CommandLineRunner {
         user2.setEmail("jane.smith@example.com");
         user2.setPassword(passwordEncoder.encode("password123"));
         user2.setPhone("0987654321");
-        user2.setRole(userRole);
+        user2.setRole(adminRole);
         userRepository.save(user2);
 
         // Create airplane
@@ -199,7 +199,7 @@ public class DataInitializer implements CommandLineRunner {
         booking2.setTotalAmount(new BigDecimal("150.00"));
         booking2.setStatus("PENDING");
         booking2.setPayment(payment2);
-        booking2.setUser(user2);
+        booking2.setUser(user1);
         bookingRepository.save(booking2);
 
         // Create tickets

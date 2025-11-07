@@ -56,11 +56,31 @@ public class BookingServiceController {
     @Autowired
     private RoleService roleService;
 
+    @Autowired
+    private FlightsService flightsService;
+
     // Screen 0: Passenger Information Form
     @GetMapping("/passenger-info")
     public String showPassengerInfoForm(@RequestParam(required = false) String flightId,
                                         Model model) {
-        model.addAttribute("flightId", flightId != null ? flightId : "FL-001");
+        String actualFlightId = flightId != null ? flightId : "FL-001";
+        model.addAttribute("flightId", actualFlightId);
+
+        // Load flight entity with full nested information (flightRoute, airports, airplane)
+        try {
+            se196411.booking_ticket.model.entity.FlightsEntity flight = flightsRepository.findById(actualFlightId).orElse(null);
+            if (flight != null) {
+                model.addAttribute("flight", flight);
+            } else {
+                System.out.println("Flight not found: " + actualFlightId);
+                model.addAttribute("flight", null);
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading flight: " + e.getMessage());
+            e.printStackTrace();
+            model.addAttribute("flight", null);
+        }
+
         return "form_booking";
     }
 

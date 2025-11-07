@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -314,27 +314,48 @@
         <!-- Flight Information -->
         <div class="flight-info">
             <h2>Thông Tin Chuyến Bay</h2>
-            <div class="flight-details">
+            <div class="flight-details" th:if="${flight != null}">
                 <div class="flight-item">
                     <label>Mã chuyến bay:</label>
-                    <span id="flightCode">VJ123</span>
+                    <span th:text="${flight.flightId}">VJ123</span>
                 </div>
                 <div class="flight-item">
                     <label>Hành trình:</label>
-                    <span id="route">Hà Nội → TP. Hồ Chí Minh</span>
+                    <span th:if="${flight.flightRoute != null and flight.flightRoute.startedAirport != null and flight.flightRoute.endedAirport != null}"
+                          th:text="${flight.flightRoute.startedAirport.place + ' (' + flight.flightRoute.startedAirport.code + ') → ' + flight.flightRoute.endedAirport.place + ' (' + flight.flightRoute.endedAirport.code + ')'}">Hà Nội → TP. Hồ Chí Minh</span>
+                    <span th:unless="${flight.flightRoute != null and flight.flightRoute.startedAirport != null and flight.flightRoute.endedAirport != null}">Chưa có thông tin</span>
+                </div>
+                <div class="flight-item">
+                    <label>Máy bay:</label>
+                    <span th:if="${flight.airplane != null}" th:text="${flight.airplane.model + ' - ' + flight.airplane.airline}">Boeing 787</span>
+                    <span th:unless="${flight.airplane != null}">Chưa có thông tin</span>
                 </div>
                 <div class="flight-item">
                     <label>Ngày bay:</label>
-                    <span id="flightDate">02/11/2025</span>
+                    <span th:text="${#temporals.format(flight.startedTime, 'dd/MM/yyyy')}">02/11/2025</span>
                 </div>
                 <div class="flight-item">
                     <label>Giờ khởi hành:</label>
-                    <span id="departureTime">14:30</span>
+                    <span th:text="${#temporals.format(flight.startedTime, 'HH:mm')}">14:30</span>
                 </div>
+                <div class="flight-item">
+                    <label>Giờ đến:</label>
+                    <span th:text="${#temporals.format(flight.endedTime, 'HH:mm')}">16:45</span>
+                </div>
+                <div class="flight-item">
+                    <label>Giá vé cơ bản:</label>
+                    <span th:text="${#numbers.formatDecimal(flight.basePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">1.500.000 VNĐ</span>
+                </div>
+            </div>
+            <div th:if="${flight == null}" style="color: #e74c3c; padding: 10px;">
+                ⚠️ Không tìm thấy thông tin chuyến bay. Vui lòng quay lại và chọn lại.
             </div>
         </div>
 
-        <form id="bookingForm" action="/booking/passenger-info" method="POST">
+        <form id="bookingForm" th:action="@{/booking/passenger-info}" method="POST">
+            <!-- Hidden field to pass flightId -->
+            <input type="hidden" name="flightId" th:value="${flightId}" />
+
             <!-- Contact Information -->
             <div class="form-section">
                 <h2>Thông Tin Liên Hệ</h2>
@@ -474,7 +495,7 @@
                     console.log('Found passenger cards:', allCards.length);
                     if (allCards.length > 0) {
                         container = allCards[allCards.length - 1];
-                    }
+                      }
                 }
 
                 if (!container) {
@@ -642,4 +663,3 @@
     </script>
 </body>
 </html>
-

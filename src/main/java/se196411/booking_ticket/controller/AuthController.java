@@ -89,16 +89,6 @@ public class AuthController {
         // Hoặc bạn có thể chuyển hướng về trang login:
         // return "redirect:/login?register_success";
     }
-
-    /**
-     * Trang test sau khi login thành công
-     * (URL này đã được cấu hình trong SecurityConfig -> defaultSuccessUrl)
-     */
-    @GetMapping("/dashboard")
-    public String showDashboard() {
-        return "dashboard"; // Trả về file dashboard.html
-    }
-
     /**
      * Trang chủ
      */

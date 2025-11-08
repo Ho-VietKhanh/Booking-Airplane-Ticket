@@ -1,29 +1,31 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments-admin :: adminHeader('Airplanes')}">
-    <link rel="stylesheet" th:href="@{/admin/css/admin.css}" />
+    <!-- fragment provides admin CSS/JS -->
 </head>
 <body>
 <div th:replace="~{admin/fragments-admin :: topbar}"></div>
 <div class="d-flex admin-layout">
     <div th:replace="~{admin/fragments-admin :: sidebar('airplanes')}"></div>
     <main class="admin-main p-4 w-100">
-        <div class="container-fluid">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2>Airplanes</h2>
-                <a class="btn btn-primary" th:href="@{/admin/airplanes/create}">+ Add Airplane</a>
+        <div class="container-admin">
+            <div class="page-header">
+                <div class="page-title">Airplanes</div>
+                <div class="page-actions">
+                    <a class="btn btn-primary" th:href="@{/admin/airplanes/create}">+ Add Airplane</a>
+                </div>
             </div>
 
             <!-- Flash messages -->
-            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="4000">
                 <span th:text="${success}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="4000">
                 <span th:text="${error}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show" role="alert">
+            <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show" role="alert" data-auto-dismiss="4000">
                 <span th:text="${warning}"></span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -58,6 +60,5 @@
         </div>
     </main>
 </div>
-<script th:src="@{/admin/js/admin.js}"></script>
 </body>
 </html>

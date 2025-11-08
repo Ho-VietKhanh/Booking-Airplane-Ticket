@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments-admin :: adminHeader('Flights Management')}">
-    <link rel="stylesheet" th:href="@{/admin/css/admin.css}" />
+    <!-- removed per-page admin.css (fragment provides it) -->
 </head>
 <body>
 <!-- topbar -->
@@ -12,10 +12,12 @@
 
     <!-- main content -->
     <main class="admin-main p-4 w-100">
-        <div class="container-fluid">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2>Flights Management</h2>
-                <a class="btn btn-primary" th:href="@{/admin/flights/create}">+ Add Flight</a>
+        <div class="container-admin">
+            <div class="page-header">
+                <div class="page-title">Flights Management</div>
+                <div class="page-actions">
+                    <a class="btn btn-primary" th:href="@{/admin/flights/create}">+ Add Flight</a>
+                </div>
             </div>
 
             <!-- Search / Filter -->

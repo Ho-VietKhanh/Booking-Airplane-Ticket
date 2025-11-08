@@ -1,146 +1,805 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments-admin :: adminHeader('Seat Map')}">
-    <link rel="stylesheet" th:href="@{/admin/css/admin.css}" />
-    <style>
-        .seat-legend { margin: 20px 0; }
-        .legend-box { display: inline-block; width: 30px; height: 30px; border: 1px solid #ddd; margin-right: 5px; vertical-align: middle; }
-        .legend-box.business { background: #4A90E2; }
-        .legend-box.economy { background: #7ED321; }
-        .legend-box.occupied { background: #999; }
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Vé & Ghế</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link th:href="@{/admin/css/admin.css}" rel="stylesheet">
 
-        .admin-seat-map { max-width: 600px; margin: 20px 0; }
-        .seat-row { display: flex; align-items: center; margin-bottom: 10px; }
-        .row-number { width: 40px; text-align: center; font-weight: bold; color: #666; }
-        .seat { width: 50px; height: 50px; margin: 0 5px; border: 2px solid #ddd; border-radius: 8px;
-                display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; }
-        .seat.business { background: #4A90E2; color: white; }
-        .seat.economy { background: #7ED321; color: white; }
-        .seat.occupied { background: #999; color: white; cursor: not-allowed; }
-        .seat:hover:not(.occupied) { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    <style>
+        :root {
+            --brand: #007bff;
+        }
+
+        /* Page Layout */
+        .seat-map-page {
+            padding: 24px;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .page-header {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+        }
+
+        .page-header h2 {
+            color: var(--brand);
+            margin: 0;
+            font-weight: 600;
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #6c757d;
+            margin-bottom: 8px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .stat-card.total .stat-value { color: #495057; }
+        .stat-card.empty .stat-value { color: #28a745; }
+        .stat-card.booked .stat-value { color: #dc3545; }
+        .stat-card.held .stat-value { color: #ffc107; }
+        .stat-card.maintenance .stat-value { color: #6c757d; }
+
+        /* Info Panel */
+        .info-panel {
+            background: white;
+            padding: 20px 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 24px;
+        }
+
+        .info-panel h5 {
+            color: var(--brand);
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .info-panel p {
+            margin: 0;
+            color: #495057;
+            line-height: 1.6;
+        }
+
+        /* Legend */
+        .seat-legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 24px 0;
+            justify-content: center;
+            align-items: center;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-box {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            border: 2px solid rgba(0,0,0,0.15);
+        }
+
+        .legend-box.business { background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%); }
+        .legend-box.economy { background: linear-gradient(135deg, #87CEEB 0%, #70B8DB 100%); }
+        .legend-box.empty { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+        .legend-box.booked { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); }
+        .legend-box.held { background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); }
+        .legend-box.maintenance { background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%); }
+
+        .legend-text {
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        /* Seat Map Container */
+        .seat-map-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .plane-header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .plane-header h4 {
+            color: var(--brand);
+            margin: 0;
+            font-weight: 600;
+            font-size: 20px;
+        }
+
+        /* Column Labels */
+        .column-labels {
+            display: grid;
+            grid-template-columns: 50px repeat(3, 80px) 50px repeat(3, 80px);
+            gap: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .column-label {
+            font-weight: 700;
+            color: #6c757d;
+            font-size: 16px;
+            padding: 10px;
+        }
+
+        /* Seat Rows */
+        .seat-row {
+            display: grid;
+            grid-template-columns: 50px repeat(3, 80px) 50px repeat(3, 80px);
+            gap: 14px;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .row-number {
+            text-align: center;
+            font-weight: 700;
+            color: #495057;
+            font-size: 18px;
+            padding: 10px;
+        }
+
+        .aisle {
+            text-align: center;
+            color: #adb5bd;
+            font-size: 24px;
+            font-weight: 300;
+        }
+
+        /* Seats */
+        .seat {
+            width: 80px;
+            height: 80px;
+            position: relative;
+        }
+
+        .seat-box {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            border: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .seat-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
+            border-radius: 10px;
+        }
+
+        /* Seat Class Colors (Default - will be overridden by status) */
+        .seat.business .seat-box {
+            background: linear-gradient(135deg, #FFD700 0%, #FFC700 100%);
+            border-color: #FFA000;
+            color: #000;
+        }
+
+        .seat.economy .seat-box {
+            background: linear-gradient(135deg, #87CEEB 0%, #70B8DB 100%);
+            border-color: #4A9BD1;
+            color: #fff;
+        }
+
+        /* Seat Status Colors (Override class colors) */
+        .seat.status-empty .seat-box {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: #fff;
+            border-color: #1e7e34;
+        }
+
+        .seat.status-booked .seat-box {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: #fff;
+            border-color: #bd2130;
+        }
+
+        .seat.status-held .seat-box {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            color: #000;
+            border-color: #d39e00;
+        }
+
+        .seat.status-maintenance .seat-box {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+            color: #fff;
+            cursor: not-allowed;
+            opacity: 0.7;
+            border-color: #545b62;
+        }
+
+        /* Hover Effects */
+        .seat-box:not(.disabled):hover {
+            transform: scale(1.15) translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+            z-index: 100;
+        }
+
+        .seat.status-maintenance .seat-box:hover {
+            transform: none;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .action-buttons .btn {
+            padding: 12px 32px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        /* Modal Styling */
+        .modal-content {
+            border-radius: 16px;
+            border: none;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--brand) 0%, #0056b3 100%);
+            color: white;
+            border-radius: 16px 16px 0 0;
+            padding: 20px 24px;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        .modal-title {
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+        }
+
+        .info-section h6 {
+            margin-bottom: 14px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 15px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-badge.booked { background: #dc3545; color: white; }
+        .status-badge.held { background: #ffc107; color: #000; }
+        .status-badge.empty { background: #28a745; color: white; }
+        .status-badge.maintenance { background: #6c757d; color: white; }
+
+        .empty-state, .maintenance-state {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .empty-state i, .maintenance-state i {
+            font-size: 72px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .empty-state { color: #28a745; }
+        .maintenance-state { color: #6c757d; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .seat-map-container {
+                padding: 20px;
+            }
+
+            .column-labels,
+            .seat-row {
+                grid-template-columns: 40px repeat(3, 60px) 40px repeat(3, 60px);
+                gap: 10px;
+            }
+
+            .seat {
+                width: 60px;
+                height: 60px;
+            }
+
+            .seat-box {
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
 <div th:replace="~{admin/fragments-admin :: topbar}"></div>
 <div class="d-flex admin-layout">
     <div th:replace="~{admin/fragments-admin :: sidebar('seats')}"></div>
-    <main class="admin-main p-4 w-100">
-        <div class="container-fluid">
-            <h2>Seat Map - Airplane <span th:text="${airplaneId}"></span></h2>
-            <div class="seat-legend mb-3">
-                <span class="legend-box business"></span> Business
-                <span class="legend-box economy" style="margin-left:12px"></span> Economy
-                <span class="legend-box occupied" style="margin-left:12px"></span> Booked
+
+    <main class="admin-main p-0 w-100">
+        <div class="seat-map-page">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <h2>
+                    <i class="bi bi-airplane"></i> Quản lý Vé & Sơ đồ Ghế
+                    <small class="text-muted" style="font-size: 18px;" th:if="${airplaneId}"> - Máy bay [[${airplaneId}]]</small>
+                </h2>
             </div>
 
-            <div th:if="${seats == null or #lists.isEmpty(seats)}" class="alert alert-warning">No seats found for this airplane.</div>
+            <!-- Stats Cards -->
+            <div class="stats-container">
+                <div class="stat-card total">
+                    <div class="stat-label">Tổng ghế</div>
+                    <div class="stat-value" th:text="${totalSeats}">180</div>
+                </div>
+                <div class="stat-card empty">
+                    <div class="stat-label">Ghế trống</div>
+                    <div class="stat-value" th:text="${emptySeats}">178</div>
+                </div>
+                <div class="stat-card booked">
+                    <div class="stat-label">Đã đặt</div>
+                    <div class="stat-value" th:text="${bookedSeats}">1</div>
+                </div>
+                <div class="stat-card held">
+                    <div class="stat-label">Đang giữ</div>
+                    <div class="stat-value" th:text="${heldSeats}">0</div>
+                </div>
+                <div class="stat-card maintenance">
+                    <div class="stat-label">Bảo trì</div>
+                    <div class="stat-value" th:text="${maintenanceSeats}">1</div>
+                </div>
+            </div>
 
-            <div class="seat-map admin-seat-map" th:unless="${seats == null or #lists.isEmpty(seats)}">
-                <!-- Group seats by row number -->
-                <div th:each="row : ${#numbers.sequence(1, 10)}" class="seat-row">
-                    <div class="row-number" th:text="${row}"></div>
-                    <!-- Display seats for this row -->
-                    <div th:each="s : ${seats}"
-                         th:if="${s.seatNumber != null and s.seatNumber.matches('^' + row + '[A-Z].*')}"
-                         class="seat"
-                         th:classappend="${s.seatClass == 'Business' ? 'business' : 'economy'} + ${!s.isAvailable ? ' occupied' : ''}"
-                         th:attr="data-seat-id=${s.seatId}, data-seat-number=${s.seatNumber}, data-available=${s.isAvailable}, data-ticket-id=${s.tickets != null and !#lists.isEmpty(s.tickets) ? s.tickets[0].ticketId : ''}"
-                         th:onclick="${s.isAvailable} ? 'selectSeat(this)' : 'showBookedInfo(this)'">
-                        <span th:text="${s.seatNumber}"></span>
+            <!-- Info Panel -->
+            <div class="info-panel">
+                <h5><i class="bi bi-info-circle-fill"></i> Hướng dẫn</h5>
+                <p>
+                    <i class="bi bi-hand-index-thumb"></i> <strong>Click vào ghế</strong> để xem chi tiết thông tin vé và hành khách.
+                    Màu sắc ghế thể hiện trạng thái của ghế trên chuyến bay.
+                </p>
+            </div>
+
+            <!-- Seat Legend -->
+            <div class="seat-legend">
+                <div class="legend-item">
+                    <div class="legend-box business"></div>
+                    <span class="legend-text">Hạng Thương Gia</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box economy"></div>
+                    <span class="legend-text">Hạng Phổ Thông</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box empty"></div>
+                    <span class="legend-text">Ghế trống</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box booked"></div>
+                    <span class="legend-text">Đã đặt</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box held"></div>
+                    <span class="legend-text">Đang giữ</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box maintenance"></div>
+                    <span class="legend-text">Bảo trì</span>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div th:if="${seats == null || #lists.isEmpty(seats)}" class="alert alert-warning text-center">
+                <i class="bi bi-exclamation-triangle-fill"></i> Không tìm thấy ghế cho máy bay này.
+            </div>
+
+            <!-- Seat Map -->
+            <div th:if="${seats != null && !#lists.isEmpty(seats)}" class="seat-map-container">
+                <div class="plane-header">
+                    <h4><i class="bi bi-airplane-fill"></i> Sơ đồ ghế máy bay</h4>
+                </div>
+
+                <div class="column-labels">
+                    <div></div>
+                    <div class="column-label">A</div>
+                    <div class="column-label">B</div>
+                    <div class="column-label">C</div>
+                    <div></div>
+                    <div class="column-label">D</div>
+                    <div class="column-label">E</div>
+                    <div class="column-label">F</div>
+                </div>
+
+                <!-- Render rows 1..30 -->
+                <div th:each="rowNum : ${#numbers.sequence(1,30)}">
+                    <div class="seat-row">
+                        <div class="row-number" th:text="${rowNum}">1</div>
+
+                        <!-- Seat A -->
+                        <div th:each="s : ${seats}"
+                             th:if="${s.seatNumber != null and s.seatNumber.matches('^[0-9]+[A-Z]$') and T(java.lang.Integer).parseInt(s.seatNumber.substring(0, s.seatNumber.length()-1)) == rowNum and s.seatNumber.substring(s.seatNumber.length()-1) == 'A'}"
+                             th:with="ticket=${(s.tickets != null and !s.tickets.isEmpty()) ? s.tickets.get(0) : null},
+                                      seatStatus=${ticket != null ? (ticket.status != null and ticket.status.equalsIgnoreCase('HELD') ? 'HELD' : 'BOOKED') : (s.available ? 'EMPTY' : 'MAINTENANCE')}"
+                             class="seat"
+                             th:classappend="${(s.seatClass == 'Business' ? ' business' : ' economy') + ' status-' + seatStatus.toLowerCase()}"
+                             th:data-status="${seatStatus}"
+                             th:data-seat-number="${s.seatNumber}"
+                             th:data-seat-class="${s.seatClass}"
+                             th:data-ticket-id="${ticket != null ? ticket.ticketId : ''}"
+                             th:data-passenger="${ticket != null ? ticket.title + ' ' + ticket.firstName + ' ' + ticket.lastName : ''}"
+                             th:data-email="${ticket != null ? ticket.email : ''}"
+                             th:data-phone="${ticket != null ? ticket.sdt : ''}"
+                             th:data-cccd="${ticket != null ? ticket.cccd : ''}"
+                             th:data-price="${ticket != null ? ticket.price : ''}"
+                             th:data-booking="${ticket != null and ticket.booking != null ? ticket.booking.bookingId : ''}"
+                             onclick="showSeatDetail(this)">
+                            <div class="seat-box" th:classappend="${seatStatus == 'MAINTENANCE' ? 'disabled' : ''}" th:text="${s.seatNumber}">1A</div>
+                        </div>
+
+                        <!-- Seat B -->
+                        <div th:each="s : ${seats}"
+                             th:if="${s.seatNumber != null and s.seatNumber.matches('^[0-9]+[A-Z]$') and T(java.lang.Integer).parseInt(s.seatNumber.substring(0, s.seatNumber.length()-1)) == rowNum and s.seatNumber.substring(s.seatNumber.length()-1) == 'B'}"
+                             th:with="ticket=${(s.tickets != null and !s.tickets.isEmpty()) ? s.tickets.get(0) : null},
+                                      seatStatus=${ticket != null ? (ticket.status != null and ticket.status.equalsIgnoreCase('HELD') ? 'HELD' : 'BOOKED') : (s.available ? 'EMPTY' : 'MAINTENANCE')}"
+                             class="seat"
+                             th:classappend="${(s.seatClass == 'Business' ? ' business' : ' economy') + ' status-' + seatStatus.toLowerCase()}"
+                             th:data-status="${seatStatus}"
+                             th:data-seat-number="${s.seatNumber}"
+                             th:data-seat-class="${s.seatClass}"
+                             th:data-ticket-id="${ticket != null ? ticket.ticketId : ''}"
+                             th:data-passenger="${ticket != null ? ticket.title + ' ' + ticket.firstName + ' ' + ticket.lastName : ''}"
+                             th:data-email="${ticket != null ? ticket.email : ''}"
+                             th:data-phone="${ticket != null ? ticket.sdt : ''}"
+                             th:data-cccd="${ticket != null ? ticket.cccd : ''}"
+                             th:data-price="${ticket != null ? ticket.price : ''}"
+                             th:data-booking="${ticket != null and ticket.booking != null ? ticket.booking.bookingId : ''}"
+                             onclick="showSeatDetail(this)">
+                            <div class="seat-box" th:classappend="${seatStatus == 'MAINTENANCE' ? 'disabled' : ''}" th:text="${s.seatNumber}">1B</div>
+                        </div>
+
+                        <!-- Seat C -->
+                        <div th:each="s : ${seats}"
+                             th:if="${s.seatNumber != null and s.seatNumber.matches('^[0-9]+[A-Z]$') and T(java.lang.Integer).parseInt(s.seatNumber.substring(0, s.seatNumber.length()-1)) == rowNum and s.seatNumber.substring(s.seatNumber.length()-1) == 'C'}"
+                             th:with="ticket=${(s.tickets != null and !s.tickets.isEmpty()) ? s.tickets.get(0) : null},
+                                      seatStatus=${ticket != null ? (ticket.status != null and ticket.status.equalsIgnoreCase('HELD') ? 'HELD' : 'BOOKED') : (s.available ? 'EMPTY' : 'MAINTENANCE')}"
+                             class="seat"
+                             th:classappend="${(s.seatClass == 'Business' ? ' business' : ' economy') + ' status-' + seatStatus.toLowerCase()}"
+                             th:data-status="${seatStatus}"
+                             th:data-seat-number="${s.seatNumber}"
+                             th:data-seat-class="${s.seatClass}"
+                             th:data-ticket-id="${ticket != null ? ticket.ticketId : ''}"
+                             th:data-passenger="${ticket != null ? ticket.title + ' ' + ticket.firstName + ' ' + ticket.lastName : ''}"
+                             th:data-email="${ticket != null ? ticket.email : ''}"
+                             th:data-phone="${ticket != null ? ticket.sdt : ''}"
+                             th:data-cccd="${ticket != null ? ticket.cccd : ''}"
+                             th:data-price="${ticket != null ? ticket.price : ''}"
+                             th:data-booking="${ticket != null and ticket.booking != null ? ticket.booking.bookingId : ''}"
+                             onclick="showSeatDetail(this)">
+                            <div class="seat-box" th:classappend="${seatStatus == 'MAINTENANCE' ? 'disabled' : ''}" th:text="${s.seatNumber}">1C</div>
+                        </div>
+
+                        <!-- Aisle -->
+                        <div class="aisle">—</div>
+
+                        <!-- Seat D -->
+                        <div th:each="s : ${seats}"
+                             th:if="${s.seatNumber != null and s.seatNumber.matches('^[0-9]+[A-Z]$') and T(java.lang.Integer).parseInt(s.seatNumber.substring(0, s.seatNumber.length()-1)) == rowNum and s.seatNumber.substring(s.seatNumber.length()-1) == 'D'}"
+                             th:with="ticket=${(s.tickets != null and !s.tickets.isEmpty()) ? s.tickets.get(0) : null},
+                                      seatStatus=${ticket != null ? (ticket.status != null and ticket.status.equalsIgnoreCase('HELD') ? 'HELD' : 'BOOKED') : (s.available ? 'EMPTY' : 'MAINTENANCE')}"
+                             class="seat"
+                             th:classappend="${(s.seatClass == 'Business' ? ' business' : ' economy') + ' status-' + seatStatus.toLowerCase()}"
+                             th:data-status="${seatStatus}"
+                             th:data-seat-number="${s.seatNumber}"
+                             th:data-seat-class="${s.seatClass}"
+                             th:data-ticket-id="${ticket != null ? ticket.ticketId : ''}"
+                             th:data-passenger="${ticket != null ? ticket.title + ' ' + ticket.firstName + ' ' + ticket.lastName : ''}"
+                             th:data-email="${ticket != null ? ticket.email : ''}"
+                             th:data-phone="${ticket != null ? ticket.sdt : ''}"
+                             th:data-cccd="${ticket != null ? ticket.cccd : ''}"
+                             th:data-price="${ticket != null ? ticket.price : ''}"
+                             th:data-booking="${ticket != null and ticket.booking != null ? ticket.booking.bookingId : ''}"
+                             onclick="showSeatDetail(this)">
+                            <div class="seat-box" th:classappend="${seatStatus == 'MAINTENANCE' ? 'disabled' : ''}" th:text="${s.seatNumber}">1D</div>
+                        </div>
+
+                        <!-- Seat E -->
+                        <div th:each="s : ${seats}"
+                             th:if="${s.seatNumber != null and s.seatNumber.matches('^[0-9]+[A-Z]$') and T(java.lang.Integer).parseInt(s.seatNumber.substring(0, s.seatNumber.length()-1)) == rowNum and s.seatNumber.substring(s.seatNumber.length()-1) == 'E'}"
+                             th:with="ticket=${(s.tickets != null and !s.tickets.isEmpty()) ? s.tickets.get(0) : null},
+                                      seatStatus=${ticket != null ? (ticket.status != null and ticket.status.equalsIgnoreCase('HELD') ? 'HELD' : 'BOOKED') : (s.available ? 'EMPTY' : 'MAINTENANCE')}"
+                             class="seat"
+                             th:classappend="${(s.seatClass == 'Business' ? ' business' : ' economy') + ' status-' + seatStatus.toLowerCase()}"
+                             th:data-status="${seatStatus}"
+                             th:data-seat-number="${s.seatNumber}"
+                             th:data-seat-class="${s.seatClass}"
+                             th:data-ticket-id="${ticket != null ? ticket.ticketId : ''}"
+                             th:data-passenger="${ticket != null ? ticket.title + ' ' + ticket.firstName + ' ' + ticket.lastName : ''}"
+                             th:data-email="${ticket != null ? ticket.email : ''}"
+                             th:data-phone="${ticket != null ? ticket.sdt : ''}"
+                             th:data-cccd="${ticket != null ? ticket.cccd : ''}"
+                             th:data-price="${ticket != null ? ticket.price : ''}"
+                             th:data-booking="${ticket != null and ticket.booking != null ? ticket.booking.bookingId : ''}"
+                             onclick="showSeatDetail(this)">
+                            <div class="seat-box" th:classappend="${seatStatus == 'MAINTENANCE' ? 'disabled' : ''}" th:text="${s.seatNumber}">1E</div>
+                        </div>
+
+                        <!-- Seat F -->
+                        <div th:each="s : ${seats}"
+                             th:if="${s.seatNumber != null and s.seatNumber.matches('^[0-9]+[A-Z]$') and T(java.lang.Integer).parseInt(s.seatNumber.substring(0, s.seatNumber.length()-1)) == rowNum and s.seatNumber.substring(s.seatNumber.length()-1) == 'F'}"
+                             th:with="ticket=${(s.tickets != null and !s.tickets.isEmpty()) ? s.tickets.get(0) : null},
+                                      seatStatus=${ticket != null ? (ticket.status != null and ticket.status.equalsIgnoreCase('HELD') ? 'HELD' : 'BOOKED') : (s.available ? 'EMPTY' : 'MAINTENANCE')}"
+                             class="seat"
+                             th:classappend="${(s.seatClass == 'Business' ? ' business' : ' economy') + ' status-' + seatStatus.toLowerCase()}"
+                             th:data-status="${seatStatus}"
+                             th:data-seat-number="${s.seatNumber}"
+                             th:data-seat-class="${s.seatClass}"
+                             th:data-ticket-id="${ticket != null ? ticket.ticketId : ''}"
+                             th:data-passenger="${ticket != null ? ticket.title + ' ' + ticket.firstName + ' ' + ticket.lastName : ''}"
+                             th:data-email="${ticket != null ? ticket.email : ''}"
+                             th:data-phone="${ticket != null ? ticket.sdt : ''}"
+                             th:data-cccd="${ticket != null ? ticket.cccd : ''}"
+                             th:data-price="${ticket != null ? ticket.price : ''}"
+                             th:data-booking="${ticket != null and ticket.booking != null ? ticket.booking.bookingId : ''}"
+                             onclick="showSeatDetail(this)">
+                            <div class="seat-box" th:classappend="${seatStatus == 'MAINTENANCE' ? 'disabled' : ''}" th:text="${s.seatNumber}">1F</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-3">
-                <a class="btn btn-secondary" th:href="@{/admin/airplanes}">Back to Airplanes</a>
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button type="button" class="btn btn-secondary btn-lg" onclick="history.back()">
+                    <i class="bi bi-arrow-left-circle"></i> Quay lại
+                </button>
             </div>
+
         </div>
     </main>
 </div>
 
-<!-- Ticket detail modal -->
+<!-- Ticket Detail Modal -->
 <div class="modal fade" id="ticketDetailModal" tabindex="-1" aria-labelledby="ticketDetailModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="ticketDetailModalLabel">Ticket Details</h5>
+        <h5 class="modal-title" id="ticketDetailModalLabel">
+            <i class="bi bi-ticket-detailed-fill"></i> Chi tiết Vé & Ghế
+        </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <dl class="row">
-          <dt class="col-sm-4">Ticket ID</dt>
-          <dd class="col-sm-8" id="md-ticketId"></dd>
+        <!-- Seat Info -->
+        <div class="info-section">
+            <h6><i class="bi bi-airplane-engines-fill"></i> Thông tin Ghế</h6>
+            <dl class="row mb-0">
+              <dt class="col-sm-4">Số ghế:</dt>
+              <dd class="col-sm-8"><strong id="md-seatNumber" class="text-primary fs-4">-</strong></dd>
 
-          <dt class="col-sm-4">Passenger</dt>
-          <dd class="col-sm-8" id="md-passenger"></dd>
+              <dt class="col-sm-4">Hạng ghế:</dt>
+              <dd class="col-sm-8"><span id="md-seatClass" class="badge bg-info">-</span></dd>
 
-          <dt class="col-sm-4">Email</dt>
-          <dd class="col-sm-8" id="md-email"></dd>
+              <dt class="col-sm-4">Trạng thái:</dt>
+              <dd class="col-sm-8"><span id="md-status" class="status-badge">-</span></dd>
+            </dl>
+        </div>
 
-          <dt class="col-sm-4">Phone</dt>
-          <dd class="col-sm-8" id="md-phone"></dd>
+        <!-- Ticket Info -->
+        <div id="ticketSection" class="info-section">
+            <h6><i class="bi bi-ticket-perforated-fill"></i> Thông tin Vé</h6>
+            <dl class="row mb-0">
+              <dt class="col-sm-4">Mã vé:</dt>
+              <dd class="col-sm-8"><code id="md-ticketId" class="fs-6 bg-light px-2 py-1 rounded">-</code></dd>
 
-          <dt class="col-sm-4">CCCD</dt>
-          <dd class="col-sm-8" id="md-cccd"></dd>
+              <dt class="col-sm-4">Mã booking:</dt>
+              <dd class="col-sm-8"><code id="md-booking" class="fs-6 bg-light px-2 py-1 rounded">-</code></dd>
 
-          <dt class="col-sm-4">Seat</dt>
-          <dd class="col-sm-8" id="md-seat"></dd>
+              <dt class="col-sm-4">Giá vé:</dt>
+              <dd class="col-sm-8"><strong id="md-price" class="text-success fs-5">-</strong></dd>
+            </dl>
+        </div>
 
-          <dt class="col-sm-4">Booking</dt>
-          <dd class="col-sm-8" id="md-booking"></dd>
+        <!-- Passenger Info -->
+        <div id="passengerSection" class="info-section">
+            <h6><i class="bi bi-person-fill"></i> Thông tin Hành khách</h6>
+            <dl class="row mb-0">
+              <dt class="col-sm-4">Họ tên:</dt>
+              <dd class="col-sm-8"><strong id="md-passenger" class="text-dark">-</strong></dd>
 
-          <dt class="col-sm-4">Status</dt>
-          <dd class="col-sm-8" id="md-status"></dd>
+              <dt class="col-sm-4">Email:</dt>
+              <dd class="col-sm-8"><span id="md-email" class="text-muted"><i class="bi bi-envelope"></i> -</span></dd>
 
-          <dt class="col-sm-4">Price</dt>
-          <dd class="col-sm-8" id="md-price"></dd>
-        </dl>
+              <dt class="col-sm-4">Số điện thoại:</dt>
+              <dd class="col-sm-8"><span id="md-phone" class="text-muted"><i class="bi bi-phone"></i> -</span></dd>
+
+              <dt class="col-sm-4">CCCD/Passport:</dt>
+              <dd class="col-sm-8"><span id="md-cccd" class="text-muted"><i class="bi bi-card-text"></i> -</span></dd>
+            </dl>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptySection" style="display: none;" class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <h5 class="mt-3">Ghế này hiện đang trống</h5>
+            <p class="text-muted mb-0">Chưa có hành khách đặt ghế này</p>
+        </div>
+
+        <!-- Maintenance State -->
+        <div id="maintenanceSection" style="display: none;" class="maintenance-state">
+            <i class="bi bi-tools"></i>
+            <h5 class="mt-3">Ghế đang bảo trì</h5>
+            <p class="text-muted mb-0">Ghế này tạm thời không khả dụng</p>
+        </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle"></i> Đóng
+        </button>
       </div>
     </div>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script th:src="@{/admin/js/admin.js}"></script>
 <script>
-function selectSeat(element) {
-    const seatId = element.getAttribute('data-seat-id');
-    const seatNumber = element.getAttribute('data-seat-number');
-    console.log('Selected available seat:', seatId);
-    alert('Seat ' + seatNumber + ' is available');
-}
+function showSeatDetail(seatElement) {
+    const status = seatElement.getAttribute('data-status');
+    const seatNumber = seatElement.getAttribute('data-seat-number');
+    const seatClass = seatElement.getAttribute('data-seat-class');
+    const ticketId = seatElement.getAttribute('data-ticket-id');
+    const passenger = seatElement.getAttribute('data-passenger');
+    const email = seatElement.getAttribute('data-email');
+    const phone = seatElement.getAttribute('data-phone');
+    const cccd = seatElement.getAttribute('data-cccd');
+    const price = seatElement.getAttribute('data-price');
+    const booking = seatElement.getAttribute('data-booking');
 
-function showBookedInfo(element) {
-    const ticketId = element.getAttribute('data-ticket-id');
-    if (!ticketId) {
-        alert('No ticket information available');
-        return;
+    // Update seat info
+    document.getElementById('md-seatNumber').textContent = seatNumber || '-';
+    document.getElementById('md-seatClass').textContent = seatClass || '-';
+
+    // Update status badge
+    const statusBadge = document.getElementById('md-status');
+    statusBadge.className = 'status-badge ' + (status ? status.toLowerCase() : 'empty');
+
+    let statusText = status;
+    if (status === 'BOOKED') statusText = 'Đã đặt';
+    else if (status === 'HELD') statusText = 'Đang giữ';
+    else if (status === 'EMPTY') statusText = 'Trống';
+    else if (status === 'MAINTENANCE') statusText = 'Bảo trì';
+    statusBadge.textContent = statusText;
+
+    // Show/hide sections based on status
+    const ticketSection = document.getElementById('ticketSection');
+    const passengerSection = document.getElementById('passengerSection');
+    const emptySection = document.getElementById('emptySection');
+    const maintenanceSection = document.getElementById('maintenanceSection');
+
+    if (status === 'EMPTY') {
+        ticketSection.style.display = 'none';
+        passengerSection.style.display = 'none';
+        emptySection.style.display = 'block';
+        maintenanceSection.style.display = 'none';
+    } else if (status === 'MAINTENANCE') {
+        ticketSection.style.display = 'none';
+        passengerSection.style.display = 'none';
+        emptySection.style.display = 'none';
+        maintenanceSection.style.display = 'block';
+    } else {
+        // BOOKED or HELD - show ticket and passenger info
+        ticketSection.style.display = 'block';
+        passengerSection.style.display = 'block';
+        emptySection.style.display = 'none';
+        maintenanceSection.style.display = 'none';
+
+        document.getElementById('md-ticketId').textContent = ticketId || '-';
+        document.getElementById('md-booking').textContent = booking || '-';
+
+        if (price && price !== '') {
+            const priceNum = parseFloat(price);
+            document.getElementById('md-price').textContent = new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(priceNum);
+        } else {
+            document.getElementById('md-price').textContent = '-';
+        }
+
+        document.getElementById('md-passenger').textContent = passenger || '-';
+        document.getElementById('md-email').innerHTML = '<i class="bi bi-envelope"></i> ' + (email || '-');
+        document.getElementById('md-phone').innerHTML = '<i class="bi bi-phone"></i> ' + (phone || '-');
+        document.getElementById('md-cccd').innerHTML = '<i class="bi bi-card-text"></i> ' + (cccd || '-');
     }
-    // Fetch ticket details via AJAX
-    fetch('/admin/api/ticket/' + ticketId)
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('md-ticketId').textContent = data.ticketId || 'N/A';
-            document.getElementById('md-passenger').textContent = (data.firstName || '') + ' ' + (data.lastName || '');
-            document.getElementById('md-email').textContent = data.email || 'N/A';
-            document.getElementById('md-phone').textContent = data.phone || 'N/A';
-            document.getElementById('md-cccd').textContent = data.cccd || 'N/A';
-            document.getElementById('md-seat').textContent = data.seatNumber || 'N/A';
-            document.getElementById('md-booking').textContent = data.bookingId || 'N/A';
-            document.getElementById('md-status').textContent = data.status || 'N/A';
-            document.getElementById('md-price').textContent = data.price ? '$' + data.price : 'N/A';
 
-            // Show modal
-            var modal = new bootstrap.Modal(document.getElementById('ticketDetailModal'));
-            modal.show();
-        })
-        .catch(err => {
-            console.error('Error fetching ticket details:', err);
-            alert('Error loading ticket details');
-        });
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('ticketDetailModal'));
+    modal.show();
 }
 </script>
+
 </body>
 </html>
+

@@ -360,17 +360,118 @@ public class DataInitializer implements CommandLineRunner {
         if (!flightsRepository.findAll().isEmpty()) {
             return; // đã có dữ liệu flight -> không seed thêm
         }
+
         LocalDateTime today = LocalDateTime.now();
         LocalDateTime tomorrow = today.plusDays(1);
+        LocalDateTime day3 = today.plusDays(2);
+        LocalDateTime day4 = today.plusDays(3);
+        LocalDateTime day5 = today.plusDays(4);
+        LocalDateTime day6 = today.plusDays(5);
 
-        // Một vài route chính: FR-001 (HAN->SGN), FR-002 (SGN->HAN), FR-003 (HAN->DAD)
-        createFlight("FL-001", "AP-001", "FR-001", 1500000, today.withHour(6).withMinute(0), today.withHour(8).withMinute(15), "OPEN");
-        createFlight("FL-002", "AP-002", "FR-001", 1400000, today.withHour(14).withMinute(0), today.withHour(16).withMinute(15), "OPEN");
-        createFlight("FL-003", "AP-001", "FR-002", 1500000, today.withHour(9).withMinute(0), today.withHour(11).withMinute(15), "OPEN");
-        createFlight("FL-004", "AP-003", "FR-003", 900000, today.withHour(7).withMinute(30), today.withHour(8).withMinute(50), "OPEN");
-        // Flights for tomorrow
-        createFlight("FL-005", "AP-001", "FR-001", 1550000, tomorrow.withHour(6).withMinute(0), tomorrow.withHour(8).withMinute(15), "OPEN");
-        createFlight("FL-006", "AP-002", "FR-002", 1550000, tomorrow.withHour(9).withMinute(0), tomorrow.withHour(11).withMinute(15), "OPEN");
+        // ========== HAN -> SGN (Today) ==========
+        createFlight("FL-001", "AP-001", "FR-001", 1500000, today.withHour(6).withMinute(0), today.withHour(8).withMinute(15), "AVAILABLE");
+        createFlight("FL-002", "AP-002", "FR-001", 1200000, today.withHour(10).withMinute(30), today.withHour(12).withMinute(45), "AVAILABLE");
+        createFlight("FL-003", "AP-003", "FR-001", 1100000, today.withHour(14).withMinute(0), today.withHour(16).withMinute(15), "AVAILABLE");
+        createFlight("FL-004", "AP-001", "FR-001", 1600000, today.withHour(18).withMinute(30), today.withHour(20).withMinute(45), "AVAILABLE");
+
+        // ========== SGN -> HAN (Today) ==========
+        createFlight("FL-005", "AP-001", "FR-002", 1500000, today.withHour(7).withMinute(0), today.withHour(9).withMinute(15), "AVAILABLE");
+        createFlight("FL-006", "AP-002", "FR-002", 1250000, today.withHour(11).withMinute(30), today.withHour(13).withMinute(45), "AVAILABLE");
+        createFlight("FL-007", "AP-003", "FR-002", 1150000, today.withHour(15).withMinute(0), today.withHour(17).withMinute(15), "AVAILABLE");
+        createFlight("FL-008", "AP-001", "FR-002", 1650000, today.withHour(19).withMinute(30), today.withHour(21).withMinute(45), "AVAILABLE");
+
+        // ========== HAN -> DAD (Today) ==========
+        createFlight("FL-009", "AP-003", "FR-003", 900000, today.withHour(8).withMinute(0), today.withHour(9).withMinute(20), "AVAILABLE");
+        createFlight("FL-010", "AP-002", "FR-003", 950000, today.withHour(13).withMinute(0), today.withHour(14).withMinute(20), "AVAILABLE");
+        createFlight("FL-011", "AP-004", "FR-003", 920000, today.withHour(17).withMinute(30), today.withHour(18).withMinute(50), "AVAILABLE");
+
+        // ========== DAD -> HAN (Today) ==========
+        createFlight("FL-012", "AP-003", "FR-004", 900000, today.withHour(10).withMinute(0), today.withHour(11).withMinute(20), "AVAILABLE");
+        createFlight("FL-013", "AP-002", "FR-004", 950000, today.withHour(15).withMinute(0), today.withHour(16).withMinute(20), "AVAILABLE");
+
+        // ========== SGN -> DAD (Today) ==========
+        createFlight("FL-014", "AP-003", "FR-005", 800000, today.withHour(9).withMinute(0), today.withHour(10).withMinute(30), "AVAILABLE");
+        createFlight("FL-015", "AP-004", "FR-005", 850000, today.withHour(14).withMinute(30), today.withHour(16).withMinute(0), "AVAILABLE");
+
+        // ========== DAD -> SGN (Today) ==========
+        createFlight("FL-016", "AP-003", "FR-006", 800000, today.withHour(11).withMinute(0), today.withHour(12).withMinute(30), "AVAILABLE");
+        createFlight("FL-017", "AP-004", "FR-006", 850000, today.withHour(17).withMinute(0), today.withHour(18).withMinute(30), "AVAILABLE");
+
+        // ========== HAN -> PQC (Today) ==========
+        createFlight("FL-018", "AP-001", "FR-007", 1800000, today.withHour(9).withMinute(0), today.withHour(11).withMinute(30), "AVAILABLE");
+        createFlight("FL-019", "AP-002", "FR-007", 1700000, today.withHour(15).withMinute(0), today.withHour(17).withMinute(30), "AVAILABLE");
+
+        // ========== PQC -> HAN (Today) ==========
+        createFlight("FL-020", "AP-001", "FR-008", 1800000, today.withHour(12).withMinute(0), today.withHour(14).withMinute(30), "AVAILABLE");
+        createFlight("FL-021", "AP-002", "FR-008", 1700000, today.withHour(18).withMinute(0), today.withHour(20).withMinute(30), "AVAILABLE");
+
+        // ========== SGN -> PQC (Today) ==========
+        createFlight("FL-022", "AP-003", "FR-009", 1000000, today.withHour(8).withMinute(30), today.withHour(9).withMinute(30), "AVAILABLE");
+        createFlight("FL-023", "AP-004", "FR-009", 1050000, today.withHour(13).withMinute(30), today.withHour(14).withMinute(30), "AVAILABLE");
+        createFlight("FL-024", "AP-003", "FR-009", 1000000, today.withHour(17).withMinute(0), today.withHour(18).withMinute(0), "AVAILABLE");
+
+        // ========== PQC -> SGN (Today) ==========
+        createFlight("FL-025", "AP-003", "FR-010", 1000000, today.withHour(10).withMinute(0), today.withHour(11).withMinute(0), "AVAILABLE");
+        createFlight("FL-026", "AP-004", "FR-010", 1050000, today.withHour(15).withMinute(0), today.withHour(16).withMinute(0), "AVAILABLE");
+
+        // ========== HAN -> CXR (Today) ==========
+        createFlight("FL-027", "AP-001", "FR-011", 1300000, today.withHour(7).withMinute(30), today.withHour(9).withMinute(45), "AVAILABLE");
+        createFlight("FL-028", "AP-002", "FR-011", 1250000, today.withHour(14).withMinute(0), today.withHour(16).withMinute(15), "AVAILABLE");
+
+        // ========== CXR -> HAN (Today) ==========
+        createFlight("FL-029", "AP-001", "FR-012", 1300000, today.withHour(10).withMinute(30), today.withHour(12).withMinute(45), "AVAILABLE");
+        createFlight("FL-030", "AP-002", "FR-012", 1250000, today.withHour(17).withMinute(0), today.withHour(19).withMinute(15), "AVAILABLE");
+
+        // ========== SGN -> DLI (Today) ==========
+        createFlight("FL-031", "AP-003", "FR-013", 700000, today.withHour(8).withMinute(0), today.withHour(9).withMinute(0), "AVAILABLE");
+        createFlight("FL-032", "AP-004", "FR-013", 750000, today.withHour(16).withMinute(0), today.withHour(17).withMinute(0), "AVAILABLE");
+
+        // ========== DLI -> SGN (Today) ==========
+        createFlight("FL-033", "AP-003", "FR-014", 700000, today.withHour(10).withMinute(0), today.withHour(11).withMinute(0), "AVAILABLE");
+        createFlight("FL-034", "AP-004", "FR-014", 750000, today.withHour(18).withMinute(0), today.withHour(19).withMinute(0), "AVAILABLE");
+
+        // ========== Tomorrow (Day 2) ==========
+        createFlight("FL-035", "AP-001", "FR-001", 1500000, tomorrow.withHour(6).withMinute(0), tomorrow.withHour(8).withMinute(15), "AVAILABLE");
+        createFlight("FL-036", "AP-002", "FR-001", 1200000, tomorrow.withHour(12).withMinute(0), tomorrow.withHour(14).withMinute(15), "AVAILABLE");
+        createFlight("FL-037", "AP-001", "FR-002", 1500000, tomorrow.withHour(7).withMinute(0), tomorrow.withHour(9).withMinute(15), "AVAILABLE");
+        createFlight("FL-038", "AP-002", "FR-002", 1250000, tomorrow.withHour(14).withMinute(0), tomorrow.withHour(16).withMinute(15), "AVAILABLE");
+        createFlight("FL-039", "AP-003", "FR-003", 900000, tomorrow.withHour(8).withMinute(30), tomorrow.withHour(9).withMinute(50), "AVAILABLE");
+        createFlight("FL-040", "AP-003", "FR-004", 900000, tomorrow.withHour(11).withMinute(0), tomorrow.withHour(12).withMinute(20), "AVAILABLE");
+
+        // ========== Day 3 ==========
+        createFlight("FL-041", "AP-001", "FR-001", 1450000, day3.withHour(9).withMinute(0), day3.withHour(11).withMinute(15), "AVAILABLE");
+        createFlight("FL-042", "AP-002", "FR-001", 1150000, day3.withHour(15).withMinute(30), day3.withHour(17).withMinute(45), "AVAILABLE");
+        createFlight("FL-043", "AP-001", "FR-002", 1450000, day3.withHour(10).withMinute(0), day3.withHour(12).withMinute(15), "AVAILABLE");
+        createFlight("FL-044", "AP-002", "FR-002", 1200000, day3.withHour(16).withMinute(30), day3.withHour(18).withMinute(45), "AVAILABLE");
+        createFlight("FL-045", "AP-003", "FR-005", 800000, day3.withHour(10).withMinute(0), day3.withHour(11).withMinute(30), "AVAILABLE");
+        createFlight("FL-046", "AP-003", "FR-006", 800000, day3.withHour(13).withMinute(0), day3.withHour(14).withMinute(30), "AVAILABLE");
+
+        // ========== Day 4 ==========
+        createFlight("FL-047", "AP-001", "FR-007", 1750000, day4.withHour(8).withMinute(0), day4.withHour(10).withMinute(30), "AVAILABLE");
+        createFlight("FL-048", "AP-001", "FR-008", 1750000, day4.withHour(13).withMinute(0), day4.withHour(15).withMinute(30), "AVAILABLE");
+        createFlight("FL-049", "AP-003", "FR-009", 1000000, day4.withHour(9).withMinute(0), day4.withHour(10).withMinute(0), "AVAILABLE");
+        createFlight("FL-050", "AP-003", "FR-010", 1000000, day4.withHour(12).withMinute(0), day4.withHour(13).withMinute(0), "AVAILABLE");
+
+        // ========== Day 5 ==========
+        createFlight("FL-051", "AP-002", "FR-001", 1300000, day5.withHour(7).withMinute(0), day5.withHour(9).withMinute(15), "AVAILABLE");
+        createFlight("FL-052", "AP-003", "FR-001", 1200000, day5.withHour(13).withMinute(0), day5.withHour(15).withMinute(15), "AVAILABLE");
+        createFlight("FL-053", "AP-002", "FR-002", 1300000, day5.withHour(8).withMinute(0), day5.withHour(10).withMinute(15), "AVAILABLE");
+        createFlight("FL-054", "AP-003", "FR-002", 1200000, day5.withHour(14).withMinute(0), day5.withHour(16).withMinute(15), "AVAILABLE");
+        createFlight("FL-055", "AP-004", "FR-003", 920000, day5.withHour(9).withMinute(30), day5.withHour(10).withMinute(50), "AVAILABLE");
+        createFlight("FL-056", "AP-004", "FR-004", 920000, day5.withHour(12).withMinute(0), day5.withHour(13).withMinute(20), "AVAILABLE");
+
+        // ========== Day 6 ==========
+        createFlight("FL-057", "AP-001", "FR-001", 1600000, day6.withHour(6).withMinute(30), day6.withHour(8).withMinute(45), "AVAILABLE");
+        createFlight("FL-058", "AP-002", "FR-001", 1250000, day6.withHour(11).withMinute(0), day6.withHour(13).withMinute(15), "AVAILABLE");
+        createFlight("FL-059", "AP-003", "FR-001", 1150000, day6.withHour(16).withMinute(0), day6.withHour(18).withMinute(15), "AVAILABLE");
+        createFlight("FL-060", "AP-001", "FR-002", 1600000, day6.withHour(7).withMinute(30), day6.withHour(9).withMinute(45), "AVAILABLE");
+        createFlight("FL-061", "AP-002", "FR-002", 1250000, day6.withHour(12).withMinute(0), day6.withHour(14).withMinute(15), "AVAILABLE");
+        createFlight("FL-062", "AP-003", "FR-002", 1150000, day6.withHour(17).withMinute(0), day6.withHour(19).withMinute(15), "AVAILABLE");
+        createFlight("FL-063", "AP-001", "FR-011", 1300000, day6.withHour(8).withMinute(0), day6.withHour(10).withMinute(15), "AVAILABLE");
+        createFlight("FL-064", "AP-001", "FR-012", 1300000, day6.withHour(11).withMinute(0), day6.withHour(13).withMinute(15), "AVAILABLE");
+        createFlight("FL-065", "AP-003", "FR-013", 700000, day6.withHour(9).withMinute(0), day6.withHour(10).withMinute(0), "AVAILABLE");
+        createFlight("FL-066", "AP-003", "FR-014", 700000, day6.withHour(11).withMinute(30), day6.withHour(12).withMinute(30), "AVAILABLE");
+
     }
 
     private void createFlight(String flightId, String airplaneId, String routeId,

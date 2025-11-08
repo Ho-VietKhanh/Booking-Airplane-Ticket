@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/fragments-admin :: adminHeader('Seats Management')}">
-    <link rel="stylesheet" th:href="@{/admin/css/admin.css}" />
+    <!-- fragment provides admin CSS/JS -->
 </head>
 <body>
 <div th:replace="~{admin/fragments-admin :: topbar}"></div>
 <div class="d-flex admin-layout">
     <div th:replace="~{admin/fragments-admin :: sidebar('seats')}"></div>
     <main class="admin-main p-4 w-100">
-        <div class="container-fluid">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2>Seats</h2>
+        <div class="container-admin">
+            <div class="page-header">
+                <div class="page-title">Seats</div>
+                <div class="page-actions">
+                    <!-- actions can be added here -->
+                </div>
             </div>
+
             <div class="card">
                 <div class="card-body p-0">
                     <table class="table table-striped mb-0">
@@ -45,4 +49,3 @@
 </div>
 </body>
 </html>
-

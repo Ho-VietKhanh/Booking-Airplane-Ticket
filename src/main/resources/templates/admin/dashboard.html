@@ -6,8 +6,14 @@
 <div class="d-flex admin-layout">
     <div th:replace="~{admin/fragments-admin :: sidebar('dashboard')}"></div>
     <main class="admin-main w-100 p-4">
-        <div class="container-fluid">
-            <h2 class="mb-4">Admin Dashboard</h2>
+        <div class="container-admin">
+            <div class="page-header">
+                <div class="page-title">Admin Dashboard</div>
+                <div class="page-actions">
+                    <!-- future actions (export, filters) -->
+                </div>
+            </div>
+
             <div class="row g-3">
                 <div class="col-md-3">
                     <div class="card shadow-sm">
@@ -53,4 +59,3 @@
 </div>
 </body>
 </html>
-

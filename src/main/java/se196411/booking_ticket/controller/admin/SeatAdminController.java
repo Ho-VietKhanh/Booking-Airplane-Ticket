@@ -23,6 +23,22 @@ public class SeatAdminController {
         model.addAttribute("seats", seats);
         model.addAttribute("airplaneId", airplaneId);
         model.addAttribute("active", "seats");
+
+        // quick stats: total / empty / booked / held / maintenance
+        long total = seats.size();
+        long booked = seats.stream().filter(s -> s.getTickets() != null && !s.getTickets().isEmpty()
+                && s.getTickets().get(0).getStatus() != null && !s.getTickets().get(0).getStatus().equalsIgnoreCase("HELD")).count();
+        long held = seats.stream().filter(s -> s.getTickets() != null && !s.getTickets().isEmpty()
+                && s.getTickets().get(0).getStatus() != null && s.getTickets().get(0).getStatus().equalsIgnoreCase("HELD")).count();
+        long maintenance = seats.stream().filter(s -> !s.isAvailable()).count();
+        long empty = total - booked - held - maintenance;
+
+        model.addAttribute("totalSeats", total);
+        model.addAttribute("emptySeats", Math.max(0, empty));
+        model.addAttribute("bookedSeats", booked);
+        model.addAttribute("heldSeats", held);
+        model.addAttribute("maintenanceSeats", maintenance);
+
         return "admin/seat-selection";
     }
 

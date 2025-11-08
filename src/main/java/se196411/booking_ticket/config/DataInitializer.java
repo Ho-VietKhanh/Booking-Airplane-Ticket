@@ -3,6 +3,7 @@ package se196411.booking_ticket.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import se196411.booking_ticket.model.entity.*;
 import se196411.booking_ticket.repository.AirplaneRepository;
@@ -54,12 +55,26 @@ public class DataInitializer implements CommandLineRunner {
                            FlightsRepository flightsRepository,
                            SeatRepository seatRepository,
                            FlightsRoutesRepository flightsRoutesRepository,
-                           AirportsRepository airportsRepository) {
+                           AirportsRepository airportsRepository,
+                           RoleRepository roleRepository,
+                           UserRepository userRepository,
+                           PaymentRepository paymentRepository,
+                           PaymentMethodRepository paymentMethodRepository,
+                           BookingRepository bookingRepository,
+                           TicketRepository ticketRepository,
+                           PasswordEncoder passwordEncoder) {
         this.airplaneRepository = airplaneRepository;
         this.flightsRepository = flightsRepository;
         this.seatRepository = seatRepository;
         this.flightsRoutesRepository = flightsRoutesRepository;
         this.airportsRepository = airportsRepository;
+        this.roleRepository = roleRepository;
+        this.userRepository = userRepository;
+        this.paymentRepository = paymentRepository;
+        this.paymentMethodRepository = paymentMethodRepository;
+        this.bookingRepository = bookingRepository;
+        this.ticketRepository = ticketRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override

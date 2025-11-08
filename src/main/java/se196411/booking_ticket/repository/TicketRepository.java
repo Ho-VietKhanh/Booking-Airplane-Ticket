@@ -23,3 +23,5 @@ public interface TicketRepository extends JpaRepository<TicketEntity,String> {
            "LEFT JOIN FETCH t.luggage")
     List<TicketEntity> findAllWithDetails();
 }
+
+

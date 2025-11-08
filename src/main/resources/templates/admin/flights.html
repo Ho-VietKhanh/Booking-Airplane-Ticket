@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments-admin :: adminHeader('Flights Management')}">
+    <!-- removed per-page admin.css (fragment provides it) -->
+</head>
+<body>
+<!-- topbar -->
+<div th:replace="~{admin/fragments-admin :: topbar}"></div>
+<div class="d-flex admin-layout">
+    <!-- sidebar -->
+    <div th:replace="~{admin/fragments-admin :: sidebar('flights')}"></div>
+
+    <!-- main content -->
+    <main class="admin-main p-4 w-100">
+        <div class="container-admin">
+            <div class="page-header">
+                <div class="page-title">Flights Management</div>
+                <div class="page-actions">
+                    <a class="btn btn-primary" th:href="@{/admin/flights/create}">+ Add Flight</a>
+                </div>
+            </div>
+
+            <!-- Search / Filter -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <form class="row g-2" method="get" th:action="@{/admin/flights}">
+                        <div class="col-md-4">
+                            <input class="form-control" type="search" name="q" placeholder="Flight ID or Airplane model" th:value="${q}" />
+                        </div>
+                        <div class="col-md-3">
+                            <input class="form-control" type="date" name="from" th:value="${from}" />
+                        </div>
+                        <div class="col-md-3">
+                            <input class="form-control" type="date" name="to" th:value="${to}" />
+                        </div>
+                        <div class="col-md-2 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                            <a class="btn btn-outline-secondary" th:href="@{/admin/flights}">Reset</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body p-0">
+                    <table class="table table-striped mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Flight ID</th>
+                            <th>Airplane</th>
+                            <th>Route</th>
+                            <th>Departure</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="f : ${flights}">
+                            <td th:text="${f.flightId}"></td>
+                            <td th:text="${f.airplane?.model ?: 'N/A'}"></td>
+                            <td>
+                                <span th:if="${f.flightRoute != null and f.flightRoute.startedAirport != null and f.flightRoute.endedAirport != null}"
+                                      th:text="${f.flightRoute.startedAirport.code + ' → ' + f.flightRoute.endedAirport.code}"></span>
+                                <span th:unless="${f.flightRoute != null and f.flightRoute.startedAirport != null and f.flightRoute.endedAirport != null}">N/A</span>
+                            </td>
+                            <td th:text="${f.startedTime != null ? #temporals.format(f.startedTime, 'yyyy-MM-dd HH:mm') : 'N/A'}"></td>
+                            <td>
+                                <span th:classappend="'badge ' + (${f.status}=='OPEN' ? 'bg-success' : (${f.status}=='FLYING' ? 'bg-primary' : (${f.status}=='DELAY' ? 'bg-warning text-dark' : 'bg-danger')))">
+                                    <span th:text="${f.status}"></span>
+                                </span>
+                            </td>
+                            <td>
+                                <a th:href="@{'/admin/flights/view/' + ${f.flightId}}" class="btn btn-sm btn-info">View</a>
+                                <a th:href="@{'/admin/flights/create?edit=' + ${f.flightId}}" class="btn btn-sm btn-warning">Edit</a>
+                                <a th:href="@{'/admin/flights/delete/' + ${f.flightId}}" class="btn btn-sm btn-danger" onclick="return confirm('Delete flight?')">Delete</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 import se196411.booking_ticket.model.entity.UserEntity;
 
 @Repository
-public interface UserRepository extends JpaRepository<UserEntity, Long> {
+public interface UserRepository extends JpaRepository<UserEntity, String> {
 
     /**
      * Tìm một UserEntity bằng email.

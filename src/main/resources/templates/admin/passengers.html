@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments-admin :: adminHeader('Quản lý Vé')}">
+</head>
+<body>
+<div th:replace="~{admin/fragments-admin :: topbar}"></div>
+<div class="d-flex admin-layout">
+    <div th:replace="~{admin/fragments-admin :: sidebar('tickets')}"></div>
+    <main class="admin-main p-4 w-100">
+        <div class="container-admin">
+            <div class="page-header mb-4">
+                <h2 class="page-title text-primary">
+                    <i class="bi bi-ticket-perforated"></i> Quản lý Vé
+                </h2>
+                <div class="page-actions">
+                    <form class="d-flex gap-2" th:action="@{/admin/passengers}" method="get">
+                        <input class="form-control" type="search" name="q"
+                               placeholder="Tìm theo tên, mã vé, mã booking..."
+                               style="min-width: 300px;"/>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-search"></i> Tìm kiếm
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted mb-2">Tổng số vé</h6>
+                            <h3 class="mb-0 text-primary" th:text="${tickets != null ? #lists.size(tickets) : 0}">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted mb-2">Đã xác nhận</h6>
+                            <h3 class="mb-0 text-success" th:text="${bookedCount != null ? bookedCount : 0}">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted mb-2">Đang giữ</h6>
+                            <h3 class="mb-0 text-warning" th:text="${heldCount != null ? heldCount : 0}">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted mb-2">Đã hủy</h6>
+                            <h3 class="mb-0 text-danger" th:text="${cancelledCount != null ? cancelledCount : 0}">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tickets Table -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-ul"></i> Danh sách Vé
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th width="10%">Mã vé</th>
+                                <th width="12%">Mã Booking</th>
+                                <th width="20%">Hành khách</th>
+                                <th width="12%">Chuyến bay</th>
+                                <th width="8%">Ghế</th>
+                                <th width="15%">Email</th>
+                                <th width="10%">Giá</th>
+                                <th width="8%">Trạng thái</th>
+                                <th width="5%">Chi tiết</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="t : ${tickets}" th:if="${tickets != null && !tickets.isEmpty()}">
+                                <td>
+                                    <code class="text-primary" th:text="${t.ticketId}">TK001</code>
+                                </td>
+                                <td>
+                                    <a th:href="@{'/admin/bookings/' + ${t.booking.bookingId}}"
+                                       class="text-decoration-none">
+                                        <code th:text="${t.booking.bookingId}">BK001</code>
+                                    </a>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-person-circle me-2 text-muted"></i>
+                                        <div>
+                                            <strong th:text="${t.title + ' ' + t.firstName + ' ' + t.lastName}">Mr. John Doe</strong>
+                                            <br/>
+                                            <small class="text-muted" th:text="${t.cccd}">CCCD: 123456789</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a th:href="@{'/admin/flights/' + ${t.flight.flightId}}"
+                                       class="text-decoration-none">
+                                        <i class="bi bi-airplane"></i>
+                                        <strong th:text="${t.flight.flightId}">FL001</strong>
+                                    </a>
+                                    <br/>
+                                    <small class="text-muted"
+                                           th:text="${t.flight.flightRoute.startedAirport.airportId + ' → ' + t.flight.flightRoute.endedAirport.airportId}">
+                                        HAN → SGN
+                                    </small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info" th:text="${t.seat.seatNumber}">1A</span>
+                                    <br/>
+                                    <small class="text-muted" th:text="${t.seat.seatClass}">Business</small>
+                                </td>
+                                <td>
+                                    <i class="bi bi-envelope text-muted"></i>
+                                    <small th:text="${t.email}">email@example.com</small>
+                                </td>
+                                <td>
+                                    <strong class="text-success"
+                                            th:text="${#numbers.formatDecimal(t.price, 0, 'COMMA', 0, 'POINT') + ' ₫'}">
+                                        1,000,000 ₫
+                                    </strong>
+                                </td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${t.status == 'CONFIRMED' or t.status == 'BOOKED' ? 'bg-success' :
+                                                          (t.status == 'PENDING' ? 'bg-info' :
+                                                          (t.status == 'HELD' ? 'bg-warning text-dark' : 'bg-danger'))}"
+                                          th:text="${t.status == 'CONFIRMED' ? 'Đã xác nhận' :
+                                                   (t.status == 'BOOKED' ? 'Đã đặt' :
+                                                   (t.status == 'PENDING' ? 'Chờ xử lý' :
+                                                   (t.status == 'HELD' ? 'Đang giữ' : 'Đã hủy')))}">
+                                        Đã đặt
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#ticketModal"
+                                            th:data-ticket-id="${t.ticketId}"
+                                            th:data-passenger="${t.title + ' ' + t.firstName + ' ' + t.lastName}"
+                                            th:data-email="${t.email}"
+                                            th:data-phone="${t.sdt}"
+                                            th:data-cccd="${t.cccd}"
+                                            th:data-birth="${t.birthDate}"
+                                            th:data-nationality="${t.nationality}"
+                                            th:data-gender="${t.gender ? 'Nam' : 'Nữ'}"
+                                            th:data-flight="${t.flight.flightId}"
+                                            th:data-seat="${t.seat.seatNumber + ' (' + t.seat.seatClass + ')'}"
+                                            th:data-booking="${t.booking.bookingId}"
+                                            th:data-price="${t.price}"
+                                            th:data-status="${t.status}"
+                                            th:data-meal="${t.meal != null ? t.meal.name : 'Không'}"
+                                            th:data-luggage="${t.luggage != null ? t.luggage.luggageAllowance + ' kg' : 'Không'}"
+                                            onclick="showTicketDetail(this)"
+                                            title="Xem thông tin chi tiết vé">
+                                        <i class="bi bi-eye me-1"></i> Xem chi tiết
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr th:if="${tickets == null || tickets.isEmpty()}">
+                                <td colspan="9" class="text-center py-5">
+                                    <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                                    <p class="text-muted mt-3">Không có vé nào</p>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Ticket Detail Modal -->
+<div class="modal fade" id="ticketModal" tabindex="-1" aria-labelledby="ticketModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="ticketModalLabel">
+                    <i class="bi bi-ticket-detailed"></i> Chi tiết Vé
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <!-- Passenger Info -->
+                    <div class="col-md-6 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title text-primary">
+                                    <i class="bi bi-person-fill"></i> Thông tin Hành khách
+                                </h6>
+                                <hr>
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-5">Họ tên:</dt>
+                                    <dd class="col-sm-7" id="modal-passenger">-</dd>
+
+                                    <dt class="col-sm-5">Giới tính:</dt>
+                                    <dd class="col-sm-7" id="modal-gender">-</dd>
+
+                                    <dt class="col-sm-5">Ngày sinh:</dt>
+                                    <dd class="col-sm-7" id="modal-birth">-</dd>
+
+                                    <dt class="col-sm-5">Quốc tịch:</dt>
+                                    <dd class="col-sm-7" id="modal-nationality">-</dd>
+
+                                    <dt class="col-sm-5">CCCD/Passport:</dt>
+                                    <dd class="col-sm-7" id="modal-cccd">-</dd>
+
+                                    <dt class="col-sm-5">Email:</dt>
+                                    <dd class="col-sm-7" id="modal-email">-</dd>
+
+                                    <dt class="col-sm-5">Điện thoại:</dt>
+                                    <dd class="col-sm-7" id="modal-phone">-</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ticket Info -->
+                    <div class="col-md-6 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title text-success">
+                                    <i class="bi bi-ticket-perforated"></i> Thông tin Vé
+                                </h6>
+                                <hr>
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-5">Mã vé:</dt>
+                                    <dd class="col-sm-7"><code id="modal-ticket-id">-</code></dd>
+
+                                    <dt class="col-sm-5">Mã booking:</dt>
+                                    <dd class="col-sm-7"><code id="modal-booking">-</code></dd>
+
+                                    <dt class="col-sm-5">Chuyến bay:</dt>
+                                    <dd class="col-sm-7" id="modal-flight">-</dd>
+
+                                    <dt class="col-sm-5">Ghế:</dt>
+                                    <dd class="col-sm-7"><span class="badge bg-info" id="modal-seat">-</span></dd>
+
+                                    <dt class="col-sm-5">Giá vé:</dt>
+                                    <dd class="col-sm-7"><strong class="text-success" id="modal-price">-</strong></dd>
+
+                                    <dt class="col-sm-5">Trạng thái:</dt>
+                                    <dd class="col-sm-7"><span class="badge" id="modal-status">-</span></dd>
+
+                                    <dt class="col-sm-5">Suất ăn:</dt>
+                                    <dd class="col-sm-7" id="modal-meal">-</dd>
+
+                                    <dt class="col-sm-5">Hành lý:</dt>
+                                    <dd class="col-sm-7" id="modal-luggage">-</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showTicketDetail(button) {
+    // Get data from button attributes
+    document.getElementById('modal-ticket-id').textContent = button.getAttribute('data-ticket-id');
+    document.getElementById('modal-passenger').textContent = button.getAttribute('data-passenger');
+    document.getElementById('modal-email').textContent = button.getAttribute('data-email');
+    document.getElementById('modal-phone').textContent = button.getAttribute('data-phone');
+    document.getElementById('modal-cccd').textContent = button.getAttribute('data-cccd');
+    document.getElementById('modal-birth').textContent = button.getAttribute('data-birth');
+    document.getElementById('modal-nationality').textContent = button.getAttribute('data-nationality');
+    document.getElementById('modal-gender').textContent = button.getAttribute('data-gender');
+    document.getElementById('modal-flight').textContent = button.getAttribute('data-flight');
+    document.getElementById('modal-seat').textContent = button.getAttribute('data-seat');
+    document.getElementById('modal-booking').textContent = button.getAttribute('data-booking');
+    document.getElementById('modal-meal').textContent = button.getAttribute('data-meal');
+    document.getElementById('modal-luggage').textContent = button.getAttribute('data-luggage');
+
+    // Format price
+    const price = parseFloat(button.getAttribute('data-price'));
+    document.getElementById('modal-price').textContent = new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND'
+    }).format(price);
+
+    // Status badge
+    const status = button.getAttribute('data-status');
+    const statusBadge = document.getElementById('modal-status');
+    let statusText = status;
+    let statusClass = 'bg-secondary';
+
+    if (status === 'BOOKED') {
+        statusText = 'Đã đặt';
+        statusClass = 'bg-success';
+    } else if (status === 'HELD') {
+        statusText = 'Đang giữ';
+        statusClass = 'bg-warning text-dark';
+    } else if (status === 'CANCELLED') {
+        statusText = 'Đã hủy';
+        statusClass = 'bg-danger';
+    } else if (status === 'PENDING') {
+        statusText = 'Chờ xử lý';
+        statusClass = 'bg-info';
+    } else if (status === 'CONFIRMED') {
+        statusText = 'Đã xác nhận';
+        statusClass = 'bg-success';
+    }
+
+    statusBadge.className = 'badge ' + statusClass;
+    statusBadge.textContent = statusText;
+}
+</script>
+
+</body>
+</html>

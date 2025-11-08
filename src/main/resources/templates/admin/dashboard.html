@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments-admin :: adminHeader('Admin Dashboard')}"></head>
+<body>
+<div th:replace="~{admin/fragments-admin :: topbar}"></div>
+<div class="d-flex admin-layout">
+    <div th:replace="~{admin/fragments-admin :: sidebar('dashboard')}"></div>
+    <main class="admin-main w-100 p-4">
+        <div class="container-admin">
+            <div class="page-header">
+                <div class="page-title">Admin Dashboard</div>
+                <div class="page-actions">
+                    <!-- future actions (export, filters) -->
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h6 class="text-muted">Flights</h6>
+                            <h3 th:text="${flightsCount}">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h6 class="text-muted">Bookings</h6>
+                            <h3 th:text="${bookingsCount}">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h6 class="text-muted">Users</h6>
+                            <h3 th:text="${usersCount}">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h6 class="text-muted">Payments</h6>
+                            <h3 th:text="${paymentsCount}">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4" />
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-info">Chào mừng bạn đến trang quản trị. Sử dụng menu bên trái để quản lý dữ liệu hệ thống.</div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

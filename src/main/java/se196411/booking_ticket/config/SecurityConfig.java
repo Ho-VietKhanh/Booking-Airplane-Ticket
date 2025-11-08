@@ -9,12 +9,18 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import se196411.booking_ticket.security.CustomAuthenticationSuccessHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.web.access.AccessDeniedHandler;
 
 @Configuration // Đánh dấu đây là file Cấu hình
 @EnableWebSecurity // Bật tính năng Spring Security
 public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
+
+    @Autowired
+    private CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
     public SecurityConfig(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
@@ -41,18 +47,13 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
 
                 // Bắt đầu cấu hình phân quyền truy cập
-                .authorizeHttpRequests((authorize) ->
-                        authorize
-                                // Cho phép TẤT CẢ MỌI NGƯỜI truy cập các URL này
-                                .requestMatchers("/register/**").permitAll()
-                                .requestMatchers("/login").permitAll()
-                                .requestMatchers("/").permitAll() // Trang chủ
-                                // Cho phép truy cập các file tĩnh (css, js, images)
-                                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-
-                                // Bất kỳ request nào khác (ngoài những cái ở trên)
-                                // đều YÊU CẦU PHẢI ĐĂNG NHẬP
-                                .anyRequest().authenticated()
+                .authorizeHttpRequests(auth -> auth
+                        // Cho phép TẤT CẢ MỌI NGƯỜI truy cập các URL này
+                        .requestMatchers("/register/**", "/login", "/", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        // Bất kỳ request nào khác (ngoài những cái ở trên)
+                        // đều YÊU CẦU PHẢI ĐĂNG NHẬP
+                        .anyRequest().authenticated()
                 )
 
                 // Cấu hình Form Đăng nhập
@@ -65,7 +66,7 @@ public class SecurityConfig {
                                 .loginProcessingUrl("/login")
 
                                 // URL điều hướng sau khi login thành công
-                                .defaultSuccessUrl("/dashboard", true)
+                                .successHandler(customAuthenticationSuccessHandler)
 
                                 // Cho phép mọi người truy cập trang login
                                 .permitAll()
@@ -78,6 +79,11 @@ public class SecurityConfig {
                                 .logoutUrl("/logout")
                                 .logoutSuccessUrl("/login?logout=true")
                                 .permitAll()
+                )
+
+                // Cấu hình trang truy cập bị từ chối
+                .exceptionHandling(ex -> ex
+                        .accessDeniedPage("/access-denied")
                 );
 
         // Xây dựng và trả về cấu hình

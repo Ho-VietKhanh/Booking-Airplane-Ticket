@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments-admin :: adminHeader('Airplanes')}">
+    <!-- fragment provides admin CSS/JS -->
+</head>
+<body>
+<div th:replace="~{admin/fragments-admin :: topbar}"></div>
+<div class="d-flex admin-layout">
+    <div th:replace="~{admin/fragments-admin :: sidebar('airplanes')}"></div>
+    <main class="admin-main p-4 w-100">
+        <div class="container-admin">
+            <div class="page-header">
+                <div class="page-title">Airplanes</div>
+                <div class="page-actions">
+                    <a class="btn btn-primary" th:href="@{/admin/airplanes/create}">+ Add Airplane</a>
+                </div>
+            </div>
+
+            <!-- Flash messages -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert" data-auto-dismiss="4000">
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert" data-auto-dismiss="4000">
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show" role="alert" data-auto-dismiss="4000">
+                <span th:text="${warning}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div class="card">
+                <div class="card-body p-0">
+                    <table class="table table-striped mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Model</th>
+                            <th>Capacity</th>
+                            <th>Airline</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="p : ${airplanes}">
+                            <td th:text="${p.airplaneId}"></td>
+                            <td th:text="${p.model}"></td>
+                            <td th:text="${p.capacity}"></td>
+                            <td th:text="${p.airline}"></td>
+                            <td>
+                                <a th:href="@{'/admin/seats/airplane/' + ${p.airplaneId}}" class="btn btn-sm btn-info">Seats</a>
+                                <a th:href="@{'/admin/airplanes/delete/' + ${p.airplaneId}}" class="btn btn-sm btn-danger" onclick="return confirm('Delete airplane?')">Delete</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

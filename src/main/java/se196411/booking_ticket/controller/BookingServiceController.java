@@ -6,13 +6,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import se196411.booking_ticket.model.dto.BookingSessionDTO;
 import se196411.booking_ticket.model.dto.PassengerInfoDTO;
-import se196411.booking_ticket.service.AdditionalServiceService;
-import se196411.booking_ticket.service.SeatService;
+import se196411.booking_ticket.model.entity.*;
+import se196411.booking_ticket.service.*;
 
 import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/booking")
@@ -24,11 +26,61 @@ public class BookingServiceController {
     @Autowired
     private AdditionalServiceService additionalServiceService;
 
+    @Autowired
+    private BookingService bookingService;
+
+    @Autowired
+    private TicketService ticketService;
+
+    @Autowired
+    private se196411.booking_ticket.repository.FlightsRepository flightsRepository;
+
+    @Autowired
+    private MealService mealService;
+
+    @Autowired
+    private LuggageService luggageService;
+
+    @Autowired
+    private se196411.booking_ticket.repository.SeatRepository seatRepository;
+
+    @Autowired
+    private PaymentService paymentService;
+
+    @Autowired
+    private PaymentMethodService paymentMethodService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private RoleService roleService;
+
+    @Autowired
+    private FlightsService flightsService;
+
     // Screen 0: Passenger Information Form
     @GetMapping("/passenger-info")
     public String showPassengerInfoForm(@RequestParam(required = false) String flightId,
                                         Model model) {
-        model.addAttribute("flightId", flightId != null ? flightId : "FL001");
+        String actualFlightId = flightId != null ? flightId : "FL-001";
+        model.addAttribute("flightId", actualFlightId);
+
+        // Load flight entity with full nested information (flightRoute, airports, airplane)
+        try {
+            se196411.booking_ticket.model.entity.FlightsEntity flight = flightsRepository.findById(actualFlightId).orElse(null);
+            if (flight != null) {
+                model.addAttribute("flight", flight);
+            } else {
+                System.out.println("Flight not found: " + actualFlightId);
+                model.addAttribute("flight", null);
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading flight: " + e.getMessage());
+            e.printStackTrace();
+            model.addAttribute("flight", null);
+        }
+
         return "form_booking";
     }
 
@@ -40,35 +92,73 @@ public class BookingServiceController {
         BookingSessionDTO bookingSession = new BookingSessionDTO();
         bookingSession.setEmail(formData.get("email"));
         bookingSession.setPhone(formData.get("phone"));
-        bookingSession.setFlightId(formData.getOrDefault("flightId", "FL001"));
+        bookingSession.setFlightId(formData.getOrDefault("flightId", "FL-001"));
 
-        // Parse passengers from form data
-        int passengerIndex = 1;
-        while (formData.containsKey("passenger" + passengerIndex + "_title")) {
+        // Parse passengers from form data - handle multiple passengers with potential gaps
+        // Check up to 10 passengers (reasonable limit)
+        for (int passengerIndex = 1; passengerIndex <= 10; passengerIndex++) {
+            // Check if this passenger exists
+            if (!formData.containsKey("passenger" + passengerIndex + "_title")) {
+                continue; // Skip this index if passenger doesn't exist
+            }
+
             PassengerInfoDTO passenger = new PassengerInfoDTO();
             passenger.setTitle(formData.get("passenger" + passengerIndex + "_title"));
             passenger.setLastName(formData.get("passenger" + passengerIndex + "_lastName"));
             passenger.setFirstName(formData.get("passenger" + passengerIndex + "_firstName"));
 
+            // Parse birth date
             String dobString = formData.get("passenger" + passengerIndex + "_dob");
             if (dobString != null && !dobString.isEmpty()) {
-                passenger.setDateOfBirth(LocalDate.parse(dobString));
+                try {
+                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+                    passenger.setBirthDate(sdf.parse(dobString));
+                } catch (Exception e) {
+                    // If parse fails, set default date
+                    try {
+                        passenger.setBirthDate(new java.text.SimpleDateFormat("yyyy-MM-dd").parse("1990-01-01"));
+                    } catch (Exception ex) {
+                        passenger.setBirthDate(new java.util.Date());
+                    }
+                }
+            } else {
+                // If no date provided, set default date
+                try {
+                    passenger.setBirthDate(new java.text.SimpleDateFormat("yyyy-MM-dd").parse("1990-01-01"));
+                } catch (Exception e) {
+                    passenger.setBirthDate(new java.util.Date());
+                }
             }
 
-            passenger.setGender(formData.get("passenger" + passengerIndex + "_gender"));
-            passenger.setIdCard(formData.get("passenger" + passengerIndex + "_idCard"));
+            String genderStr = formData.get("passenger" + passengerIndex + "_gender");
+            passenger.setGender("male".equalsIgnoreCase(genderStr) || "true".equalsIgnoreCase(genderStr));
+
+            passenger.setCccd(formData.get("passenger" + passengerIndex + "_idCard"));
             passenger.setNationality(formData.get("passenger" + passengerIndex + "_nationality"));
 
+            // sdt and email are at booking level
+            passenger.setSdt(null); // Will use booking phone
+            passenger.setEmail(null); // Will use booking email
+
+            // Initialize with base flight price
+            passenger.setPrice(BigDecimal.ZERO);
+            passenger.setStatus("PENDING");
+
             bookingSession.addPassenger(passenger);
-            passengerIndex++;
+        }
+
+        // Validate that at least one passenger exists
+        if (bookingSession.getPassengers() == null || bookingSession.getPassengers().isEmpty()) {
+            // Redirect back with error
+            return "redirect:/booking/passenger-info?flightId=" + bookingSession.getFlightId() + "&error=noPassengers";
         }
 
         // Save to session
         session.setAttribute("bookingSession", bookingSession);
 
-        // Redirect to service selection
-        return "redirect:/booking/services/select?flightId=" + bookingSession.getFlightId()
-               + "&passengers=" + bookingSession.getPassengerCount();
+        System.out.println("Parsed " + bookingSession.getPassengers().size() + " passengers from form");
+        // Redirect to seat selection first
+        return "redirect:/booking/services/seats?flightId=" + bookingSession.getFlightId();
     }
 
     // Screen 1: Service Selection Menu
@@ -85,7 +175,7 @@ public class BookingServiceController {
             model.addAttribute("passengerCount", bookingSession.getPassengerCount());
             model.addAttribute("email", bookingSession.getEmail());
         } else {
-            model.addAttribute("flightId", flightId != null ? flightId : "FL001");
+            model.addAttribute("flightId", flightId != null ? flightId : "FL-001");
             model.addAttribute("passengerCount", passengers != null ? passengers : 1);
         }
 
@@ -106,8 +196,10 @@ public class BookingServiceController {
         if (bookingSession != null) {
             actualFlightId = bookingSession.getFlightId();
             passengerCount = bookingSession.getPassengerCount();
+            // Add bookingSession to model so template can access it
+            model.addAttribute("bookingSession", bookingSession);
         } else {
-            actualFlightId = flightId != null ? flightId : "FL001";
+            actualFlightId = flightId != null ? flightId : "FL-001";
             passengerCount = passengers != null ? passengers : 1;
         }
 
@@ -137,7 +229,7 @@ public class BookingServiceController {
             actualFlightId = bookingSession.getFlightId();
         } else {
             passengerCount = passengers != null ? passengers : 1;
-            actualFlightId = flightId != null ? flightId : "FL001";
+            actualFlightId = flightId != null ? flightId : "FL-001";
         }
 
         var baggageOptions = additionalServiceService.getAllBaggageOptions();
@@ -159,6 +251,241 @@ public class BookingServiceController {
                             @RequestParam(required = false) String bookingId) {
         boolean success = seatService.reserveSeat(seatId, bookingId != null ? bookingId : "TEMP");
         return success ? "success" : "failed";
+    }
+
+    // Handle seat selection submission
+    @PostMapping("/services/seats/submit")
+    public String submitSeatSelection(@RequestParam(required = false) List<String> selectedSeats,
+                                     @RequestParam Map<String, String> allParams,
+                                     HttpSession session) {
+        BookingSessionDTO bookingSession = (BookingSessionDTO) session.getAttribute("bookingSession");
+
+        System.out.println("=== Seat Selection Submission ===");
+        System.out.println("All parameters received: " + allParams);
+        System.out.println("Received selectedSeats: " + selectedSeats);
+
+        // Filter out empty or null seat IDs
+        if (selectedSeats != null) {
+            selectedSeats = selectedSeats.stream()
+                .filter(s -> s != null && !s.isEmpty())
+                .collect(java.util.stream.Collectors.toList());
+            System.out.println("Filtered selectedSeats: " + selectedSeats);
+        }
+
+        if (selectedSeats == null || selectedSeats.isEmpty()) {
+            System.out.println("ERROR: No seats selected!");
+            // Redirect back with error
+            return "redirect:/booking/services/seats?flightId=" +
+                   (bookingSession != null ? bookingSession.getFlightId() : "FL-001") +
+                   "&error=noSeats";
+        }
+
+        if (bookingSession != null && bookingSession.getPassengers() != null) {
+            System.out.println("Passenger count: " + bookingSession.getPassengers().size());
+
+            // Assign seats to passengers
+            for (int i = 0; i < selectedSeats.size() && i < bookingSession.getPassengers().size(); i++) {
+                String seatId = selectedSeats.get(i);
+                bookingSession.getPassengers().get(i).setSeatId(seatId);
+                System.out.println("Assigned seat " + seatId + " to passenger " + i);
+            }
+
+            // Save back to session
+            session.setAttribute("bookingSession", bookingSession);
+            System.out.println("Booking session updated and saved");
+        } else {
+            System.out.println("ERROR: BookingSession or passengers is null!");
+        }
+
+        return "redirect:/booking/services/extras?flightId=" +
+               (bookingSession != null ? bookingSession.getFlightId() : "FL-001");
+    }
+
+    // Handle extras (meal & luggage) selection submission
+    @PostMapping("/services/extras/submit")
+    public String submitExtrasSelection(@RequestParam Map<String, String> formData,
+                                       HttpSession session) {
+        BookingSessionDTO bookingSession = (BookingSessionDTO) session.getAttribute("bookingSession");
+
+        if (bookingSession == null || bookingSession.getPassengers() == null || bookingSession.getPassengers().isEmpty()) {
+            return "redirect:/booking/passenger-info";
+        }
+
+        // Process each passenger's selections
+        for (int i = 0; i < bookingSession.getPassengers().size(); i++) {
+            PassengerInfoDTO passenger = bookingSession.getPassengers().get(i);
+
+            // Get meal selection for this passenger
+            String mealKey = "passenger_" + i + "_meal";
+            String mealValue = formData.get(mealKey);
+            if (mealValue != null && !mealValue.isEmpty()) {
+                try {
+                    passenger.setMealId(Integer.parseInt(mealValue));
+                } catch (NumberFormatException e) {
+                    passenger.setMealId(null);
+                }
+            } else {
+                passenger.setMealId(null);
+            }
+
+            // Get luggage selection for this passenger
+            String luggageKey = "passenger_" + i + "_luggage";
+            String luggageValue = formData.get(luggageKey);
+            if (luggageValue != null && !luggageValue.isEmpty()) {
+                try {
+                    passenger.setLuggageId(Integer.parseInt(luggageValue));
+                } catch (NumberFormatException e) {
+                    passenger.setLuggageId(null);
+                }
+            } else {
+                passenger.setLuggageId(null);
+            }
+        }
+
+        session.setAttribute("bookingSession", bookingSession);
+
+        // Create booking and tickets
+        String bookingId = createBookingAndTickets(bookingSession);
+
+        if (bookingId != null) {
+            return "redirect:/booking/payment?bookingId=" + bookingId;
+        } else {
+            return "redirect:/booking/services/extras?error=bookingFailed";
+        }
+    }
+
+    /**
+     * Helper method to create booking and tickets from session data
+     */
+    private String createBookingAndTickets(BookingSessionDTO bookingSession) {
+        try {
+            // Get flight
+            FlightsEntity flight = flightsRepository.findById(bookingSession.getFlightId()).orElse(null);
+            if (flight == null) {
+                System.out.println("Flight not found: " + bookingSession.getFlightId());
+                return null;
+            }
+
+            // Create a pending payment first (required for booking)
+            PaymentEntity payment = new PaymentEntity();
+            payment.setPaymentId(UUID.randomUUID().toString());
+            payment.setCreatedAt(LocalDateTime.now());
+            payment.setStatus("PENDING");
+            payment.setAmount(BigDecimal.ZERO); // Will be updated later
+
+            // Try to get default payment method, or set to null
+            try {
+                PaymentMethodEntity defaultMethod = paymentMethodService.getAllPaymentMethods()
+                    .stream()
+                    .findFirst()
+                    .orElse(null);
+                payment.setPaymentMethod(defaultMethod);
+            } catch (Exception e) {
+                payment.setPaymentMethod(null);
+            }
+
+            PaymentEntity savedPayment = paymentService.createPayment(payment);
+            System.out.println("Payment created: " + savedPayment.getPaymentId());
+
+            // Create booking without user (guest booking)
+            BookingEntity booking = new BookingEntity();
+            booking.setBookingId(UUID.randomUUID().toString());
+            booking.setBookingTime(LocalDateTime.now());
+            booking.setStatus("PENDING_PAYMENT");
+            booking.setUser(null); // Guest booking, no user required
+            booking.setPayment(savedPayment); // Link to payment
+            booking.setTotalAmount(BigDecimal.ZERO); // Will be updated later
+
+            // ✅ SAVE BOOKING FIRST before creating tickets
+            BookingEntity savedBooking = bookingService.create(booking);
+            System.out.println("Booking created: " + savedBooking.getBookingId());
+
+            // Now create tickets for each passenger
+            BigDecimal ticketsTotal = BigDecimal.ZERO;
+
+            for (PassengerInfoDTO passengerDTO : bookingSession.getPassengers()) {
+                TicketEntity ticket = new TicketEntity();
+                ticket.setTicketId(UUID.randomUUID().toString());
+                ticket.setFlight(flight);
+                ticket.setBooking(savedBooking); // ✅ Use savedBooking (already persisted)
+
+                // Set seat
+                SeatEntity seat = seatRepository.findById(passengerDTO.getSeatId()).orElse(null);
+                if (seat != null) {
+                    ticket.setSeat(seat);
+                }
+
+                // Set passenger info with null checks
+                ticket.setTitle(passengerDTO.getTitle() != null ? passengerDTO.getTitle() : "Mr");
+                ticket.setFirstName(passengerDTO.getFirstName() != null ? passengerDTO.getFirstName() : "Guest");
+                ticket.setLastName(passengerDTO.getLastName() != null ? passengerDTO.getLastName() : "User");
+
+                // Ensure birthDate is never null
+                if (passengerDTO.getBirthDate() != null) {
+                    ticket.setBirthDate(passengerDTO.getBirthDate());
+                } else {
+                    // Set default birth date if null
+                    try {
+                        ticket.setBirthDate(new java.text.SimpleDateFormat("yyyy-MM-dd").parse("1990-01-01"));
+                    } catch (Exception e) {
+                        ticket.setBirthDate(new java.util.Date());
+                    }
+                }
+
+                ticket.setGender(passengerDTO.getGender() != null ? passengerDTO.getGender() : false);
+                ticket.setCccd(passengerDTO.getCccd() != null ? passengerDTO.getCccd() : "000000000000");
+                ticket.setNationality(passengerDTO.getNationality() != null ? passengerDTO.getNationality() : "Vietnam");
+
+                // ✅ Use booking session email and phone for all passengers
+                ticket.setSdt(bookingSession.getPhone() != null ? bookingSession.getPhone() : "0000000000");
+                ticket.setEmail(bookingSession.getEmail() != null ? bookingSession.getEmail() : "guest@example.com");
+                ticket.setStatus("PENDING");
+
+                // Calculate ticket price
+                BigDecimal ticketPrice = flight.getBasePrice();
+
+                // Add meal price if selected
+                if (passengerDTO.getMealId() != null) {
+                    MealEntity meal = mealService.findById(passengerDTO.getMealId());
+                    if (meal != null) {
+                        ticket.setMeal(meal);
+                        ticketPrice = ticketPrice.add(meal.getPrice());
+                    }
+                }
+
+                // Add luggage price if selected
+                if (passengerDTO.getLuggageId() != null) {
+                    LuggageEntity luggage = luggageService.findById(passengerDTO.getLuggageId());
+                    if (luggage != null) {
+                        ticket.setLuggage(luggage);
+                        ticketPrice = ticketPrice.add(luggage.getPrice());
+                    }
+                }
+
+                ticket.setPrice(ticketPrice);
+                ticketsTotal = ticketsTotal.add(ticketPrice);
+
+                // Save ticket
+                ticketService.create(ticket);
+                System.out.println("Ticket created: " + ticket.getTicketId() + " - Price: " + ticketPrice);
+            }
+
+            // Update booking and payment with total amount
+            savedBooking.setTotalAmount(ticketsTotal);
+            savedPayment.setAmount(ticketsTotal);
+
+            // Update both
+            bookingService.create(savedBooking);
+            paymentService.createPayment(savedPayment);
+
+            System.out.println("Booking updated with total: " + ticketsTotal);
+
+            return savedBooking.getBookingId();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     // API endpoint to calculate total price

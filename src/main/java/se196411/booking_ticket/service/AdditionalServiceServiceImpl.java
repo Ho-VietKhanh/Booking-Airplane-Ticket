@@ -1,62 +1,92 @@
 package se196411.booking_ticket.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import se196411.booking_ticket.model.dto.BaggageOptionDTO;
 import se196411.booking_ticket.model.dto.MealOptionDTO;
+import se196411.booking_ticket.model.entity.LuggageEntity;
+import se196411.booking_ticket.model.entity.MealEntity;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AdditionalServiceServiceImpl implements AdditionalServiceService {
 
+    @Autowired
+    private MealService mealService;
+
+    @Autowired
+    private LuggageService luggageService;
+
     @Override
     public List<BaggageOptionDTO> getAllBaggageOptions() {
-        List<BaggageOptionDTO> options = new ArrayList<>();
-
-        options.add(new BaggageOptionDTO("BAG_15", "Hành Lý 15kg", 15,
-                new BigDecimal("200000"), "Hành lý ký gửi 15kg"));
-        options.add(new BaggageOptionDTO("BAG_20", "Hành Lý 20kg", 20,
-                new BigDecimal("300000"), "Hành lý ký gửi 20kg"));
-        options.add(new BaggageOptionDTO("BAG_25", "Hành Lý 25kg", 25,
-                new BigDecimal("400000"), "Hành lý ký gửi 25kg"));
-        options.add(new BaggageOptionDTO("BAG_30", "Hành Lý 30kg", 30,
-                new BigDecimal("500000"), "Hành lý ký gửi 30kg"));
-
-        return options;
+        List<LuggageEntity> luggageEntities = luggageService.findAll();
+        return luggageEntities.stream()
+                .map(l -> new BaggageOptionDTO(
+                        String.valueOf(l.getLuggageId()),
+                        "Hành Lý " + l.getLuggageAllowance() + "kg",
+                        l.getLuggageAllowance().intValue(),
+                        l.getPrice(),
+                        l.getNote()
+                ))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<MealOptionDTO> getAllMealOptions() {
-        List<MealOptionDTO> options = new ArrayList<>();
-
-        options.add(new MealOptionDTO("MEAL_01", "Xôi Thịt Kho Trứng",
-                new BigDecimal("80000"), "Xôi thịt kho trứng truyền thống", null));
-        options.add(new MealOptionDTO("MEAL_02", "Mỳ Ý Sốt Bò Bằm",
-                new BigDecimal("80000"), "Mỳ Ý sốt bò bằm thơm ngon", null));
-        options.add(new MealOptionDTO("MEAL_03", "Mì Ly Ăn Liền Và 1 Lon Nước Ngọt Có Ga (7 Up/Pepsi)",
-                new BigDecimal("55000"), "Combo mì ly và nước ngọt", null));
-        options.add(new MealOptionDTO("MEAL_04", "Bánh Mì Pate",
-                new BigDecimal("45000"), "Bánh mì pate truyền thống", null));
-
-        return options;
+        List<MealEntity> mealEntities = mealService.findAll();
+        return mealEntities.stream()
+                .map(m -> new MealOptionDTO(
+                        String.valueOf(m.getMealId()),
+                        m.getName(),
+                        m.getPrice(),
+                        m.getNote(),
+                        null
+                ))
+                .collect(Collectors.toList());
     }
 
     @Override
     public BaggageOptionDTO getBaggageOptionById(String id) {
-        return getAllBaggageOptions().stream()
-                .filter(b -> b.getId().equals(id))
-                .findFirst()
-                .orElse(null);
+        try {
+            Integer luggageId = Integer.parseInt(id);
+            LuggageEntity luggage = luggageService.findById(luggageId);
+            if (luggage != null) {
+                return new BaggageOptionDTO(
+                        String.valueOf(luggage.getLuggageId()),
+                        "Hành Lý " + luggage.getLuggageAllowance() + "kg",
+                        luggage.getLuggageAllowance().intValue(),
+                        luggage.getPrice(),
+                        luggage.getNote()
+                );
+            }
+        } catch (NumberFormatException e) {
+            // Invalid ID format
+        }
+        return null;
     }
 
     @Override
     public MealOptionDTO getMealOptionById(String id) {
-        return getAllMealOptions().stream()
-                .filter(m -> m.getId().equals(id))
-                .findFirst()
-                .orElse(null);
+        try {
+            Integer mealId = Integer.parseInt(id);
+            MealEntity meal = mealService.findById(mealId);
+            if (meal != null) {
+                return new MealOptionDTO(
+                        String.valueOf(meal.getMealId()),
+                        meal.getName(),
+                        meal.getPrice(),
+                        meal.getNote(),
+                        null
+                );
+            }
+        } catch (NumberFormatException e) {
+            // Invalid ID format
+        }
+        return null;
     }
 }
 

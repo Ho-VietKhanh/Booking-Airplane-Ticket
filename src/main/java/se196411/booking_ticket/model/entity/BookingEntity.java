@@ -30,10 +30,10 @@ public class BookingEntity {
     private List<TicketEntity> tickets;
 
     @ManyToOne
-    @JoinColumn(name = "payment_id", nullable = false)
+    @JoinColumn(name = "payment_id")
     private PaymentEntity payment;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private UserEntity user;
 }

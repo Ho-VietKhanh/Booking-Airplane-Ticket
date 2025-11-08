@@ -1,0 +1,46 @@
+/* Bamboo-like admin CSS moved from fragment (compact, maintainable) */
+:root{
+    --brand:#00613A; /* bamboo green */
+    --brand-dark:#004129;
+    --accent:#D4AF37;
+    --muted:#6c757d;
+    --panel:#ffffff;
+    --bg:#f6f8f9;
+}
+html,body{height:100%}
+body{font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:var(--bg);margin:0;color:#222}
+/* Top nav */
+.bamboo-navbar{background:var(--panel);box-shadow:0 2px 8px rgba(0,0,0,0.06);position:sticky;top:0;z-index:1030}
+.bamboo-logo{display:inline-flex;align-items:center;gap:10px;text-decoration:none}
+.bamboo-logo-icon{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand-dark));display:flex;align-items:center;justify-content:center;color:#fff}
+.bamboo-logo-text{display:flex;flex-direction:column;line-height:1}
+.bamboo-logo-text .brand-name{font-weight:800;color:var(--brand);font-size:16px}
+.bamboo-logo-text .brand-tag{font-size:10px;color:var(--accent);font-weight:600}
+/* Layout */
+.admin-layout{display:flex;min-height:calc(100vh - 64px);margin-top:16px}
+.admin-sidebar{width:240px;background:white;border-right:1px solid #e8eaed;padding-top:20px}
+.sidebar-inner{padding:0 12px}
+.admin-main{flex:1;padding:24px}
+.nav-link.sidebar-item{color:#334;border-radius:8px;padding:10px 12px;margin:4px 0;display:flex;align-items:center}
+.nav-link.sidebar-item:hover{background:rgba(0,97,58,0.06);color:var(--brand)}
+.nav-link.sidebar-item.active{background:var(--brand);color:#fff}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.user-name{font-weight:700;color:var(--brand-dark)}
+.btn-ghost{background:transparent;border:1px solid rgba(0,0,0,0.08);border-radius:8px;padding:6px 10px}
+.card{border-radius:10px;box-shadow:0 6px 20px rgba(16,24,40,0.04);background:white}
+/* responsive */
+@media (max-width:991px){.admin-sidebar{position:fixed;left:-300px;top:64px;height:calc(100% - 64px);z-index:1040;transition:left .25s ease}.admin-sidebar.open{left:0}.admin-layout{margin-top:0}}
+/* page header */
+.page-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.page-title{font-size:22px;font-weight:800;color:var(--brand)}
+.page-actions{display:flex;gap:8px}
+/* table tweaks */
+.table .btn-sm{padding:4px 8px}
+/* small helper */
+.kv{font-size:13px;color:var(--muted)}
+
+/* utility */
+.container-admin{max-width:1200px;margin:0 auto}
+
+/* end */
+

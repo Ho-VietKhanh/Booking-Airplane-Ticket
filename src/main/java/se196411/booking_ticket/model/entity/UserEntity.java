@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import se196411.booking_ticket.model.entity.RoleEntity;
+import se196411.booking_ticket.model.enums.Role;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,12 +38,9 @@ public class UserEntity {
     @Column(name = "create_at", updatable = false)
     private LocalDateTime createAt;
 
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id", nullable = false)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private RoleEntity role;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Role role;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @ToString.Exclude

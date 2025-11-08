@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments-admin :: adminHeader('Flight Form')}">
+    <link rel="stylesheet" th:href="@{/admin/css/admin.css}" />
+</head>
+<body>
+<div th:replace="~{admin/fragments-admin :: topbar}"></div>
+<div class="d-flex admin-layout">
+    <div th:replace="~{admin/fragments-admin :: sidebar('flights')}"></div>
+    <main class="admin-main p-4 w-100">
+        <div class="container-fluid">
+            <h2 th:text="${flight.flightId != null ? 'Edit Flight - ' + flight.flightId : 'Create New Flight'}"></h2>
+
+            <!-- Flash messages -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <form th:action="@{/admin/flights/save}" method="post">
+                        <!-- Hidden field for flight ID (only for edit mode) -->
+                        <input type="hidden" th:if="${flight.flightId != null}" name="flightId" th:value="${flight.flightId}" />
+
+                        <!-- Display Flight ID in edit mode -->
+                        <div class="mb-3" th:if="${flight.flightId != null}">
+                            <label class="form-label">Flight ID</label>
+                            <input class="form-control" type="text" th:value="${flight.flightId}" disabled />
+                            <small class="text-muted">Flight ID cannot be changed</small>
+                        </div>
+
+                        <!-- Auto-generate message for create mode -->
+                        <div class="alert alert-info" th:if="${flight.flightId == null}">
+                            <i class="bi bi-info-circle"></i> Flight ID will be automatically generated (e.g., FL-123)
+                        </div>
+
+                        <!-- Warnings if lists empty -->
+                        <div class="alert alert-warning" th:if="${#lists.isEmpty(airplanes)}">
+                            <i class="bi bi-exclamation-triangle"></i> Chưa có máy bay nào. Vui lòng tạo máy bay trước khi tạo chuyến bay.
+                        </div>
+                        <div class="alert alert-warning" th:if="${#lists.isEmpty(routes)}">
+                            <i class="bi bi-exclamation-triangle"></i> Chưa có tuyến bay nào. Vui lòng tạo tuyến bay trước khi tạo chuyến bay.
+                        </div>
+
+                        <!-- Airplane selection -->
+                        <div class="mb-3">
+                            <label class="form-label">Airplane *</label>
+                            <select class="form-select" name="airplaneId" th:disabled="${#lists.isEmpty(airplanes)}" required>
+                                <option value="" th:if="${flight.airplane == null}" disabled selected>Choose an airplane</option>
+                                <option th:each="ap : ${airplanes}"
+                                        th:value="${ap.airplaneId}"
+                                        th:selected="${flight.airplane != null and flight.airplane.airplaneId == ap.airplaneId}"
+                                        th:text="${ap.airplaneId + ' - ' + ap.model + ' (' + ap.airline + ') - ' + ap.capacity + ' seats'}">
+                                </option>
+                            </select>
+                            <small class="text-muted" th:if="${!#lists.isEmpty(airplanes)}">Select an existing airplane</small>
+                        </div>
+
+                        <!-- Flight Route selection -->
+                        <div class="mb-3">
+                            <label class="form-label">Flight Route *</label>
+                            <select class="form-select" name="flightRouteId" th:disabled="${#lists.isEmpty(routes)}" required>
+                                <option value="" th:if="${flight.flightRoute == null}" disabled selected>Choose a route</option>
+                                <option th:each="r : ${routes}"
+                                        th:value="${r.flightRoutesId}"
+                                        th:selected="${flight.flightRoute != null and flight.flightRoute.flightRoutesId == r.flightRoutesId}"
+                                        th:text="${r.flightRoutesId + ' - ' + r.startedAirport.code + ' → ' + r.endedAirport.code}">
+                                </option>
+                            </select>
+                            <small class="text-muted" th:if="${!#lists.isEmpty(routes)}">Select an existing route</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Base Price *</label>
+                            <input class="form-control" type="number" step="0.01" th:value="${flight.basePrice}" name="basePrice" required
+                                   placeholder="Enter base price" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Start Time *</label>
+                            <input class="form-control" type="datetime-local"
+                                   th:value="${flight.startedTime != null ? #temporals.format(flight.startedTime, 'yyyy-MM-dd HH:mm').replace(' ', 'T') : ''}"
+                                   name="startedTime" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">End Time *</label>
+                            <input class="form-control" type="datetime-local"
+                                   th:value="${flight.endedTime != null ? #temporals.format(flight.endedTime, 'yyyy-MM-dd HH:mm').replace(' ', 'T') : ''}"
+                                   name="endedTime" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Status *</label>
+                            <select class="form-select" name="status" required>
+                                <option value="OPEN" th:selected="${flight.status} == 'OPEN'">OPEN</option>
+                                <option value="FLYING" th:selected="${flight.status} == 'FLYING'">FLYING</option>
+                                <option value="DELAY" th:selected="${flight.status} == 'DELAY'">DELAY</option>
+                                <option value="CANCELED" th:selected="${flight.status} == 'CANCELED'">CANCELED</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" type="submit"
+                                th:disabled="${#lists.isEmpty(airplanes) or #lists.isEmpty(routes)}">
+                            <i class="bi bi-save"></i> Save Flight
+                        </button>
+                        <a class="btn btn-secondary" th:href="@{/admin/flights}">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/admin/js/admin.js}"></script>
+</body>
+</html>

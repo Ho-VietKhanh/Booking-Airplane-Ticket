@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments-admin :: adminHeader('Passengers')}">
+</head>
+<body>
+<div th:replace="~{admin/fragments-admin :: topbar}"></div>
+<div class="d-flex admin-layout">
+    <div th:replace="~{admin/fragments-admin :: sidebar('passengers')}"></div>
+    <main class="admin-main p-4 w-100">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>Passengers</h2>
+                <form class="d-flex" th:action="@{/admin/passengers}" method="get">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Search by name or booking id" />
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+            </div>
+            <div class="card">
+                <div class="card-body p-0">
+                    <table class="table table-striped mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Passenger</th>
+                            <th>Flight</th>
+                            <th>Seat</th>
+                            <th>Email</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="t : ${tickets}">
+                            <td th:text="${t.booking.bookingId}"></td>
+                            <td th:text="${t.firstName + ' ' + t.lastName}"></td>
+                            <td th:text="${t.booking.flight.flightId}"></td>
+                            <td th:text="${t.seat.seatNumber}"></td>
+                            <td th:text="${t.email}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<script th:src="@{/admin/js/admin.js}"></script>
+</body>
+</html>

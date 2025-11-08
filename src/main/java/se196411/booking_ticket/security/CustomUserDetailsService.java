@@ -7,10 +7,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import se196411.booking_ticket.model.entity.UserEntity;
+import se196411.booking_ticket.model.enums.Role;
 import se196411.booking_ticket.repository.UserRepository;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -35,7 +37,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     private Collection< ? extends GrantedAuthority> mapRolesToAuthorities(UserEntity user) {
-        // Vì một user chỉ có một role, chúng ta bọc nó trong một collection
-        return Collections.singleton(new SimpleGrantedAuthority(user.getRole().getName()));
+        se196411.booking_ticket.model.enums.Role role = user.getRole() != null ? user.getRole() : se196411.booking_ticket.model.enums.Role.USER;
+        String authority = "ROLE_" + role.name();
+        return Collections.singleton(new SimpleGrantedAuthority(authority));
     }
 }

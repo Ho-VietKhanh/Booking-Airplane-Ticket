@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments-admin :: adminHeader('Seat Map')}">
+    <link rel="stylesheet" th:href="@{/admin/css/admin.css}" />
+    <style>
+        .seat-legend { margin: 20px 0; }
+        .legend-box { display: inline-block; width: 30px; height: 30px; border: 1px solid #ddd; margin-right: 5px; vertical-align: middle; }
+        .legend-box.business { background: #4A90E2; }
+        .legend-box.economy { background: #7ED321; }
+        .legend-box.occupied { background: #999; }
+
+        .admin-seat-map { max-width: 600px; margin: 20px 0; }
+        .seat-row { display: flex; align-items: center; margin-bottom: 10px; }
+        .row-number { width: 40px; text-align: center; font-weight: bold; color: #666; }
+        .seat { width: 50px; height: 50px; margin: 0 5px; border: 2px solid #ddd; border-radius: 8px;
+                display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; }
+        .seat.business { background: #4A90E2; color: white; }
+        .seat.economy { background: #7ED321; color: white; }
+        .seat.occupied { background: #999; color: white; cursor: not-allowed; }
+        .seat:hover:not(.occupied) { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/fragments-admin :: topbar}"></div>
+<div class="d-flex admin-layout">
+    <div th:replace="~{admin/fragments-admin :: sidebar('seats')}"></div>
+    <main class="admin-main p-4 w-100">
+        <div class="container-fluid">
+            <h2>Seat Map - Airplane <span th:text="${airplaneId}"></span></h2>
+            <div class="seat-legend mb-3">
+                <span class="legend-box business"></span> Business
+                <span class="legend-box economy" style="margin-left:12px"></span> Economy
+                <span class="legend-box occupied" style="margin-left:12px"></span> Booked
+            </div>
+
+            <div th:if="${seats == null or #lists.isEmpty(seats)}" class="alert alert-warning">No seats found for this airplane.</div>
+
+            <div class="seat-map admin-seat-map" th:unless="${seats == null or #lists.isEmpty(seats)}">
+                <!-- Group seats by row number -->
+                <div th:each="row : ${#numbers.sequence(1, 10)}" class="seat-row">
+                    <div class="row-number" th:text="${row}"></div>
+                    <!-- Display seats for this row -->
+                    <div th:each="s : ${seats}"
+                         th:if="${s.seatNumber != null and s.seatNumber.matches('^' + row + '[A-Z].*')}"
+                         class="seat"
+                         th:classappend="${s.seatClass == 'Business' ? 'business' : 'economy'} + ${!s.isAvailable ? ' occupied' : ''}"
+                         th:attr="data-seat-id=${s.seatId}, data-seat-number=${s.seatNumber}, data-available=${s.isAvailable}, data-ticket-id=${s.tickets != null and !#lists.isEmpty(s.tickets) ? s.tickets[0].ticketId : ''}"
+                         th:onclick="${s.isAvailable} ? 'selectSeat(this)' : 'showBookedInfo(this)'">
+                        <span th:text="${s.seatNumber}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <a class="btn btn-secondary" th:href="@{/admin/airplanes}">Back to Airplanes</a>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Ticket detail modal -->
+<div class="modal fade" id="ticketDetailModal" tabindex="-1" aria-labelledby="ticketDetailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="ticketDetailModalLabel">Ticket Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <dl class="row">
+          <dt class="col-sm-4">Ticket ID</dt>
+          <dd class="col-sm-8" id="md-ticketId"></dd>
+
+          <dt class="col-sm-4">Passenger</dt>
+          <dd class="col-sm-8" id="md-passenger"></dd>
+
+          <dt class="col-sm-4">Email</dt>
+          <dd class="col-sm-8" id="md-email"></dd>
+
+          <dt class="col-sm-4">Phone</dt>
+          <dd class="col-sm-8" id="md-phone"></dd>
+
+          <dt class="col-sm-4">CCCD</dt>
+          <dd class="col-sm-8" id="md-cccd"></dd>
+
+          <dt class="col-sm-4">Seat</dt>
+          <dd class="col-sm-8" id="md-seat"></dd>
+
+          <dt class="col-sm-4">Booking</dt>
+          <dd class="col-sm-8" id="md-booking"></dd>
+
+          <dt class="col-sm-4">Status</dt>
+          <dd class="col-sm-8" id="md-status"></dd>
+
+          <dt class="col-sm-4">Price</dt>
+          <dd class="col-sm-8" id="md-price"></dd>
+        </dl>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script th:src="@{/admin/js/admin.js}"></script>
+<script>
+function selectSeat(element) {
+    const seatId = element.getAttribute('data-seat-id');
+    const seatNumber = element.getAttribute('data-seat-number');
+    console.log('Selected available seat:', seatId);
+    alert('Seat ' + seatNumber + ' is available');
+}
+
+function showBookedInfo(element) {
+    const ticketId = element.getAttribute('data-ticket-id');
+    if (!ticketId) {
+        alert('No ticket information available');
+        return;
+    }
+    // Fetch ticket details via AJAX
+    fetch('/admin/api/ticket/' + ticketId)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('md-ticketId').textContent = data.ticketId || 'N/A';
+            document.getElementById('md-passenger').textContent = (data.firstName || '') + ' ' + (data.lastName || '');
+            document.getElementById('md-email').textContent = data.email || 'N/A';
+            document.getElementById('md-phone').textContent = data.phone || 'N/A';
+            document.getElementById('md-cccd').textContent = data.cccd || 'N/A';
+            document.getElementById('md-seat').textContent = data.seatNumber || 'N/A';
+            document.getElementById('md-booking').textContent = data.bookingId || 'N/A';
+            document.getElementById('md-status').textContent = data.status || 'N/A';
+            document.getElementById('md-price').textContent = data.price ? '$' + data.price : 'N/A';
+
+            // Show modal
+            var modal = new bootstrap.Modal(document.getElementById('ticketDetailModal'));
+            modal.show();
+        })
+        .catch(err => {
+            console.error('Error fetching ticket details:', err);
+            alert('Error loading ticket details');
+        });
+}
+</script>
+</body>
+</html>

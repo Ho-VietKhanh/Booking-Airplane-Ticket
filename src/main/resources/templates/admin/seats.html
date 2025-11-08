@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments-admin :: adminHeader('Seats Management')}">
+    <link rel="stylesheet" th:href="@{/admin/css/admin.css}" />
+</head>
+<body>
+<div th:replace="~{admin/fragments-admin :: topbar}"></div>
+<div class="d-flex admin-layout">
+    <div th:replace="~{admin/fragments-admin :: sidebar('seats')}"></div>
+    <main class="admin-main p-4 w-100">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>Seats</h2>
+            </div>
+            <div class="card">
+                <div class="card-body p-0">
+                    <table class="table table-striped mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Seat ID</th>
+                            <th>Seat Number</th>
+                            <th>Class</th>
+                            <th>Available</th>
+                            <th>Airplane</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="s : ${seats}">
+                            <td th:text="${s.seatId}"></td>
+                            <td th:text="${s.seatNumber}"></td>
+                            <td th:text="${s.seatClass}"></td>
+                            <td><span th:text="${s.isAvailable} ? 'Yes' : 'No'"></span></td>
+                            <td th:text="${s.airplane.model}"></td>
+                            <td>
+                                <a th:href="@{'/admin/seats/airplane/' + ${s.airplane.airplaneId}}" class="btn btn-sm btn-info">View Map</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>
+

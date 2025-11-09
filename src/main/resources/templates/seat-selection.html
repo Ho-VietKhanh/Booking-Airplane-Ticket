@@ -469,6 +469,60 @@
         let passengerSeats = new Array(passengerCount).fill(null);
         let selectedSeatIds = new Set();
 
+        // ✅ Load previously selected seats from session (if any)
+        /*[# th:if="${bookingSession != null and bookingSession.passengers != null}"]*/
+        /*[# th:each="passenger, iterStat : ${bookingSession.passengers}"]*/
+        /*[# th:if="${passenger.seatId != null and !#strings.isEmpty(passenger.seatId)}"]*/
+        (function() {
+            const index = /*[[${iterStat.index}]]*/ 0;
+            const seatId = /*[[${passenger.seatId}]]*/ '';
+            const seatNumber = getSeatNumberFromId(seatId);
+
+            if (seatId && seatNumber) {
+                passengerSeats[index] = {
+                    seatId: seatId,
+                    seatNumber: seatNumber
+                };
+                selectedSeatIds.add(seatId);
+                console.log('✅ Loaded saved seat for passenger', index, ':', seatNumber);
+            }
+        })();
+        /*[/]*/
+        /*[/]*/
+        /*[/]*/
+
+        // Helper function to get seat number from seat ID
+        function getSeatNumberFromId(seatId) {
+            const radio = document.querySelector(`input[value="${seatId}"]`);
+            return radio ? radio.dataset.seatNumber : seatId;
+        }
+
+        // Function to save seat selection to server session
+        async function saveSeatToSession(passengerIndex, seatId) {
+            try {
+                const formData = new URLSearchParams();
+                formData.append('passengerIndex', passengerIndex);
+                formData.append('seatId', seatId || '');
+
+                const response = await fetch('/booking/services/seats/save-to-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    console.log('✅ Seat saved to server session:', seatId);
+                } else {
+                    console.error('❌ Failed to save seat to session:', result.message);
+                }
+            } catch (error) {
+                console.error('❌ Error saving seat to session:', error);
+            }
+        }
+
         function selectPassenger(index) {
             console.log('=== Switching to passenger:', index, '===');
             console.log('Current passenger before switch:', currentPassengerIndex);
@@ -548,6 +602,10 @@
                 const radio = document.querySelector(`input[value="${passengerSeats[index].seatId}"]`);
                 if (radio) {
                     radio.checked = true;
+                    // ✅ Make sure to enable it for the current passenger even if it was marked as occupied
+                    radio.disabled = false;
+                    radio.parentElement.classList.remove('occupied');
+                    radio.nextElementSibling.classList.remove('disabled');
                 }
                 document.getElementById('currentSeatSelection').textContent = 'Đã chọn: Ghế ' + passengerSeats[index].seatNumber;
             } else {
@@ -571,6 +629,8 @@
                 selectedSeatIds.delete(seatId);
                 passengerSeats[currentPassengerIndex] = null;
 
+                // ✅ Save deselection to server session
+                saveSeatToSession(currentPassengerIndex, null);
 
                 // Update display
                 document.getElementById('currentSeatSelection').textContent = 'Vui lòng chọn ghế bên dưới';
@@ -601,6 +661,9 @@
                 seatNumber: seatNumber
             };
             selectedSeatIds.add(seatId);
+
+            // ✅ Save to server session immediately
+            saveSeatToSession(currentPassengerIndex, seatId);
 
             // Update display
             document.getElementById('currentSeatSelection').textContent = 'Đã chọn: Ghế ' + seatNumber;
@@ -667,6 +730,46 @@
                     }
                 });
             });
+
+            // ✅ Restore previously selected seats from session
+            console.log('=== Restoring seats from session ===');
+            console.log('passengerSeats after load:', passengerSeats);
+
+            // Mark seats as checked and update UI for all passengers with saved selections
+            for (let i = 0; i < passengerCount; i++) {
+                if (passengerSeats[i] !== null) {
+                    const seatId = passengerSeats[i].seatId;
+                    const radio = document.querySelector(`input[value="${seatId}"]`);
+
+                    if (radio && !radio.disabled) {
+                        // Check the radio button
+                        radio.checked = false; // First uncheck to ensure change event fires
+
+                        // Update UI for this passenger tab
+                        const passengerTab = document.getElementById('passengerTab' + i);
+                        const seatInfoElement = document.getElementById('seatInfo' + i);
+
+                        if (passengerTab && seatInfoElement) {
+                            passengerTab.classList.add('completed');
+                            seatInfoElement.textContent = 'Ghế: ' + passengerSeats[i].seatNumber;
+                        }
+
+                        // Disable this seat for others
+                        document.querySelectorAll(`input[value="${seatId}"]`).forEach(r => {
+                            if (r.disabled && !r.hasAttribute('data-original-disabled')) {
+                                // Skip - already disabled for other reason
+                            } else {
+                                r.parentElement.classList.add('occupied');
+                                r.nextElementSibling.classList.add('disabled');
+                            }
+                        });
+
+                        console.log('✅ Restored seat', passengerSeats[i].seatNumber, 'for passenger', i);
+                    } else {
+                        console.warn('⚠️ Seat', seatId, 'not found or disabled for passenger', i);
+                    }
+                }
+            }
 
             // Add form submit handler to ensure all seats are saved
             const form = document.getElementById('seatForm');

@@ -6,11 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import se196411.booking_ticket.model.entity.*;
-import se196411.booking_ticket.repository.AirplaneRepository;
-import se196411.booking_ticket.repository.FlightsRepository;
-import se196411.booking_ticket.repository.SeatRepository;
-import se196411.booking_ticket.repository.AirportsRepository;
-import se196411.booking_ticket.repository.FlightsRoutesRepository;
+import se196411.booking_ticket.repository.*;
 import se196411.booking_ticket.service.*;
 
 import java.math.BigDecimal;
@@ -24,12 +20,16 @@ import se196411.booking_ticket.model.enums.Role;
 
 @Configuration
 public class DataInitializer implements CommandLineRunner {
-
-    private final AirplaneRepository airplaneRepository;
-    private final FlightsRepository flightsRepository;
-    private final SeatRepository seatRepository;
-    private final FlightsRoutesRepository flightsRoutesRepository;
-    private final AirportsRepository airportsRepository;
+    @Autowired
+    private  AirplaneRepository airplaneRepository;
+    @Autowired
+    private  FlightsRepository flightsRepository;
+    @Autowired
+    private  SeatRepository seatRepository;
+    @Autowired
+    private  FlightsRoutesRepository flightsRoutesRepository;
+    @Autowired
+    private  AirportsRepository airportsRepository;
     @Autowired
     private PaymentMethodService paymentMethodService;
 
@@ -51,31 +51,7 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public DataInitializer(AirplaneRepository airplaneRepository,
-                           FlightsRepository flightsRepository,
-                           SeatRepository seatRepository,
-                           FlightsRoutesRepository flightsRoutesRepository,
-                           AirportsRepository airportsRepository,
-                           RoleRepository roleRepository,
-                           UserRepository userRepository,
-                           PaymentRepository paymentRepository,
-                           PaymentMethodRepository paymentMethodRepository,
-                           BookingRepository bookingRepository,
-                           TicketRepository ticketRepository,
-                           PasswordEncoder passwordEncoder) {
-        this.airplaneRepository = airplaneRepository;
-        this.flightsRepository = flightsRepository;
-        this.seatRepository = seatRepository;
-        this.flightsRoutesRepository = flightsRoutesRepository;
-        this.airportsRepository = airportsRepository;
-        this.roleRepository = roleRepository;
-        this.userRepository = userRepository;
-        this.paymentRepository = paymentRepository;
-        this.paymentMethodRepository = paymentMethodRepository;
-        this.bookingRepository = bookingRepository;
-        this.ticketRepository = ticketRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+
 
     @Override
     @Transactional

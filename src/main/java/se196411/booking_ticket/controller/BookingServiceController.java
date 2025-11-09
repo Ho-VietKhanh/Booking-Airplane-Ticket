@@ -253,6 +253,39 @@ public class BookingServiceController {
         return success ? "success" : "failed";
     }
 
+    // API to save seat selection to session (called from JavaScript)
+    @PostMapping("/services/seats/save-to-session")
+    @ResponseBody
+    public String saveSeatToSession(@RequestParam int passengerIndex,
+                                   @RequestParam(required = false) String seatId,
+                                   HttpSession session) {
+        try {
+            BookingSessionDTO bookingSession = (BookingSessionDTO) session.getAttribute("bookingSession");
+
+            if (bookingSession == null || bookingSession.getPassengers() == null) {
+                return "{\"success\": false, \"message\": \"No booking session found\"}";
+            }
+
+            if (passengerIndex < 0 || passengerIndex >= bookingSession.getPassengers().size()) {
+                return "{\"success\": false, \"message\": \"Invalid passenger index\"}";
+            }
+
+            // Update seat for this passenger
+            bookingSession.getPassengers().get(passengerIndex).setSeatId(seatId);
+
+            // Save back to session
+            session.setAttribute("bookingSession", bookingSession);
+
+            System.out.println("✅ Saved seat " + seatId + " for passenger " + passengerIndex + " to session");
+
+            return "{\"success\": true, \"message\": \"Seat saved to session\"}";
+        } catch (Exception e) {
+            System.err.println("Error saving seat to session: " + e.getMessage());
+            e.printStackTrace();
+            return "{\"success\": false, \"message\": \"" + e.getMessage() + "\"}";
+        }
+    }
+
     // Handle seat selection submission
     @PostMapping("/services/seats/submit")
     public String submitSeatSelection(@RequestParam(required = false) List<String> selectedSeats,

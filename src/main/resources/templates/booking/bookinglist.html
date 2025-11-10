@@ -1,56 +1,406 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking List</title>
+    <title>Booking List - Bamboo Airways</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bamboo-green: #00613A;
+            --bamboo-green-dark: #004129;
+            --bamboo-gold: #D4AF37;
+            --bamboo-light: #F7F7F7;
+            --bamboo-gray: #E5E5E5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bamboo-light);
+            padding-top: 80px;
+        }
+
+        .navbar {
+            background: white !important;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            padding: 12px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .bamboo-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bamboo-logo-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--bamboo-green) 0%, var(--bamboo-green-dark) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 97, 58, 0.3);
+        }
+
+        .bamboo-logo-icon i {
+            font-size: 24px;
+            color: white;
+        }
+
+        .bamboo-logo-text .brand-name {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--bamboo-green);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .bamboo-logo-text .brand-tagline {
+            font-size: 10px;
+            color: var(--bamboo-gold);
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .nav-link {
+            color: #333 !important;
+            font-weight: 600;
+            padding: 10px 20px !important;
+            transition: all 0.3s ease;
+            border-radius: 25px;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background: linear-gradient(135deg, var(--bamboo-green), var(--bamboo-green-dark));
+            color: white !important;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--bamboo-green), var(--bamboo-green-dark));
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .page-header h1 {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .search-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 2px solid var(--bamboo-gray);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--bamboo-green);
+            box-shadow: 0 0 0 3px rgba(0, 97, 58, 0.1);
+        }
+
+        .search-box button {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--bamboo-green);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-box button:hover {
+            background: var(--bamboo-green-dark);
+        }
+
+        table {
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        thead {
+            background: linear-gradient(135deg, var(--bamboo-green), var(--bamboo-green-dark));
+            color: white;
+        }
+
+        thead th {
+            padding: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--bamboo-gray);
+            transition: all 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background: var(--bamboo-light);
+        }
+
+        tbody td {
+            padding: 20px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .btn-view {
+            background: var(--bamboo-green);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-view:hover {
+            background: var(--bamboo-green-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 97, 58, 0.3);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: 15px;
+        }
+
+        .empty-state i {
+            font-size: 80px;
+            color: var(--bamboo-gray);
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .footer {
+            background: var(--bamboo-green);
+            color: white;
+            padding: 40px 0 20px;
+            margin-top: 80px;
+        }
+
+        .footer h5 {
+            color: var(--bamboo-gold);
+            margin-bottom: 15px;
+        }
+
+        .footer p, .footer a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .footer a:hover {
+            color: var(--bamboo-gold);
+        }
+    </style>
 </head>
 <body>
-    <h1>Booking List</h1>
-    <button class="btn btn-add" onclick="window.location.href='/booking/add'">Add New Booking</button>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Booking ID</th>
-                <th>Booking Time</th>
-                <th>Total Amount</th>
-                <th>Status</th>
-                <th>User</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="booking : ${bookings}">
-                <td th:text="${booking.bookingId}"></td>
-                <td th:text="${#temporals.format(booking.bookingTime, 'yyyy-MM-dd HH:mm')}"></td>
-                <td th:text="${'$' + #numbers.formatDecimal(booking.totalAmount, 1, 2)}"></td>
-                <td th:text="${booking.status}"></td>
-                <td th:text="${booking.userId}"></td>
-                <td>
-                    <button class="btn btn-view" th:data-booking-id="${booking.bookingId}">View Details</button>
-                    <button class="btn btn-delete" th:data-booking-id="${booking.bookingId}">Delete</button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/dashboard}">
+            <div class="bamboo-logo">
+                <div class="bamboo-logo-icon">
+                    <i class="fas fa-plane"></i>
+                </div>
+                <div class="bamboo-logo-text">
+                    <span class="brand-name">Bamboo Airways</span>
+                    <span class="brand-tagline">Fly Green Fly Far</span>
+                </div>
+            </div>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/dashboard}">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item" th:if="${isAuthenticated}">
+                    <a class="nav-link">
+                        <i class="fas fa-user"></i> <span th:text="${username}">User</span>
+                    </a>
+                </li>
+                <li class="nav-item" th:if="${isAuthenticated}">
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-link nav-link">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </form>
+                </li>
+                <li class="nav-item" th:unless="${isAuthenticated}">
+                    <a class="nav-link" th:href="@{/login}">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
 
-    <script>
-        document.querySelectorAll('.btn-view').forEach(button => {
-            button.addEventListener('click', function() {
-                const bookingId = this.getAttribute('data-booking-id');
-                window.location.href = '/booking/detail/' + bookingId;
-            });
-        });
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-list"></i> Booking Management</h1>
+        <p th:if="${isAuthenticated}">View and manage your booking records</p>
+        <p th:unless="${isAuthenticated}">Search for your booking by Booking ID or Ticket ID</p>
+    </div>
+</div>
 
-        document.querySelectorAll('.btn-delete').forEach(button => {
-            button.addEventListener('click', function() {
-                const bookingId = this.getAttribute('data-booking-id');
-                if (confirm('Are you sure?')) {
-                    window.location.href = '/booking/delete/' + bookingId;
-                }
-            });
-        });
-    </script>
+<!-- Main Content -->
+<div class="container mb-5">
+    <!-- Search Section -->
+    <div class="search-section">
+        <form th:action="@{/booking/list}" method="get">
+            <div class="search-box">
+                <input type="text"
+                       name="search"
+                       th:value="${search}"
+                       placeholder="Enter Booking ID or Ticket ID to search..."
+                       required>
+                <button type="submit">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </form>
+        <p class="text-muted mt-2 mb-0">
+            <i class="fas fa-info-circle"></i>
+            <span th:if="${isAuthenticated}">Search within your bookings using Booking ID or Ticket ID</span>
+            <span th:unless="${isAuthenticated}">Enter your Booking ID or Ticket ID to find your booking</span>
+        </p>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" th:if="${bookings == null || bookings.isEmpty()}">
+        <i class="fas fa-search"></i>
+        <h3 th:if="${search != null && !search.isEmpty()}">No bookings found</h3>
+        <h3 th:unless="${search != null && !search.isEmpty()}">Enter search criteria</h3>
+        <p class="text-muted" th:if="${search != null && !search.isEmpty()}">
+            No bookings found for "<strong th:text="${search}"></strong>"
+        </p>
+        <p class="text-muted" th:unless="${search != null && !search.isEmpty()}">
+            Use the search box above to find your booking
+        </p>
+    </div>
+
+    <!-- Booking Table -->
+    <div th:if="${bookings != null && !bookings.isEmpty()}">
+        <table>
+            <thead>
+                <tr>
+                    <th><i class="fas fa-hashtag"></i> Booking ID</th>
+                    <th><i class="far fa-calendar-alt"></i> Booking Time</th>
+                    <th><i class="fas fa-dollar-sign"></i> Total Amount</th>
+                    <th><i class="fas fa-info-circle"></i> Status</th>
+                    <th><i class="fas fa-tools"></i> Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="booking : ${bookings}">
+                    <td th:text="${booking.bookingId}"></td>
+                    <td th:text="${#temporals.format(booking.bookingTime, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td th:text="${#numbers.formatDecimal(booking.totalAmount, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}"></td>
+                    <td th:text="${booking.status}"></td>
+                    <td>
+                        <a th:href="@{/booking/detail/{id}(id=${booking.bookingId})}" class="btn-view">
+                            <i class="fas fa-eye"></i> View Details
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <h5><i class="fas fa-plane-departure"></i> BAMBOO AIRWAYS</h5>
+                <p>Vietnam's first 5-star airline</p>
+            </div>
+            <div class="col-md-4 mb-4">
+                <h5>Contact</h5>
+                <p><i class="fas fa-phone"></i> Hotline: 1900 1166</p>
+                <p><i class="fas fa-envelope"></i> Email: info@bambooairways.com</p>
+            </div>
+            <div class="col-md-4 mb-4">
+                <h5>Information</h5>
+                <a href="#">About Us</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Privacy Policy</a>
+            </div>
+        </div>
+        <div class="text-center pt-3 border-top border-secondary">
+            <p>&copy; 2025 Bamboo Airways. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

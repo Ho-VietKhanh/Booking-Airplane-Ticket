@@ -673,6 +673,13 @@
                     </a>
                 </li>
 
+                <!-- Tìm vé - Hiển thị cho TẤT CẢ người dùng -->
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/booking/list}">
+                        <i class="fas fa-ticket-alt"></i> Tìm vé
+                    </a>
+                </li>
+
                 <!-- Hiển thị khi CHƯA đăng nhập -->
                 <li class="nav-item" th:if="${!isAuthenticated}">
                     <a class="nav-link" th:href="@{/login}">
@@ -693,7 +700,7 @@
                 </li>
                 <li class="nav-item" th:if="${isAuthenticated}">
                     <form th:action="@{/logout}" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-link nav-link logout-btn" style="border: none; background: none; cursor: pointer;">
+                        <button type="submit" class="btn btn-link nav-link logout-btn">
                             <i class="fas fa-sign-out-alt"></i> Đăng xuất
                         </button>
                     </form>

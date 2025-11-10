@@ -13,4 +13,6 @@ public interface TicketService {
     void deleteById(String ticketId);
 
     public List<TicketResponseDTO> getAllTicketsByBookingId(String bookingId);
+
+    TicketResponseDTO getTicketByTicketId(String ticketId);
 }

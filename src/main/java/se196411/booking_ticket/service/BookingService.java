@@ -24,4 +24,8 @@ public interface BookingService {
     public List<BookingResponseDTO> getAllBookingsByUserId(String userId);
 
     public List<BookingResponseDTO> getAllBookings();
+
+    public List<BookingResponseDTO> searchBookingsByUserId(String userId, String trim);
+
+    public List<BookingResponseDTO> searchBookings(String trim);
 }

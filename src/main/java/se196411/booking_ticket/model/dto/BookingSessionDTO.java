@@ -13,6 +13,9 @@ public class BookingSessionDTO {
     private String email;
     private String phone;
     private String flightId;
+    private String returnFlightId; // For round trip
+    private boolean isRoundTrip;
+    private String currentLeg; // "outbound" or "return"
     private List<PassengerInfoDTO> passengers = new ArrayList<>();
 
     public void addPassenger(PassengerInfoDTO passenger) {
@@ -26,6 +29,3 @@ public class BookingSessionDTO {
         return this.passengers != null ? this.passengers.size() : 0;
     }
 }
-
-
-

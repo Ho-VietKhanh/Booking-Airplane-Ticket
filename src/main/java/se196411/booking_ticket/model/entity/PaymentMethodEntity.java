@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,5 +32,6 @@ public class PaymentMethodEntity {
 
     // Relationships
     @OneToMany(mappedBy = "paymentMethod")
+    @ToString.Exclude
     private List<PaymentEntity> payments = new ArrayList<>();
 }

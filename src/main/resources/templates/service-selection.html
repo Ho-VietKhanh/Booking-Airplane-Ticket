@@ -191,7 +191,7 @@
         </div>
 
         <div class="action-buttons">
-            <a href="#" class="btn btn-secondary">Quay lại</a>
+            <a th:href="@{/booking/services/seats(flightId=${flightId})}" class="btn btn-secondary">Quay lại</a>
             <a href="#" class="btn btn-primary" onclick="skipServices()">Bỏ qua và tiếp tục</a>
         </div>
     </div>
@@ -219,4 +219,3 @@
     </script>
 </body>
 </html>
-

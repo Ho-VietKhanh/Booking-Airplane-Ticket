@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -31,7 +32,6 @@ public class LuggageEntity {
 
     // Relationships
     @OneToMany(mappedBy = "luggage")
+    @ToString.Exclude
     private List<TicketEntity> tickets = new ArrayList<>();
 }
-
-

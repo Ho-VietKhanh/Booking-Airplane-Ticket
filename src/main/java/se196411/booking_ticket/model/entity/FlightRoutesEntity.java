@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -18,10 +19,13 @@ public class FlightRoutesEntity {
     String flightRoutesId;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "started_airport_id", nullable = false)
+    @ToString.Exclude
     private AirportsEntity startedAirport;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ended_airport_id", nullable = false)
+    @ToString.Exclude
     private AirportsEntity endedAirport;
     @OneToMany(mappedBy = "flightRoute")
+    @ToString.Exclude
     private List<FlightsEntity> flights;
 }

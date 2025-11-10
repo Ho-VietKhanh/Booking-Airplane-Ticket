@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -34,9 +35,11 @@ public class PaymentEntity {
 
     //Relationships
     @ManyToOne
-    @JoinColumn(name = "payment_method_id", nullable = false) 
+    @JoinColumn(name = "payment_method_id", nullable = false)
+    @ToString.Exclude
     private PaymentMethodEntity paymentMethod;
 
     @OneToMany(mappedBy = "payment")
+    @ToString.Exclude
     private List<BookingEntity> bookings = new ArrayList<>();
 }

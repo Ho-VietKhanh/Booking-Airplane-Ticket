@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -27,13 +28,16 @@ public class BookingEntity {
 
     // Relationships
     @OneToMany(mappedBy = "booking", fetch = FetchType.EAGER)
+    @ToString.Exclude
     private List<TicketEntity> tickets;
 
     @ManyToOne
     @JoinColumn(name = "payment_id")
+    @ToString.Exclude
     private PaymentEntity payment;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @ToString.Exclude
     private UserEntity user;
 }

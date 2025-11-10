@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -55,21 +56,26 @@ public class TicketEntity {
     // Relationships
     @ManyToOne
     @JoinColumn(name = "flight_id", nullable = false)
+    @ToString.Exclude
     private FlightsEntity flight;
 
     @ManyToOne
     @JoinColumn(name = "booking_id", nullable = false)
+    @ToString.Exclude
     private BookingEntity booking;
 
     @ManyToOne
     @JoinColumn(name = "seat_id")
+    @ToString.Exclude
     private SeatEntity seat;
 
     @ManyToOne
     @JoinColumn(name = "meal_id")
+    @ToString.Exclude
     private MealEntity meal;
 
     @ManyToOne
     @JoinColumn(name = "luggage_id")
+    @ToString.Exclude
     private LuggageEntity luggage;
 }

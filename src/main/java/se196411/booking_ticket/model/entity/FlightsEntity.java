@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,9 +21,11 @@ public class FlightsEntity {
     String flightId;
     @ManyToOne
     @JoinColumn(name = "airplane_id", nullable = false)
+    @ToString.Exclude
     private AirPlaneEntity airplane;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "flight_routes_id", nullable = false)
+    @ToString.Exclude
     private FlightRoutesEntity flightRoute;
     @Column(name = "base_price", nullable = false)
     private BigDecimal basePrice;
@@ -34,5 +37,6 @@ public class FlightsEntity {
     private String status;
 
     @OneToMany(mappedBy = "flight", fetch = FetchType.EAGER)
+    @ToString.Exclude
     private List<TicketEntity> tickets;
 }

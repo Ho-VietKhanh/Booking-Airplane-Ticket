@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "airplane")
@@ -31,9 +32,11 @@ public class AirPlaneEntity {
     private String airline;
 
     @OneToMany(mappedBy = "airplane")
+    @ToString.Exclude
     private List<SeatEntity> seats;
 
     @OneToMany(mappedBy = "airplane")
+    @ToString.Exclude
     private List<FlightsEntity> flights;
 
 }

@@ -13,8 +13,10 @@ import se196411.booking_ticket.model.entity.PaymentMethodEntity;
 import se196411.booking_ticket.service.BookingService;
 import se196411.booking_ticket.service.PaymentMethodService;
 import se196411.booking_ticket.service.PaymentService;
+import se196411.booking_ticket.service.BookingCreationService;
 import se196411.booking_ticket.utils.RandomId;
 
+import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,6 +33,9 @@ public class PaymentController {
 
     @Autowired
     private BookingService bookingService;
+
+    @Autowired
+    private BookingCreationService bookingCreationService;
 
     @GetMapping("/booking/payment")
     private String showPaymentPage(
@@ -57,9 +62,32 @@ public class PaymentController {
 
     @PostMapping("/booking/payment/confirm")
     private String confirmPayment(
-            @RequestParam("bookingId") String bookingId,
+            @RequestParam(name = "bookingId", required = false) String bookingId,
             @RequestParam("paymentMethodId") String paymentMethodId,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
+
+        // ✅ FIX: Tạo booking từ session nếu chưa có bookingId
+        if (bookingId == null || bookingId.isBlank()) {
+            // Get booking session from session
+            se196411.booking_ticket.model.dto.BookingSessionDTO bookingSession =
+                (se196411.booking_ticket.model.dto.BookingSessionDTO) session.getAttribute("bookingSession");
+
+            if (bookingSession == null || bookingSession.getPassengers() == null || bookingSession.getPassengers().isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "No booking session found");
+                return "redirect:/";
+            }
+
+            // Create booking and tickets from session
+            bookingId = createBookingFromSession(bookingSession, paymentMethodId, session);
+
+            if (bookingId == null) {
+                redirectAttributes.addFlashAttribute("error", "Failed to create booking");
+                return "redirect:/booking/payment-preview";
+            }
+        }
+
+        // Get the created booking
         Optional<BookingEntity> bookingOpt = this.bookingService.findById(bookingId);
         if (bookingOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "Booking not found");
@@ -68,20 +96,21 @@ public class PaymentController {
 
         BookingEntity booking = bookingOpt.get();
 
-        // Check if payment already exists for this booking
+        // ✅ Check if payment already exists for this booking
         if (booking.getPayment() != null) {
-            // Payment already exists, redirect to payment page
+            // Payment already exists, just redirect
             redirectAttributes.addAttribute("paymentId", booking.getPayment().getPaymentId());
             return "redirect:/booking/payment/redirect";
         }
 
+        // ✅ Validate payment method exists
         Optional<PaymentMethodEntity> pmOpt = this.paymentMethodService.getPaymentMethodById(paymentMethodId);
         if (pmOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "Payment method not found");
             return "redirect:/booking/payment?bookingId=" + bookingId;
         }
 
-        // Create new payment
+        // ✅ Create new payment
         PaymentEntity payment = new PaymentEntity();
         payment.setPaymentId("PAY-" + RandomId.generateRandomId(2, 4)); // PAY-AB1234
         payment.setCreatedAt(LocalDateTime.now());
@@ -91,12 +120,42 @@ public class PaymentController {
 
         PaymentEntity savedPayment = this.paymentService.createPayment(payment);
 
-        // Update booking with payment reference
+        // ✅ Update booking with payment reference
         booking.setPayment(savedPayment);
         this.bookingService.create(booking);
 
         redirectAttributes.addAttribute("paymentId", savedPayment.getPaymentId());
         return "redirect:/booking/payment/redirect";
+    }
+
+    /**
+     * ✅ NEW: Helper method to create booking from session
+     */
+    private String createBookingFromSession(
+            se196411.booking_ticket.model.dto.BookingSessionDTO bookingSession,
+            String paymentMethodId,
+            HttpSession session) {
+        try {
+            System.out.println("🔄 Delegating to BookingCreationService...");
+
+            // Use BookingCreationService to create booking from session
+            String bookingId = bookingCreationService.createBookingFromSession(bookingSession, paymentMethodId);
+
+            if (bookingId != null) {
+                // Clear session after successful booking creation
+                session.removeAttribute("bookingSession");
+                System.out.println("✅ Booking created successfully: " + bookingId);
+            } else {
+                System.err.println("❌ Failed to create booking from session");
+            }
+
+            return bookingId;
+
+        } catch (Exception e) {
+            System.err.println("❌ Error creating booking from session: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @GetMapping("/booking/payment/redirect")

@@ -3,6 +3,8 @@ package se196411.booking_ticket.controller;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -11,6 +13,7 @@ import org.springframework.web.servlet.ModelAndView;
 import se196411.booking_ticket.model.dto.BookingRequestDTO;
 import se196411.booking_ticket.model.dto.BookingResponseDTO;
 import se196411.booking_ticket.model.dto.TicketResponseDTO;
+import se196411.booking_ticket.model.entity.UserEntity;
 import se196411.booking_ticket.service.BookingService;
 import se196411.booking_ticket.service.TicketService;
 import se196411.booking_ticket.service.UserService;
@@ -129,5 +132,34 @@ public class BookingController {
         ModelAndView mv = new ModelAndView("booking/bookinglist");
         mv.addObject("bookings", bookings);
         return mv;
+    }
+
+    @GetMapping("/history")
+    public String showBookingHistory(Model model) {
+        // Get current authenticated user
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return "redirect:/login";
+        }
+
+        // Get user email from authentication
+        String userEmail = auth.getName();
+
+        // Find user by email
+        UserEntity user = userService.findByEmail(userEmail);
+
+        if (user == null) {
+            return "redirect:/dashboard";
+        }
+
+        // Get all bookings for this user
+        List<BookingResponseDTO> bookings = bookingService.getAllBookingsByUserId(user.getUserId());
+
+        model.addAttribute("bookings", bookings);
+        model.addAttribute("username", user.getFullName());
+        model.addAttribute("isAuthenticated", true);
+
+        return "booking-history";
     }
 }

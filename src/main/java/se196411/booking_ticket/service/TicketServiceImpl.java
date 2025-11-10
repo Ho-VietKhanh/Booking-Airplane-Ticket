@@ -66,6 +66,18 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public List<TicketResponseDTO> getAllTicketsByBookingId(String bookingId) {
-        return ticketRepository.findAllTicketsByBookingBookingId(bookingId);
+        List<TicketEntity> tickets = ticketRepository.findAllTicketsByBookingBookingId(bookingId);
+        return tickets.stream()
+                .map(ticket -> {
+                    TicketResponseDTO dto = new TicketResponseDTO();
+                    dto.setTicketId(ticket.getTicketId());
+                    dto.setPrice(ticket.getPrice());
+                    dto.setStatus(ticket.getStatus());
+                    dto.setFlightId(ticket.getFlight() != null ? ticket.getFlight().getFlightId() : null);
+                    dto.setBookingId(ticket.getBooking() != null ? ticket.getBooking().getBookingId() : null);
+                    dto.setSeatId(ticket.getSeat() != null ? ticket.getSeat().getSeatId() : null);
+                    return dto;
+                })
+                .collect(java.util.stream.Collectors.toList());
     }
 }

@@ -20,7 +20,9 @@
                     <p>Status: <span th:text="${flight.status}"></span></p>
                     <p>Base price: <span th:text="${flight.basePrice}"></span></p>
                     <div class="mt-3">
-                        <a th:href="@{'/admin/seats/airplane/' + ${flight.airplane?.airplaneId}}" class="btn btn-primary" th:if="${flight.airplane != null}">View Seat Map</a>
+                        <a th:href="@{'/admin/seats/flight/' + ${flight.flightId}}" class="btn btn-primary">
+                            <i class="bi bi-airplane-engines"></i> View Seat Map (Flight [[${flight.flightId}]])
+                        </a>
                     </div>
                 </div>
             </div>

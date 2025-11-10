@@ -129,7 +129,19 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingResponseDTO> getAllBookingsByUserId(String userId) {
-        return bookingRepository.findAllByUserUserId(userId);
+        List<BookingEntity> bookings = bookingRepository.findAllByUserUserId(userId);
+        return bookings.stream()
+                .map(booking -> {
+                    BookingResponseDTO dto = new BookingResponseDTO();
+                    dto.setBookingId(booking.getBookingId());
+                    dto.setBookingTime(booking.getBookingTime());
+                    dto.setTotalAmount(booking.getTotalAmount());
+                    dto.setStatus(booking.getStatus());
+                    dto.setPaymentId(booking.getPayment() != null ? booking.getPayment().getPaymentId() : null);
+                    dto.setUserId(booking.getUser().getUserId());
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override

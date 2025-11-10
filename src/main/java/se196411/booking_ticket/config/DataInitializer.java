@@ -505,11 +505,15 @@ public class DataInitializer implements CommandLineRunner {
             int rows = (capacity + columnsCount - 1) / columnsCount; // làm tròn lên
             List<SeatEntity> seats = new ArrayList<>();
             int created = 0;
+
+            // 18 ghế Business = 3 hàng đầu (3 hàng x 6 cột = 18 ghế)
+            // Còn lại là Economy
             for (int row = 1; row <= rows && created < capacity; row++) {
                 for (int c = 0; c < columnsCount && created < capacity; c++) {
                     SeatEntity seat = new SeatEntity();
                     seat.setSeatId(UUID.randomUUID().toString());
                     seat.setSeatNumber(row + columns[c]);
+                    // 3 hàng đầu là Business (18 ghế), còn lại là Economy
                     seat.setSeatClass(row <= 3 ? "Business" : "Economy");
                     seat.setAvailable(true);
                     seat.setAirplane(airplane);

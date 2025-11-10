@@ -49,4 +49,9 @@ public class MealServiceImpl implements MealService {
     public void deleteById(Integer mealId) {
         mealRepository.deleteById(mealId);
     }
+
+    @Override
+    public Optional<Object> getAllMeals() {
+        return Optional.of(mealRepository.findAll());
+    }
 }

@@ -11,10 +11,8 @@ import se196411.booking_ticket.service.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import se196411.booking_ticket.model.enums.Role;
 
@@ -51,7 +49,17 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private TicketRepository ticketRepository;
 
+    @Autowired
+    private BookingRepository bookingRepository;
+
+    @Autowired
+    private MealRepository mealRepository;
+
+    @Autowired
+    private LuggageRepository luggageRepository;
 
     @Override
     @Transactional
@@ -66,6 +74,7 @@ public class DataInitializer implements CommandLineRunner {
         createSamplePaymentAndBooking();
         createMeals();
         createLuggage();
+        createTickets();
     }
 
     // ============== USERS WITH ENUM ROLE ==============
@@ -496,11 +505,15 @@ public class DataInitializer implements CommandLineRunner {
             int rows = (capacity + columnsCount - 1) / columnsCount; // làm tròn lên
             List<SeatEntity> seats = new ArrayList<>();
             int created = 0;
+
+            // 18 ghế Business = 3 hàng đầu (3 hàng x 6 cột = 18 ghế)
+            // Còn lại là Economy
             for (int row = 1; row <= rows && created < capacity; row++) {
                 for (int c = 0; c < columnsCount && created < capacity; c++) {
                     SeatEntity seat = new SeatEntity();
                     seat.setSeatId(UUID.randomUUID().toString());
                     seat.setSeatNumber(row + columns[c]);
+                    // 3 hàng đầu là Business (18 ghế), còn lại là Economy
                     seat.setSeatClass(row <= 3 ? "Business" : "Economy");
                     seat.setAvailable(true);
                     seat.setAirplane(airplane);
@@ -510,5 +523,107 @@ public class DataInitializer implements CommandLineRunner {
             }
             seatRepository.saveAll(seats);
         }
+    }
+
+    // ============== TICKETS ==============
+    private void createTicket(String ticketId, BigDecimal price, String cccd, String firstName,
+                             String sdt, String lastName, String nationality, String title,
+                             Boolean gender, Date birthDate, String email, String status,
+                             FlightsEntity flight, BookingEntity booking, SeatEntity seat,
+                             MealEntity meal, LuggageEntity luggage) {
+        if (ticketRepository.findById(ticketId).isEmpty()) {
+            TicketEntity ticket = new TicketEntity();
+            ticket.setTicketId(ticketId);
+            ticket.setPrice(price);
+            ticket.setCccd(cccd);
+            ticket.setFirstName(firstName);
+            ticket.setSdt(sdt);
+            ticket.setLastName(lastName);
+            ticket.setNationality(nationality);
+            ticket.setTitle(title);
+            ticket.setGender(gender);
+            ticket.setBirthDate(birthDate);
+            ticket.setEmail(email);
+            ticket.setStatus(status);
+            ticket.setFlight(flight);
+            ticket.setBooking(booking);
+            ticket.setSeat(seat);
+            ticket.setMeal(meal);
+            ticket.setLuggage(luggage);
+
+            ticketRepository.save(ticket);
+            System.out.println("Created ticket: " + ticketId);
+        }
+    }
+
+    private void createTickets() {
+        if (ticketRepository.count() > 0) {
+            System.out.println("Tickets already exist. Skipping initialization.");
+            return;
+        }
+
+        System.out.println("Creating sample tickets...");
+
+        // Get existing data
+        List<BookingEntity> bookings = bookingService.getAllBookings().stream()
+                .map(dto -> bookingRepository.findById(dto.getBookingId()).orElse(null))
+                .filter(booking -> booking != null)
+                .toList();
+
+        List<FlightsEntity> flights = flightsRepository.findAll();
+        List<MealEntity> meals = mealRepository.findAll();
+        List<LuggageEntity> luggages = luggageRepository.findAll();
+
+        int ticketCounter = 1;
+
+        for (BookingEntity booking : bookings) {
+            // Create 1-3 tickets per booking
+            int numTickets = 1 + (int)(Math.random() * 3);
+
+            for (int i = 0; i < numTickets; i++) {
+                String ticketId = String.format("TK-%03d", ticketCounter++);
+
+                // Get random flight
+                FlightsEntity flight = flights.get((int)(Math.random() * flights.size()));
+
+                // Get available seat for this flight
+                List<SeatEntity> availableSeats = seatRepository.findSeatsByAirplaneId(flight.getAirplane().getAirplaneId())
+                        .stream()
+                        .filter(seat -> ticketRepository.findBySeatSeatId(seat.getSeatId()).isEmpty())
+                        .toList();
+
+                if (availableSeats.isEmpty()) continue;
+
+                SeatEntity seat = availableSeats.get(0);
+
+                // Random meal and luggage (50% chance of having them)
+                MealEntity meal = Math.random() > 0.5 && !meals.isEmpty()
+                        ? meals.get((int)(Math.random() * meals.size())) : null;
+                LuggageEntity luggage = Math.random() > 0.5 && !luggages.isEmpty()
+                        ? luggages.get((int)(Math.random() * luggages.size())) : null;
+
+                // Calculate price
+                BigDecimal basePrice = flight.getBasePrice();
+                BigDecimal mealPrice = meal != null ? meal.getPrice() : BigDecimal.ZERO;
+                BigDecimal luggagePrice = luggage != null ? luggage.getPrice() : BigDecimal.ZERO;
+                BigDecimal totalPrice = basePrice.add(mealPrice).add(luggagePrice);
+
+                // Create ticket
+                createTicket(ticketId, totalPrice,
+                        "001234567890", // CCCD
+                        "John", // firstName
+                        "0901234567", // sdt
+                        "Doe", // lastName
+                        "Vietnam", // nationality
+                        "Mr.", // title
+                        true, // gender (true = male)
+                        new Date(System.currentTimeMillis() - (30L * 365 * 24 * 60 * 60 * 1000)), // birthDate (30 years ago)
+                        booking.getUser().getEmail(), // email
+                        "ACTIVE", // status
+                        flight, booking, seat, meal, luggage);
+            }
+        }
+
+        System.out.println("Sample tickets created successfully!");
     }
 }

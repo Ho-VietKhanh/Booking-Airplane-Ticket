@@ -10,6 +10,7 @@ import se196411.booking_ticket.model.entity.UserEntity;
 import se196411.booking_ticket.repository.BookingRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -159,5 +160,60 @@ public class BookingServiceImpl implements BookingService {
                     return dto;
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BookingResponseDTO> searchBookingsByUserId(String userId, String keyword) {
+        List<BookingEntity> bookings = new ArrayList<>();
+
+        // Search by booking ID for this user
+        Optional<BookingEntity> bookingById = bookingRepository.findById(keyword);
+        if (bookingById.isPresent() && bookingById.get().getUser().getUserId().equals(userId)) {
+            bookings.add(bookingById.get());
+        }
+
+        // Search by ticket ID for this user
+        List<BookingEntity> bookingsByTicket = bookingRepository.findByTicketsTicketIdAndUserUserId(keyword, userId);
+        for (BookingEntity booking : bookingsByTicket) {
+            if (!bookings.contains(booking)) {
+                bookings.add(booking);
+            }
+        }
+
+        return bookings.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BookingResponseDTO> searchBookings(String keyword) {
+        List<BookingEntity> bookings = new ArrayList<>();
+
+        // Search by booking ID
+        Optional<BookingEntity> bookingById = bookingRepository.findById(keyword);
+        bookingById.ifPresent(bookings::add);
+
+        // Search by ticket ID
+        List<BookingEntity> bookingsByTicket = bookingRepository.findByTicketsTicketId(keyword);
+        for (BookingEntity booking : bookingsByTicket) {
+            if (!bookings.contains(booking)) {
+                bookings.add(booking);
+            }
+        }
+
+        return bookings.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    private BookingResponseDTO convertToDTO(BookingEntity booking) {
+        BookingResponseDTO dto = new BookingResponseDTO();
+        dto.setBookingId(booking.getBookingId());
+        dto.setBookingTime(booking.getBookingTime());
+        dto.setTotalAmount(booking.getTotalAmount());
+        dto.setStatus(booking.getStatus());
+        dto.setPaymentId(booking.getPayment() != null ? booking.getPayment().getPaymentId() : null);
+        dto.setUserId(booking.getUser().getUserId());
+        return dto;
     }
 }

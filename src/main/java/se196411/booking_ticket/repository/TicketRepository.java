@@ -7,6 +7,7 @@ import se196411.booking_ticket.model.entity.TicketEntity;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TicketRepository extends JpaRepository<TicketEntity,String> {
@@ -30,4 +31,8 @@ public interface TicketRepository extends JpaRepository<TicketEntity,String> {
     // Query để lấy danh sách seat number đã được đặt cho một chuyến bay cụ thể
     @Query("SELECT t.seat.seatNumber FROM TicketEntity t WHERE t.flight.flightId = :flightId AND t.status != 'CANCELLED'")
     List<String> findReservedSeatNumbersByFlightId(@Param("flightId") String flightId);
+
+    Optional<Object> findByTicketId(String keyword);
+
+    List<TicketEntity> findBySeatSeatId(String seatId);
 }

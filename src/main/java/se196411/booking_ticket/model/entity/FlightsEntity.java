@@ -21,7 +21,7 @@ public class FlightsEntity {
     @ManyToOne
     @JoinColumn(name = "airplane_id", nullable = false)
     private AirPlaneEntity airplane;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "flight_routes_id", nullable = false)
     private FlightRoutesEntity flightRoute;
     @Column(name = "base_price", nullable = false)
@@ -33,6 +33,6 @@ public class FlightsEntity {
     @Column(name = "status", nullable = false)
     private String status;
 
-    @OneToMany(mappedBy = "flight")
+    @OneToMany(mappedBy = "flight", fetch = FetchType.EAGER)
     private List<TicketEntity> tickets;
 }

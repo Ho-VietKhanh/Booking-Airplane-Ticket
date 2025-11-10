@@ -136,6 +136,11 @@
             margin-bottom: 10px;
         }
 
+        /* ✅ Ẩn các hàng ghế không có ghế nào */
+        .seat-row:not(:has(.seat)) {
+            display: none;
+        }
+
         .row-number {
             display: flex;
             align-items: center;
@@ -273,6 +278,16 @@
                 <span id="currentPassengerName">Hành khách 1</span>
                 <br/>
                 <span id="currentSeatSelection">Vui lòng chọn ghế bên dưới</span>
+                <br/>
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 2px solid #00693E;">
+                    <strong style="font-size: 16px; color: #00693E;">Tổng chi phí hiện tại:</strong>
+                    <div style="font-size: 24px; font-weight: bold; color: #00693E; margin-top: 5px;" id="totalPrice">
+                        0 ₫
+                    </div>
+                    <small id="priceBreakdown" style="color: #666; display: block; margin-top: 5px;">
+                        (Giá vé cơ bản cho <span id="passengerCountDisplay">0</span> hành khách)
+                    </small>
+                </div>
             </div>
         </div>
 
@@ -280,7 +295,7 @@
         <div class="seat-legend">
             <div class="legend-item">
                 <div class="legend-box legend-business"></div>
-                <span>Hạng Thương Gia</span>
+                <span>Hạng Thương Gia (+1.800.000 ₫)</span>
             </div>
             <div class="legend-item">
                 <div class="legend-box legend-economy"></div>
@@ -321,128 +336,90 @@
                     <div>F</div>
                 </div>
 
-                <!-- Simple seat rendering - just loop through all seats -->
-                <div th:each="seat : ${seats}">
-                    <div th:if="${seat.row == 1 and seat.column == 'A'}" class="seat-row" th:remove="tag">
-                        <div class="seat-row">
-                            <div class="row-number">1</div>
-                            <div th:each="s : ${seats}" th:if="${s.row == 1 and s.column == 'A'}"
-                                 class="seat"
-                                 th:classappend="${s.seatClass == 'Business' ? 'business' : 'economy'} + ${!s.available ? ' occupied' : ''}">
-                                <input type="radio" th:id="'seat_' + ${s.seatId}" name="currentPassengerSeat"
-                                       th:value="${s.seatId}" th:data-seat-number="${s.seatNumber}"
-                                       th:disabled="${!s.available}" onchange="updateSeatSelection(this)"/>
-                                <label th:for="'seat_' + ${s.seatId}" class="seat-label"
-                                       th:classappend="${!s.available ? 'disabled' : ''}" th:text="${s.seatNumber}">1A</label>
-                            </div>
-                            <div th:each="s : ${seats}" th:if="${s.row == 1 and s.column == 'B'}"
-                                 class="seat"
-                                 th:classappend="${s.seatClass == 'Business' ? 'business' : 'economy'} + ${!s.available ? ' occupied' : ''}">
-                                <input type="radio" th:id="'seat_' + ${s.seatId}" name="currentPassengerSeat"
-                                       th:value="${s.seatId}" th:data-seat-number="${s.seatNumber}"
-                                       th:disabled="${!s.available}" onchange="updateSeatSelection(this)"/>
-                                <label th:for="'seat_' + ${s.seatId}" class="seat-label"
-                                       th:classappend="${!s.available ? 'disabled' : ''}" th:text="${s.seatNumber}">1B</label>
-                            </div>
-                            <div th:each="s : ${seats}" th:if="${s.row == 1 and s.column == 'C'}"
-                                 class="seat"
-                                 th:classappend="${s.seatClass == 'Business' ? 'business' : 'economy'} + ${!s.available ? ' occupied' : ''}">
-                                <input type="radio" th:id="'seat_' + ${s.seatId}" name="currentPassengerSeat"
-                                       th:value="${s.seatId}" th:data-seat-number="${s.seatNumber}"
-                                       th:disabled="${!s.available}" onchange="updateSeatSelection(this)"/>
-                                <label th:for="'seat_' + ${s.seatId}" class="seat-label"
-                                       th:classappend="${!s.available ? 'disabled' : ''}" th:text="${s.seatNumber}">1C</label>
-                            </div>
-                            <div></div>
-                            <div th:each="s : ${seats}" th:if="${s.row == 1 and s.column == 'D'}"
-                                 class="seat"
-                                 th:classappend="${s.seatClass == 'Business' ? 'business' : 'economy'} + ${!s.available ? ' occupied' : ''}">
-                                <input type="radio" th:id="'seat_' + ${s.seatId}" name="currentPassengerSeat"
-                                       th:value="${s.seatId}" th:data-seat-number="${s.seatNumber}"
-                                       th:disabled="${!s.available}" onchange="updateSeatSelection(this)"/>
-                                <label th:for="'seat_' + ${s.seatId}" class="seat-label"
-                                       th:classappend="${!s.available ? 'disabled' : ''}" th:text="${s.seatNumber}">1D</label>
-                            </div>
-                            <div th:each="s : ${seats}" th:if="${s.row == 1 and s.column == 'E'}"
-                                 class="seat"
-                                 th:classappend="${s.seatClass == 'Business' ? 'business' : 'economy'} + ${!s.available ? ' occupied' : ''}">
-                                <input type="radio" th:id="'seat_' + ${s.seatId}" name="currentPassengerSeat"
-                                       th:value="${s.seatId}" th:data-seat-number="${s.seatNumber}"
-                                       th:disabled="${!s.available}" onchange="updateSeatSelection(this)"/>
-                                <label th:for="'seat_' + ${s.seatId}" class="seat-label"
-                                       th:classappend="${!s.available ? 'disabled' : ''}" th:text="${s.seatNumber}">1E</label>
-                            </div>
-                            <div th:each="s : ${seats}" th:if="${s.row == 1 and s.column == 'F'}"
-                                 class="seat"
-                                 th:classappend="${s.seatClass == 'Business' ? 'business' : 'economy'} + ${!s.available ? ' occupied' : ''}">
-                                <input type="radio" th:id="'seat_' + ${s.seatId}" name="currentPassengerSeat"
-                                       th:value="${s.seatId}" th:data-seat-number="${s.seatNumber}"
-                                       th:disabled="${!s.available}" onchange="updateSeatSelection(this)"/>
-                                <label th:for="'seat_' + ${s.seatId}" class="seat-label"
-                                       th:classappend="${!s.available ? 'disabled' : ''}" th:text="${s.seatNumber}">1F</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Render remaining rows 2-5 manually -->
-                <div th:each="rowNum : ${#numbers.sequence(2, 5)}">
+                <!-- Render all rows (up to 40 to handle large airplanes) -->
+                <div th:each="rowNum : ${#numbers.sequence(1, 40)}">
                     <div class="seat-row">
-                        <div class="row-number" th:text="${rowNum}">2</div>
-                        <div th:each="s : ${seats}" th:if="${s.row == rowNum and s.column == 'A'}"
+                        <div class="row-number" th:text="${rowNum}">1</div>
+
+                        <!-- Seat A -->
+                        <div th:each="s : ${seats}"
+                             th:if="${s.seatNumber != null and s.seatNumber.matches('^[0-9]+[A-Z]$') and T(java.lang.Integer).parseInt(s.seatNumber.substring(0, s.seatNumber.length()-1)) == rowNum and s.seatNumber.substring(s.seatNumber.length()-1) == 'A'}"
                              class="seat"
                              th:classappend="${s.seatClass == 'Business' ? 'business' : 'economy'} + ${!s.available ? ' occupied' : ''}">
                             <input type="radio" th:id="'seat_' + ${s.seatId}" name="currentPassengerSeat"
                                    th:value="${s.seatId}" th:data-seat-number="${s.seatNumber}"
-                                   th:disabled="${!s.available}" onchange="updateSeatSelection(this)"/>
+                                   th:disabled="${!s.available}" th:attr="data-original-disabled=${!s.available ? 'true' : null}"
+                                   onchange="updateSeatSelection(this)"/>
                             <label th:for="'seat_' + ${s.seatId}" class="seat-label"
-                                   th:classappend="${!s.available ? 'disabled' : ''}" th:text="${s.seatNumber}">2A</label>
+                                   th:classappend="${!s.available ? 'disabled' : ''}" th:text="${s.seatNumber}">1A</label>
                         </div>
-                        <div th:each="s : ${seats}" th:if="${s.row == rowNum and s.column == 'B'}"
+
+                        <!-- Seat B -->
+                        <div th:each="s : ${seats}"
+                             th:if="${s.seatNumber != null and s.seatNumber.matches('^[0-9]+[A-Z]$') and T(java.lang.Integer).parseInt(s.seatNumber.substring(0, s.seatNumber.length()-1)) == rowNum and s.seatNumber.substring(s.seatNumber.length()-1) == 'B'}"
                              class="seat"
                              th:classappend="${s.seatClass == 'Business' ? 'business' : 'economy'} + ${!s.available ? ' occupied' : ''}">
                             <input type="radio" th:id="'seat_' + ${s.seatId}" name="currentPassengerSeat"
                                    th:value="${s.seatId}" th:data-seat-number="${s.seatNumber}"
-                                   th:disabled="${!s.available}" onchange="updateSeatSelection(this)"/>
+                                   th:disabled="${!s.available}" th:attr="data-original-disabled=${!s.available ? 'true' : null}"
+                                   onchange="updateSeatSelection(this)"/>
                             <label th:for="'seat_' + ${s.seatId}" class="seat-label"
-                                   th:classappend="${!s.available ? 'disabled' : ''}" th:text="${s.seatNumber}">2B</label>
+                                   th:classappend="${!s.available ? 'disabled' : ''}" th:text="${s.seatNumber}">1B</label>
                         </div>
-                        <div th:each="s : ${seats}" th:if="${s.row == rowNum and s.column == 'C'}"
+
+                        <!-- Seat C -->
+                        <div th:each="s : ${seats}"
+                             th:if="${s.seatNumber != null and s.seatNumber.matches('^[0-9]+[A-Z]$') and T(java.lang.Integer).parseInt(s.seatNumber.substring(0, s.seatNumber.length()-1)) == rowNum and s.seatNumber.substring(s.seatNumber.length()-1) == 'C'}"
                              class="seat"
                              th:classappend="${s.seatClass == 'Business' ? 'business' : 'economy'} + ${!s.available ? ' occupied' : ''}">
                             <input type="radio" th:id="'seat_' + ${s.seatId}" name="currentPassengerSeat"
                                    th:value="${s.seatId}" th:data-seat-number="${s.seatNumber}"
-                                   th:disabled="${!s.available}" onchange="updateSeatSelection(this)"/>
+                                   th:disabled="${!s.available}" th:attr="data-original-disabled=${!s.available ? 'true' : null}"
+                                   onchange="updateSeatSelection(this)"/>
                             <label th:for="'seat_' + ${s.seatId}" class="seat-label"
-                                   th:classappend="${!s.available ? 'disabled' : ''}" th:text="${s.seatNumber}">2C</label>
+                                   th:classappend="${!s.available ? 'disabled' : ''}" th:text="${s.seatNumber}">1C</label>
                         </div>
+
+                        <!-- Aisle -->
                         <div></div>
-                        <div th:each="s : ${seats}" th:if="${s.row == rowNum and s.column == 'D'}"
+
+                        <!-- Seat D -->
+                        <div th:each="s : ${seats}"
+                             th:if="${s.seatNumber != null and s.seatNumber.matches('^[0-9]+[A-Z]$') and T(java.lang.Integer).parseInt(s.seatNumber.substring(0, s.seatNumber.length()-1)) == rowNum and s.seatNumber.substring(s.seatNumber.length()-1) == 'D'}"
                              class="seat"
                              th:classappend="${s.seatClass == 'Business' ? 'business' : 'economy'} + ${!s.available ? ' occupied' : ''}">
                             <input type="radio" th:id="'seat_' + ${s.seatId}" name="currentPassengerSeat"
                                    th:value="${s.seatId}" th:data-seat-number="${s.seatNumber}"
-                                   th:disabled="${!s.available}" onchange="updateSeatSelection(this)"/>
+                                   th:disabled="${!s.available}" th:attr="data-original-disabled=${!s.available ? 'true' : null}"
+                                   onchange="updateSeatSelection(this)"/>
                             <label th:for="'seat_' + ${s.seatId}" class="seat-label"
-                                   th:classappend="${!s.available ? 'disabled' : ''}" th:text="${s.seatNumber}">2D</label>
+                                   th:classappend="${!s.available ? 'disabled' : ''}" th:text="${s.seatNumber}">1D</label>
                         </div>
-                        <div th:each="s : ${seats}" th:if="${s.row == rowNum and s.column == 'E'}"
+
+                        <!-- Seat E -->
+                        <div th:each="s : ${seats}"
+                             th:if="${s.seatNumber != null and s.seatNumber.matches('^[0-9]+[A-Z]$') and T(java.lang.Integer).parseInt(s.seatNumber.substring(0, s.seatNumber.length()-1)) == rowNum and s.seatNumber.substring(s.seatNumber.length()-1) == 'E'}"
                              class="seat"
                              th:classappend="${s.seatClass == 'Business' ? 'business' : 'economy'} + ${!s.available ? ' occupied' : ''}">
                             <input type="radio" th:id="'seat_' + ${s.seatId}" name="currentPassengerSeat"
                                    th:value="${s.seatId}" th:data-seat-number="${s.seatNumber}"
-                                   th:disabled="${!s.available}" onchange="updateSeatSelection(this)"/>
+                                   th:disabled="${!s.available}" th:attr="data-original-disabled=${!s.available ? 'true' : null}"
+                                   onchange="updateSeatSelection(this)"/>
                             <label th:for="'seat_' + ${s.seatId}" class="seat-label"
-                                   th:classappend="${!s.available ? 'disabled' : ''}" th:text="${s.seatNumber}">2E</label>
+                                   th:classappend="${!s.available ? 'disabled' : ''}" th:text="${s.seatNumber}">1E</label>
                         </div>
-                        <div th:each="s : ${seats}" th:if="${s.row == rowNum and s.column == 'F'}"
+
+                        <!-- Seat F -->
+                        <div th:each="s : ${seats}"
+                             th:if="${s.seatNumber != null and s.seatNumber.matches('^[0-9]+[A-Z]$') and T(java.lang.Integer).parseInt(s.seatNumber.substring(0, s.seatNumber.length()-1)) == rowNum and s.seatNumber.substring(s.seatNumber.length()-1) == 'F'}"
                              class="seat"
                              th:classappend="${s.seatClass == 'Business' ? 'business' : 'economy'} + ${!s.available ? ' occupied' : ''}">
                             <input type="radio" th:id="'seat_' + ${s.seatId}" name="currentPassengerSeat"
                                    th:value="${s.seatId}" th:data-seat-number="${s.seatNumber}"
-                                   th:disabled="${!s.available}" onchange="updateSeatSelection(this)"/>
+                                   th:disabled="${!s.available}" th:attr="data-original-disabled=${!s.available ? 'true' : null}"
+                                   onchange="updateSeatSelection(this)"/>
                             <label th:for="'seat_' + ${s.seatId}" class="seat-label"
-                                   th:classappend="${!s.available ? 'disabled' : ''}" th:text="${s.seatNumber}">2F</label>
+                                   th:classappend="${!s.available ? 'disabled' : ''}" th:text="${s.seatNumber}">1F</label>
                         </div>
                     </div>
                 </div>
@@ -468,6 +445,81 @@
         let currentPassengerIndex = 0;
         let passengerSeats = new Array(passengerCount).fill(null);
         let selectedSeatIds = new Set();
+
+        // ✅ Get flight base price and business surcharge
+        const basePrice = /*[[${flight != null ? flight.basePrice : 0}]]*/ 0;
+        const businessSurcharge = 1800000; // 1.8 million VND
+
+        console.log('📊 Dữ liệu khởi tạo:');
+        console.log('- Số hành khách:', passengerCount);
+        console.log('- Giá vé gốc:', basePrice);
+        console.log('- Phụ thu Business:', businessSurcharge);
+
+        // ✅ Create a map of seat IDs to seat classes for quick lookup
+        const seatClassMap = new Map();
+        /*[# th:each="s : ${seats}"]*/
+        seatClassMap.set(/*[[${s.seatId}]]*/ '', /*[[${s.seatClass}]]*/ '');
+        /*[/]*/
+
+        console.log('- Tổng số loại ghế:', seatClassMap.size);
+        console.log('- Nội dung seatClassMap:', Array.from(seatClassMap.entries()).slice(0, 5)); // Log 5 ghế đầu tiên
+
+        // ✅ Function to calculate total price
+        function calculateTotalPrice() {
+            let seatSurcharge = 0;
+            let businessCount = 0;
+            let economyCount = 0;
+
+            for (let i = 0; i < passengerCount; i++) {
+                if (passengerSeats[i] !== null) {
+                    const seatId = passengerSeats[i].seatId;
+                    const seatClass = seatClassMap.get(seatId);
+
+                    console.log('Ghế hành khách', i, ':', seatId, '- Loại:', seatClass);
+
+                    if (seatClass === 'Business') {
+                        seatSurcharge += businessSurcharge;
+                        businessCount++;
+                    } else {
+                        economyCount++;
+                    }
+                }
+            }
+
+            // ✅ TỔNG = (Giá vé gốc × Số hành khách) + Phụ thu ghế Thương Gia
+            const baseTicketTotal = basePrice * passengerCount;
+            const total = baseTicketTotal + seatSurcharge;
+
+            console.log('💰 Tính giá:');
+            console.log('- Vé gốc:', baseTicketTotal, '(', passengerCount, '×', basePrice, ')');
+            console.log('- Phụ thu Business:', seatSurcharge, '(', businessCount, 'ghế )');
+            console.log('- TỔNG:', total);
+
+            return { total, baseTicketTotal, seatSurcharge, businessCount, economyCount };
+        }
+
+        // ✅ Function to update price display
+        function updatePriceDisplay() {
+            const priceInfo = calculateTotalPrice();
+            const totalPriceElement = document.getElementById('totalPrice');
+            const priceBreakdownElement = document.getElementById('priceBreakdown');
+
+            if (totalPriceElement) {
+                totalPriceElement.textContent = priceInfo.total.toLocaleString('vi-VN') + ' ₫';
+            }
+
+            if (priceBreakdownElement) {
+                let breakdown = 'Vé máy bay: ' + passengerCount + ' × ' + basePrice.toLocaleString('vi-VN') + ' ₫ = ' + priceInfo.baseTicketTotal.toLocaleString('vi-VN') + ' ₫';
+
+                if (priceInfo.businessCount > 0) {
+                    breakdown += ' + Phụ thu Thương Gia: ' + priceInfo.businessCount + ' × 1,800,000 ₫ = +' + priceInfo.seatSurcharge.toLocaleString('vi-VN') + ' ₫';
+                }
+
+                priceBreakdownElement.innerHTML = '<small style="color: #666;">(' + breakdown + ')</small>';
+            }
+
+            console.log('✅ Đã cập nhật giá lên giao diện');
+        }
 
         // ✅ Load previously selected seats from session (if any)
         /*[# th:if="${bookingSession != null and bookingSession.passengers != null}"]*/
@@ -613,6 +665,7 @@
             }
 
             checkAllSeatsSelected();
+            updatePriceDisplay(); // ✅ Update price when switching passengers
         }
 
         function updateSeatSelection(radio) {
@@ -638,6 +691,7 @@
                 document.getElementById('passengerTab' + currentPassengerIndex).classList.remove('completed');
 
                 checkAllSeatsSelected();
+                updatePriceDisplay(); // ✅ Update price after deselection
                 return;
             }
 
@@ -670,8 +724,6 @@
             document.getElementById('seatInfo' + currentPassengerIndex).textContent = 'Ghế: ' + seatNumber;
             document.getElementById('passengerTab' + currentPassengerIndex).classList.add('completed');
 
-            // Note: We'll create hidden inputs dynamically on submit instead of updating them here
-
             // Disable this seat for other passengers
             document.querySelectorAll(`input[value="${seatId}"]`).forEach(r => {
                 if (r !== radio) {
@@ -683,6 +735,7 @@
 
             // Check and enable submit button
             checkAllSeatsSelected();
+            updatePriceDisplay(); // ✅ Update price after selection
 
             // Auto-switch to next passenger if exists and not yet selected
             if (currentPassengerIndex < passengerCount - 1 && passengerSeats[currentPassengerIndex + 1] === null) {
@@ -830,6 +883,7 @@
             }
 
             selectPassenger(0);
+            updatePriceDisplay(); // ✅ Initial price display
         });
         /*]]>*/
     </script>

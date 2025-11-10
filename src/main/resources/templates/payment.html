@@ -1,33 +1,188 @@
-<!-- html -->
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Checkout</title>
+  <title>Thanh toán - Bamboo Airways</title>
 
   <style>
-    body { font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: #f5f7f6; color: #1f2933; margin: 0; padding: 32px 16px; }
-    .page { max-width: 1100px; margin: 0 auto; background: #fff; border-radius: 10px; padding: 32px; box-shadow: 0 8px 30px rgba(20,30,40,0.08); }
-    h1 { font-size: 28px; margin: 0 0 18px 0; color: #0f1720; }
-
-    .info { background: #e9f7f2; border-left: 4px solid #16a34a; padding: 14px 18px; border-radius: 6px; margin-bottom: 20px; color: #094d2b; }
-    .info .muted { color: #254f41; font-weight: 600; }
-    .amount { font-weight: 700; color: #064e3b; }
-
-    .methods { display: grid; gap: 12px; }
-    .method {
-      display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px; border-radius:8px;
-      background:#fff; border:1px solid #e6e9ea; box-shadow:0 2px 6px rgba(16,24,32,0.03);
-      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease; cursor:pointer; position:relative;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%);
+      color: #1f2933;
+      padding: 20px;
+      min-height: 100vh;
     }
-    .method:hover { transform:translateY(-3px); border-color:#cfeee1; box-shadow:0 10px 22px rgba(14,34,25,0.06); }
-    .method__left { display:flex; gap:12px; align-items:center; }
-    .method__icon { width:56px; height:40px; border-radius:6px; background:linear-gradient(135deg,#f3faf6,#e9fff0); display:flex; align-items:center; justify-content:center; font-weight:700; color:#04603a; box-shadow: inset 0 -8px 18px rgba(4,96,58,0.04); }
-    .method__title { font-weight:700; color:#0b1720; margin-bottom:4px; }
-    .method__desc { font-size:13px; color:#6b7280; }
 
-    /* keep radio accessible but visually hidden */
+    .header {
+      max-width: 1200px;
+      margin: 0 auto 30px;
+      background: #fff;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #00693E;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 24px;
+    }
+
+    .main-content {
+      background: #fff;
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .sidebar {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      height: fit-content;
+      position: sticky;
+      top: 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin: 0 0 24px 0;
+      color: #00693E;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin: 0 0 16px 0;
+      color: #00693E;
+      border-bottom: 2px solid #00693E;
+      padding-bottom: 8px;
+    }
+
+    .booking-info {
+      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+      border-left: 4px solid #00693E;
+      padding: 20px 24px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(0,105,62,0.1);
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: #2d5f3f;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .info-value {
+      color: #00693E;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .amount-large {
+      font-size: 24px;
+      color: #00693E;
+    }
+
+    .section {
+      margin-bottom: 24px;
+    }
+
+    .methods {
+      display: grid;
+      gap: 14px;
+    }
+
+    .method {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px;
+      border-radius: 10px;
+      background: #fff;
+      border: 2px solid #e6e9ea;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .method:hover {
+      transform: translateY(-2px);
+      border-color: #00693E;
+      box-shadow: 0 6px 20px rgba(0,105,62,0.15);
+    }
+
+    .method__left {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex: 1;
+    }
+
+    .method__icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #00693E;
+      font-size: 18px;
+      box-shadow: 0 4px 12px rgba(0,105,62,0.1);
+    }
+
+    .method__info {
+      flex: 1;
+    }
+
+    .method__title {
+      font-weight: 700;
+      color: #1f2933;
+      margin-bottom: 6px;
+      font-size: 16px;
+    }
+
+    .method__desc {
+      font-size: 14px;
+      color: #6b7280;
+      line-height: 1.4;
+    }
+
     .method input[type="radio"] {
       position: absolute;
       opacity: 0;
@@ -36,66 +191,297 @@
       pointer-events: none;
     }
 
-    .radio-circle { width:22px; height:22px; border-radius:50%; border:2px solid #c8d6ce; display:flex; align-items:center; justify-content:center; transition: border-color .12s ease, background .12s ease; }
-    .radio-circle::after { content:""; width:10px; height:10px; border-radius:50%; background:transparent; transition: background .12s ease; }
+    .radio-circle {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #c8d6ce;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
 
-    /* use general sibling selector (~) because .method__content is not immediately adjacent */
-    .method input[type="radio"]:checked ~ .method__content .radio-circle { border-color:#0b8552; background:#e6fff3; }
-    .method input[type="radio"]:checked ~ .method__content .radio-circle::after { background:#0b8552; }
-    .method.selected { border-color:#cfeee1; }
+    .radio-circle::after {
+      content: "";
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: transparent;
+      transition: background 0.3s ease;
+    }
 
-    .actions { display:flex; justify-content:flex-end; gap:12px; margin-top:20px; align-items:center; }
-    .btn { padding:10px 18px; border-radius:8px; border:none; cursor:pointer; font-weight:600; }
-    .btn-ghost { background:transparent; color:#065f46; border:1px solid transparent; }
-    .btn-primary { background:#0f8a57; color:#fff; box-shadow:0 6px 18px rgba(15,138,87,0.18); }
+    .method input[type="radio"]:checked ~ .method__content .radio-circle {
+      border-color: #00693E;
+      background: #e8f5e9;
+    }
 
-    @media (max-width:640px) { .page{padding:20px;} .method__icon{width:48px;height:36px;font-size:14px;} .actions{flex-direction:column-reverse;align-items:stretch;} .btn{width:100%;} }
+    .method input[type="radio"]:checked ~ .method__content .radio-circle::after {
+      background: #00693E;
+    }
+
+    .method.selected {
+      border-color: #00693E;
+      background: #f9fdf9;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #e6e9ea;
+    }
+
+    .summary-item:last-child {
+      border-bottom: none;
+      padding-top: 16px;
+      margin-top: 8px;
+      border-top: 2px solid #00693E;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .summary-label {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .summary-value {
+      color: #1f2933;
+      font-weight: 600;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 32px;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: #00693E;
+      border: 2px solid #00693E;
+    }
+
+    .btn-secondary:hover {
+      background: #f9fdf9;
+    }
+
+    .btn-primary {
+      background: #00693E;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0,105,62,0.3);
+      flex: 1;
+    }
+
+    .btn-primary:hover {
+      background: #005030;
+      box-shadow: 0 6px 16px rgba(0,105,62,0.4);
+    }
+
+    .security-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      background: #f9fdf9;
+      border-radius: 6px;
+      margin-top: 16px;
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    .badge-icon {
+      color: #00693E;
+      font-size: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .page {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        position: static;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .header {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+      }
+      .main-content {
+        padding: 20px;
+      }
+      .method__icon {
+        width: 50px;
+        height: 50px;
+        font-size: 16px;
+      }
+      .actions {
+        flex-direction: column;
+      }
+      .btn {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="page">
-    <h1>Checkout</h1>
-
-    <div class="info">
-      <div>Booking ID: <span class="muted" th:text="${booking.bookingId}">bk-0001</span></div>
-      <div>Total amount: <span class="amount" th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'COMMA')} + ' VND'">8,008,000 VND</span></div>
+  <div class="header">
+    <div class="logo">
+      🛫 BAMBOO AIRWAYS
     </div>
+    <div style="color: #6b7280; font-size: 14px;">
+      Thanh toán an toàn & bảo mật
+    </div>
+  </div>
 
-    <form th:action="@{/booking/payment/confirm}" method="post">
-      <input type="hidden" name="bookingId" th:value="${booking.bookingId}" />
+  <div class="page">
+    <div class="main-content">
+      <h1>💳 Chọn phương thức thanh toán</h1>
 
-      <div class="methods">
-        <div th:each="pm,iterStat : ${paymentMethods}">
-          <label class="method" th:classappend="${iterStat.index == 0} ? ' selected'">
-            <input type="radio" name="paymentMethodId" th:value="${pm.paymentMethodId}" th:checked="${iterStat.index == 0}" />
-
-            <div class="method__left">
-              <div class="method__icon" th:text="${pm.paymentMethodName.substring(0,3).toUpperCase()}">PM</div>
-              <div>
-                <div class="method__title" th:text="${pm.paymentMethodName}">Payment Name</div>
-                <div class="method__desc" th:text="${pm.description}">Description</div>
-              </div>
-            </div>
-
-            <div class="method__content">
-              <div class="radio-circle" aria-hidden="true"></div>
-            </div>
-          </label>
+      <div class="booking-info">
+        <div class="info-row">
+          <span class="info-label">📋 Mã đặt chỗ</span>
+          <span class="info-value" th:text="${booking.bookingId}">BK-0001</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">👤 Hành khách</span>
+          <span class="info-value" th:text="${booking.tickets != null ? booking.tickets.size() : 0}">1</span>
+        </div>
+        <div class="info-row" th:if="${booking.tickets != null and !booking.tickets.isEmpty()}">
+          <span class="info-label">✈️ Chuyến bay</span>
+          <span class="info-value" th:text="${booking.tickets[0].flight != null ? booking.tickets[0].flight.flightId : '-'}">FL-001</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">💰 Tổng thanh toán</span>
+          <span class="amount-large" th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">8,008,000 ₫</span>
         </div>
       </div>
 
-      <div class="actions">
-        <a class="btn btn-ghost" th:href="@{/}" role="button">Back</a>
-        <button type="submit" class="btn btn-primary">Proceed to Pay</button>
+      <form th:action="@{/booking/payment/confirm}" method="post">
+        <input type="hidden" name="bookingId" th:value="${booking.bookingId}" />
+
+        <div class="section">
+          <h2>Phương thức thanh toán</h2>
+          <div class="methods">
+            <div th:each="pm, iterStat : ${paymentMethods}">
+              <label class="method" th:classappend="${iterStat.index == 0} ? ' selected'">
+                <input type="radio" name="paymentMethodId" th:value="${pm.paymentMethodId}" th:checked="${iterStat.index == 0}" />
+
+                <div class="method__left">
+                  <div class="method__icon" th:text="${pm.paymentMethodName.substring(0,3).toUpperCase()}">PM</div>
+                  <div class="method__info">
+                    <div class="method__title" th:text="${pm.paymentMethodName}">Payment Name</div>
+                    <div class="method__desc" th:text="${pm.description}">Description</div>
+                  </div>
+                </div>
+
+                <div class="method__content">
+                  <div class="radio-circle" aria-hidden="true"></div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="security-badge">
+          <span class="badge-icon">🔒</span>
+          <span>Thông tin thanh toán của bạn được mã hóa và bảo mật tuyệt đối</span>
+        </div>
+
+        <div class="actions">
+          <a class="btn btn-secondary" th:href="@{/}" role="button">← Quay lại</a>
+          <button type="submit" class="btn btn-primary">Tiến hành thanh toán →</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="sidebar">
+      <h2>📊 Chi tiết thanh toán</h2>
+
+      <!-- Giá vé cơ bản -->
+      <div class="summary-item" th:if="${booking.tickets != null and !booking.tickets.isEmpty() and booking.tickets[0].flight != null}">
+        <span class="summary-label">Giá vé cơ bản</span>
+        <span class="summary-value" th:text="${#numbers.formatDecimal(booking.tickets[0].flight.basePrice * booking.tickets.size(), 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
       </div>
-    </form>
+
+      <!-- Phụ thu ghế Thương Gia -->
+      <th:block th:if="${booking.tickets != null}">
+        <th:block th:with="businessCount=${#lists.size(booking.tickets.?[seat != null and seat.seatClass == 'Business'])}">
+          <div class="summary-item" th:if="${businessCount > 0}">
+            <span class="summary-label">
+              Phụ thu ghế Thương Gia
+              <span style="font-size: 12px; color: #00693E;">([[${businessCount}]] ghế)</span>
+            </span>
+            <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(businessCount * 1800000, 0, 'COMMA', 0, 'POINT')} + ' ₫'">+1,800,000 ₫</span>
+          </div>
+        </th:block>
+      </th:block>
+
+      <!-- Dịch vụ hành lý -->
+      <th:block th:if="${booking.tickets != null}">
+        <th:block th:with="luggageTotal=${#aggregates.sum(booking.tickets.![luggage != null ? luggage.price : 0])}">
+          <div class="summary-item" th:if="${luggageTotal > 0}">
+            <span class="summary-label">Hành lý ký gửi</span>
+            <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(luggageTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+          </div>
+        </th:block>
+      </th:block>
+
+      <!-- Dịch vụ suất ăn -->
+      <th:block th:if="${booking.tickets != null}">
+        <th:block th:with="mealTotal=${#aggregates.sum(booking.tickets.![meal != null ? meal.price : 0])}">
+          <div class="summary-item" th:if="${mealTotal > 0}">
+            <span class="summary-label">Suất ăn</span>
+            <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(mealTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+          </div>
+        </th:block>
+      </th:block>
+
+      <!-- Thuế & phí -->
+      <div class="summary-item">
+        <span class="summary-label">Thuế & phí</span>
+        <span class="summary-value">0 ₫</span>
+      </div>
+
+      <!-- Tổng cộng -->
+      <div class="summary-item">
+        <span>Tổng cộng</span>
+        <span th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">8,008,000 ₫</span>
+      </div>
+
+      <div style="margin-top: 24px; padding: 16px; background: #f9fdf9; border-radius: 8px; border: 1px solid #c8e6c9;">
+        <div style="font-size: 13px; color: #6b7280; line-height: 1.6;">
+          <strong style="color: #00693E;">Lưu ý:</strong><br>
+          • Vé đã mua không được hoàn lại<br>
+          • Có thể đổi vé theo quy định<br>
+          • Vui lòng kiểm tra kỹ thông tin trước khi thanh toán
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
-    // keep this to visually mark the selected card (and support older browsers)
     document.querySelectorAll('.method').forEach(label => {
       label.addEventListener('click', (e) => {
-        // set checked on the radio (label click normally toggles it, but ensure for custom handling)
         const radio = label.querySelector('input[type=radio]');
         if (radio) radio.checked = true;
 

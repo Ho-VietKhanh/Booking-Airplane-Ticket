@@ -68,12 +68,20 @@ public class PaymentController {
 
         BookingEntity booking = bookingOpt.get();
 
+        // Check if payment already exists for this booking
+        if (booking.getPayment() != null) {
+            // Payment already exists, redirect to payment page
+            redirectAttributes.addAttribute("paymentId", booking.getPayment().getPaymentId());
+            return "redirect:/booking/payment/redirect";
+        }
+
         Optional<PaymentMethodEntity> pmOpt = this.paymentMethodService.getPaymentMethodById(paymentMethodId);
         if (pmOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "Payment method not found");
             return "redirect:/booking/payment?bookingId=" + bookingId;
         }
 
+        // Create new payment
         PaymentEntity payment = new PaymentEntity();
         payment.setPaymentId("PAY-" + RandomId.generateRandomId(2, 4)); // PAY-AB1234
         payment.setCreatedAt(LocalDateTime.now());
@@ -81,12 +89,13 @@ public class PaymentController {
         payment.setAmount(booking.getTotalAmount() != null ? booking.getTotalAmount() : BigDecimal.ZERO);
         payment.setPaymentMethod(pmOpt.get());
 
-        PaymentEntity saved = this.paymentService.createPayment(payment);
+        PaymentEntity savedPayment = this.paymentService.createPayment(payment);
 
-        booking.setPayment(saved);
+        // Update booking with payment reference
+        booking.setPayment(savedPayment);
         this.bookingService.create(booking);
 
-        redirectAttributes.addAttribute("paymentId", saved.getPaymentId());
+        redirectAttributes.addAttribute("paymentId", savedPayment.getPaymentId());
         return "redirect:/booking/payment/redirect";
     }
 
@@ -99,7 +108,9 @@ public class PaymentController {
 
     @GetMapping("/booking/payment/complete")
     public String completePayment(
-            @RequestParam("paymentId") String paymentId, Model model) {
+            @RequestParam("paymentId") String paymentId,
+            jakarta.servlet.http.HttpSession session,
+            Model model) {
         Optional<PaymentEntity> pOpt = this.paymentService.getPaymentById(paymentId);
         if (pOpt.isEmpty()) {
             model.addAttribute("error", "Payment not found");
@@ -107,6 +118,10 @@ public class PaymentController {
         }
 
         PaymentEntity paid = paymentService.markAsPaid(paymentId);
+
+        // 🗑️ Clear booking session after successful payment
+        session.removeAttribute("bookingSession");
+        System.out.println("🗑️ Cleared booking session - Payment completed successfully");
 
         model.addAttribute("payment", paid);
         model.addAttribute("booking", paid != null ? paid.getBookings().isEmpty() ? null : paid.getBookings().get(0) : null);

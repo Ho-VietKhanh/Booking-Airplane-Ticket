@@ -7,6 +7,7 @@ import se196411.booking_ticket.model.entity.TicketEntity;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TicketRepository extends JpaRepository<TicketEntity,String> {
@@ -18,10 +19,9 @@ public interface TicketRepository extends JpaRepository<TicketEntity,String> {
            "LEFT JOIN FETCH f.flightRoute fr " +
            "LEFT JOIN FETCH fr.startedAirport " +
            "LEFT JOIN FETCH fr.endedAirport " +
-           "LEFT JOIN FETCH t.booking b " +
+           "LEFT JOIN FETCH t.booking " +
            "LEFT JOIN FETCH t.meal " +
-           "LEFT JOIN FETCH t.luggage " +
-           "ORDER BY b.bookingTime DESC")
+           "LEFT JOIN FETCH t.luggage")
     List<TicketEntity> findAllWithDetails();
 
     // Query để lấy danh sách seat ID đã được đặt cho một chuyến bay cụ thể
@@ -49,4 +49,8 @@ public interface TicketRepository extends JpaRepository<TicketEntity,String> {
            "OR LOWER(CONCAT(t.firstName, ' ', t.lastName)) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
            "ORDER BY b.bookingTime DESC")
     List<TicketEntity> searchTickets(@Param("keyword") String keyword);
+
+    Optional<Object> findByTicketId(String keyword);
+
+    List<TicketEntity> findBySeatSeatId(String seatId);
 }

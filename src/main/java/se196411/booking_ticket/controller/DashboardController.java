@@ -39,6 +39,15 @@ public class DashboardController {
         return "redirect:/dashboard";
     }
 
+    // Clear session and return to dashboard (from booking flow)
+    @GetMapping("/dashboard/clear-and-return")
+    public String clearSessionAndReturnToDashboard(jakarta.servlet.http.HttpSession session) {
+        // Clear booking session when user clicks "Back" button from passenger-info
+        session.removeAttribute("bookingSession");
+        logger.info("🗑️ Cleared booking session - User returned to dashboard from booking");
+        return "redirect:/dashboard";
+    }
+
     @GetMapping("/dashboard")
     public String showDashboard(Model model) {
         // Get all airports for the dropdown
@@ -65,7 +74,12 @@ public class DashboardController {
             @RequestParam("arrivalAirport") String arrivalAirportId,
             @RequestParam("departureDate") String departureDateStr,
             @RequestParam(value = "returnDate", required = false) String returnDateStr,
-            @RequestParam("tripType") String tripType) {
+            @RequestParam("tripType") String tripType,
+            jakarta.servlet.http.HttpSession session) {
+
+        // 🗑️ Clear old booking session when user starts new flight search
+        session.removeAttribute("bookingSession");
+        logger.info("🗑️ Cleared booking session - User starting new flight search");
 
         logger.info("========== AJAX FLIGHT SEARCH ==========");
         logger.info("Departure Airport ID: {}", departureAirportId);

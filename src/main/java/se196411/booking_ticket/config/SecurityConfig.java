@@ -48,11 +48,13 @@ public class SecurityConfig {
 
                 // Bắt đầu cấu hình phân quyền truy cập
                 .authorizeHttpRequests(auth -> auth
-                        // Cho phép TẤT CẢ MỌI NGƯỜI truy cập các URL này
-                        .requestMatchers("/register/**", "/login", "/", "/css/**", "/js/**", "/images/**").permitAll()
+                        // Cho phép TẤT CẢ MỌI NGƯỜI truy cập các URL này (không cần đăng nhập)
+                        .requestMatchers("/register/**", "/login", "/logout", "/css/**", "/js/**", "/images/**", "/static/**").permitAll()
+                        // Cho phép truy cập trang dashboard và booking mà không cần đăng nhập
+                        .requestMatchers("/", "/dashboard", "/dashboard/**", "/booking/**", "/api/**").permitAll()
+                        // Chỉ ADMIN mới được truy cập /admin
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        // Bất kỳ request nào khác (ngoài những cái ở trên)
-                        // đều YÊU CẦU PHẢI ĐĂNG NHẬP
+                        // Bất kỳ request nào khác đều YÊU CẦU PHẢI ĐĂNG NHẬP
                         .anyRequest().authenticated()
                 )
 

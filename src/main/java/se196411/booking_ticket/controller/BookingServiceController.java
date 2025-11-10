@@ -1,6 +1,8 @@
 package se196411.booking_ticket.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -8,13 +10,14 @@ import se196411.booking_ticket.model.dto.BookingSessionDTO;
 import se196411.booking_ticket.model.dto.PassengerInfoDTO;
 import se196411.booking_ticket.model.entity.*;
 import se196411.booking_ticket.service.*;
+import se196411.booking_ticket.utils.RandomId;
 
 import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Set;
 
 @Controller
 @RequestMapping("/booking")
@@ -58,6 +61,13 @@ public class BookingServiceController {
 
     @Autowired
     private FlightsService flightsService;
+
+    // API endpoint để lấy danh sách seat ID đã được đặt cho một chuyến bay
+    @GetMapping("/api/flights/{flightId}/reserved-seats")
+    @ResponseBody
+    public Set<String> getReservedSeats(@PathVariable String flightId) {
+        return seatService.getReservedSeatIdsByFlightId(flightId);
+    }
 
     // Screen 0: Passenger Information Form
     @GetMapping("/passenger-info")
@@ -431,7 +441,7 @@ public class BookingServiceController {
 
             // Create a pending payment first (required for booking)
             PaymentEntity payment = new PaymentEntity();
-            payment.setPaymentId(UUID.randomUUID().toString());
+            payment.setPaymentId("PAY-" + RandomId.generateRandomId(2, 4)); // PAY-AB1234
             payment.setCreatedAt(LocalDateTime.now());
             payment.setStatus("PENDING");
             payment.setAmount(BigDecimal.ZERO); // Will be updated later
@@ -450,14 +460,36 @@ public class BookingServiceController {
             PaymentEntity savedPayment = paymentService.createPayment(payment);
             System.out.println("Payment created: " + savedPayment.getPaymentId());
 
-            // Create booking without user (guest booking)
+            // ✅ Get logged-in user (if any)
+            UserEntity currentUser = null;
+            try {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+                    String userEmail = auth.getName();
+                    currentUser = userService.findByEmail(userEmail);
+                    if (currentUser != null) {
+                        System.out.println("✅ Found logged-in user: " + currentUser.getFullName() + " (ID: " + currentUser.getUserId() + ")");
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("⚠️ Could not get logged-in user: " + e.getMessage());
+                currentUser = null;
+            }
+
+            // Create booking
             BookingEntity booking = new BookingEntity();
-            booking.setBookingId(UUID.randomUUID().toString());
+            booking.setBookingId("BK-" + RandomId.generateRandomId(3, 3)); // BK-ABC123
             booking.setBookingTime(LocalDateTime.now());
             booking.setStatus("PENDING_PAYMENT");
-            booking.setUser(null); // Guest booking, no user required
+            booking.setUser(currentUser); // ✅ Set user if logged in, null if guest
             booking.setPayment(savedPayment); // Link to payment
             booking.setTotalAmount(BigDecimal.ZERO); // Will be updated later
+
+            if (currentUser != null) {
+                System.out.println("✅ Booking will be linked to user: " + currentUser.getUserId());
+            } else {
+                System.out.println("⚠️ Guest booking (no user linked)");
+            }
 
             // ✅ SAVE BOOKING FIRST before creating tickets
             BookingEntity savedBooking = bookingService.create(booking);
@@ -468,7 +500,7 @@ public class BookingServiceController {
 
             for (PassengerInfoDTO passengerDTO : bookingSession.getPassengers()) {
                 TicketEntity ticket = new TicketEntity();
-                ticket.setTicketId(UUID.randomUUID().toString());
+                ticket.setTicketId("TK-" + RandomId.generateRandomId(2, 4)); // TK-AB1234
                 ticket.setFlight(flight);
                 ticket.setBooking(savedBooking); // ✅ Use savedBooking (already persisted)
 

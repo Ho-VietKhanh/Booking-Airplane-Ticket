@@ -89,11 +89,4 @@ public class AuthController {
         // Hoặc bạn có thể chuyển hướng về trang login:
         // return "redirect:/login?register_success";
     }
-    /**
-     * Trang chủ
-     */
-    @GetMapping("/")
-    public String showHomePage() {
-        return "index"; // Trả về file index.html
-    }
 }

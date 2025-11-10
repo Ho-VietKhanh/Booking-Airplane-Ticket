@@ -10,11 +10,11 @@ import se196411.booking_ticket.repository.BookingRepository;
 import se196411.booking_ticket.repository.PaymentRepository;
 import se196411.booking_ticket.repository.SeatRepository;
 import se196411.booking_ticket.repository.TicketRepository;
+import se196411.booking_ticket.utils.RandomId;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -38,7 +38,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public PaymentEntity createPayment(PaymentEntity payment) {
         if (payment.getPaymentId() == null || payment.getPaymentId().isBlank()) {
-            payment.setPaymentId(UUID.randomUUID().toString());
+            payment.setPaymentId("PAY-" + RandomId.generateRandomId(2, 4)); // PAY-AB1234
         }
         payment.setCreatedAt(LocalDateTime.now());
         return paymentRepository.save(payment);

@@ -1,6 +1,8 @@
 package se196411.booking_ticket.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -31,11 +33,27 @@ public class DashboardController {
     @Autowired
     private FlightsRepository flightsRepository;
 
+    // Redirect từ "/" sang "/dashboard"
+    @GetMapping("/")
+    public String redirectToDashboard() {
+        return "redirect:/dashboard";
+    }
+
     @GetMapping("/dashboard")
     public String showDashboard(Model model) {
         // Get all airports for the dropdown
         List<AirportsEntity> airports = airportsRepository.findAll();
         model.addAttribute("airports", airports);
+
+        // Kiểm tra trạng thái đăng nhập
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAuthenticated = auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal());
+        model.addAttribute("isAuthenticated", isAuthenticated);
+
+        if (isAuthenticated) {
+            model.addAttribute("username", auth.getName());
+        }
+
         return "dashboard";
     }
 

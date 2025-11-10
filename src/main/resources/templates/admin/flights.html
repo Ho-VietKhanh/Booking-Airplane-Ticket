@@ -70,9 +70,18 @@
                                 </span>
                             </td>
                             <td>
-                                <a th:href="@{'/admin/flights/view/' + ${f.flightId}}" class="btn btn-sm btn-info">View</a>
-                                <a th:href="@{'/admin/flights/create?edit=' + ${f.flightId}}" class="btn btn-sm btn-warning">Edit</a>
-                                <a th:href="@{'/admin/flights/delete/' + ${f.flightId}}" class="btn btn-sm btn-danger" onclick="return confirm('Delete flight?')">Delete</a>
+                                <a th:href="@{'/admin/flights/view/' + ${f.flightId}}" class="btn btn-sm btn-info">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                <a th:href="@{'/admin/seats/flight/' + ${f.flightId}}" class="btn btn-sm btn-success" title="Xem sơ đồ ghế cho chuyến bay này">
+                                    <i class="bi bi-airplane-engines"></i> Seats
+                                </a>
+                                <a th:href="@{'/admin/flights/create?edit=' + ${f.flightId}}" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <a th:href="@{'/admin/flights/delete/' + ${f.flightId}}" class="btn btn-sm btn-danger" onclick="return confirm('Delete flight?')">
+                                    <i class="bi bi-trash"></i> Delete
+                                </a>
                             </td>
                         </tr>
                         </tbody>

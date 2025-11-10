@@ -24,15 +24,18 @@ public class PaymentServiceImpl implements PaymentService {
     private final BookingRepository bookingRepository;
     private final TicketRepository ticketRepository;
     private final SeatRepository seatRepository;
+    private final EmailService emailService;
 
     public PaymentServiceImpl(PaymentRepository paymentRepository,
                              BookingRepository bookingRepository,
                              TicketRepository ticketRepository,
-                             SeatRepository seatRepository) {
+                             SeatRepository seatRepository,
+                             EmailService emailService) {
         this.paymentRepository = paymentRepository;
         this.bookingRepository = bookingRepository;
         this.ticketRepository = ticketRepository;
         this.seatRepository = seatRepository;
+        this.emailService = emailService;
     }
 
     @Override
@@ -93,9 +96,17 @@ public class PaymentServiceImpl implements PaymentService {
 
                 // ✅ Update associated tickets to CONFIRMED and mark seats as unavailable
                 if (booking.getTickets() != null && !booking.getTickets().isEmpty()) {
+                    // Get email from the first ticket's email field
+                    String recipientEmail = null;
+
                     for (TicketEntity ticket : booking.getTickets()) {
                         ticket.setStatus("CONFIRMED");
                         ticketRepository.save(ticket);
+
+                        // Get email from ticket if not yet retrieved
+                        if (recipientEmail == null && ticket.getEmail() != null && !ticket.getEmail().isEmpty()) {
+                            recipientEmail = ticket.getEmail();
+                        }
 
                         // ✅ Mark seat as unavailable
                         if (ticket.getSeat() != null) {
@@ -104,6 +115,19 @@ public class PaymentServiceImpl implements PaymentService {
                             seatRepository.save(seat);
                             System.out.println("Marked seat " + seat.getSeatNumber() + " as unavailable");
                         }
+                    }
+
+                    // ✅ Send confirmation email
+                    if (recipientEmail != null && !recipientEmail.isEmpty()) {
+                        try {
+                            emailService.sendBookingConfirmationEmail(booking, recipientEmail);
+                            System.out.println("✅ Confirmation email sent to: " + recipientEmail);
+                        } catch (Exception e) {
+                            System.err.println("❌ Failed to send confirmation email: " + e.getMessage());
+                            e.printStackTrace();
+                        }
+                    } else {
+                        System.out.println("⚠️ No email address found for booking: " + booking.getBookingId());
                     }
                 }
             }

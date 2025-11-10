@@ -296,7 +296,12 @@ public class BookingServiceController {
                                         @RequestParam(required = false) String returnFlightId,
                                         @RequestParam(defaultValue = "1") int adults,
                                         @RequestParam(defaultValue = "0") int children,
+                                        HttpSession session,
                                         Model model) {
+
+        // Get booking session data (if exists from previous steps like coming back from seat selection)
+        BookingSessionDTO bookingSession = (BookingSessionDTO) session.getAttribute("bookingSession");
+
         // Determine if this is a round trip or one way
         boolean isRoundTrip = (outboundFlightId != null && returnFlightId != null);
 
@@ -317,13 +322,25 @@ public class BookingServiceController {
                 model.addAttribute("returnFlight", null);
             }
         } else {
-            actualFlightId = flightId != null ? flightId : "FL-001";
+            // Use parameter flightId
+            actualFlightId = (flightId != null ? flightId : "FL-001");
             model.addAttribute("isRoundTrip", false);
         }
 
         model.addAttribute("flightId", actualFlightId);
+
+        // Use fresh parameters for passenger count
         model.addAttribute("numAdults", adults);
         model.addAttribute("numChildren", children);
+
+        // ✅ IMPORTANT: Pass bookingSession to model for pre-filling data
+        // This allows JavaScript to restore passenger data when user returns from seat selection
+        if (bookingSession != null) {
+            model.addAttribute("bookingSession", bookingSession);
+            System.out.println("✅ Passing bookingSession to template with " + bookingSession.getPassengers().size() + " passengers");
+        } else {
+            System.out.println("ℹ️ No bookingSession in session - fresh form");
+        }
 
         // Load flight entity with full nested information (flightRoute, airports, airplane)
         try {

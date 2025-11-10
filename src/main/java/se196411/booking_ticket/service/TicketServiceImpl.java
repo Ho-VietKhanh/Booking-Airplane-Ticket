@@ -80,4 +80,40 @@ public class TicketServiceImpl implements TicketService {
                 })
                 .collect(java.util.stream.Collectors.toList());
     }
+
+    @Override
+    public TicketResponseDTO getTicketByTicketId(String ticketId) {
+        Optional<TicketEntity> ticketOpt = ticketRepository.findById(ticketId);
+
+        if (ticketOpt.isEmpty()) {
+            return null;
+        }
+
+        TicketEntity ticket = ticketOpt.get();
+        TicketResponseDTO dto = new TicketResponseDTO();
+
+        // Basic ticket information
+        dto.setTicketId(ticket.getTicketId());
+        dto.setPrice(ticket.getPrice());
+        dto.setStatus(ticket.getStatus());
+
+        // Passenger information
+        dto.setCccd(ticket.getCccd());
+        dto.setFirstName(ticket.getFirstName());
+        dto.setSdt(ticket.getSdt());
+        dto.setLastName(ticket.getLastName());
+        dto.setNationality(ticket.getNationality());
+        dto.setTitle(ticket.getTitle());
+        dto.setGender(ticket.getGender());
+        dto.setBirthDate(ticket.getBirthDate());
+        dto.setEmail(ticket.getEmail());
+
+        // Related entities
+        dto.setFlightId(ticket.getFlight() != null ? ticket.getFlight().getFlightId() : null);
+        dto.setBookingId(ticket.getBooking() != null ? ticket.getBooking().getBookingId() : null);
+        dto.setSeatId(ticket.getSeat() != null ? ticket.getSeat().getSeatId() : null);
+        dto.setMealId(ticket.getMeal() != null ? String.valueOf(ticket.getMeal().getMealId()) : null);
+        dto.setLuggageId(ticket.getLuggage() != null ? String.valueOf(ticket.getLuggage().getLuggageId()) : null);
+        return dto;
+    }
 }

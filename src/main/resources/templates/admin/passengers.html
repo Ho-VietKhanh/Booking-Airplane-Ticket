@@ -15,13 +15,24 @@
                 <div class="page-actions">
                     <form class="d-flex gap-2" th:action="@{/admin/passengers}" method="get">
                         <input class="form-control" type="search" name="q"
+                               th:value="${searchKeyword}"
                                placeholder="Tìm theo tên, mã vé, mã booking..."
                                style="min-width: 300px;"/>
                         <button class="btn btn-primary" type="submit">
                             <i class="bi bi-search"></i> Tìm kiếm
                         </button>
+                        <a th:href="@{/admin/passengers}" class="btn btn-secondary" th:if="${searchKeyword != null}">
+                            <i class="bi bi-x-circle"></i> Xóa
+                        </a>
                     </form>
                 </div>
+            </div>
+
+            <!-- Search Result Info -->
+            <div class="alert alert-info" th:if="${searchKeyword != null && searchKeyword != ''}">
+                <i class="bi bi-info-circle"></i>
+                Đang hiển thị kết quả tìm kiếm cho: <strong th:text="${searchKeyword}"></strong>
+                - Tìm thấy <strong th:text="${tickets != null ? #lists.size(tickets) : 0}">0</strong> vé
             </div>
 
             <!-- Stats Cards -->

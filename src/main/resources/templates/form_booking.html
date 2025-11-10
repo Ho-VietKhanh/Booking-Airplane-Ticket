@@ -392,6 +392,9 @@
             <!-- Hidden field to pass flightId -->
             <input type="hidden" name="flightId" th:value="${flightId}" />
 
+            <!-- ✅ Hidden field to pass returnFlightId for round trip -->
+            <input type="hidden" name="returnFlightId" th:value="${returnFlightId}" th:if="${returnFlightId != null}" />
+
             <!-- Contact Information -->
             <div class="form-section">
                 <h2>Thông Tin Liên Hệ</h2>

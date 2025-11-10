@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "seat")
@@ -34,9 +35,11 @@ public class  SeatEntity {
 
     @ManyToOne
     @JoinColumn(name = "airplane_id", nullable = false)
+    @ToString.Exclude
     private AirPlaneEntity airplane;
 
     @OneToMany(mappedBy = "seat")
+    @ToString.Exclude
     private List<TicketEntity> tickets;
 
 }

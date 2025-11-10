@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -24,7 +25,9 @@ public class AirportsEntity {
     private String place;
 
     @OneToMany(mappedBy = "startedAirport")
+    @ToString.Exclude
     List<FlightRoutesEntity> startedFlightRoutes;
     @OneToMany(mappedBy = "endedAirport")
+    @ToString.Exclude
     List<FlightRoutesEntity> endedFlightRoutes;
 }

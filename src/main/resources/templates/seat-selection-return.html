@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chọn chỗ ngồi - Bamboo Airways</title>
+    <title>Chọn chỗ ngồi (Chuyến về) - Bamboo Airways</title>
     <style>
         * {
             margin: 0;
@@ -35,6 +35,15 @@
             font-size: 24px;
             font-weight: bold;
             color: #00693E;
+        }
+
+        .return-flight-badge {
+            background-color: #FF6B6B;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
         }
 
         .container {
@@ -136,7 +145,6 @@
             margin-bottom: 10px;
         }
 
-        /* ✅ Ẩn các hàng ghế không có ghế nào */
         .seat-row:not(:has(.seat)) {
             display: none;
         }
@@ -251,14 +259,17 @@
     <div class="header">
         <div class="header-content">
             <div class="logo">🛫 BAMBOO AIRWAYS</div>
-            <div>Chọn chỗ ngồi của Quý khách</div>
+            <div>
+                <span class="return-flight-badge">✈ CHUYẾN VỀ</span>
+                <span style="margin-left: 15px;">Chọn chỗ ngồi của Quý khách</span>
+            </div>
         </div>
     </div>
 
     <div class="container">
         <!-- Passenger Selector -->
         <div class="passenger-selector" th:if="${bookingSession != null and bookingSession.passengers != null}">
-            <h3 style="margin-bottom: 15px; color: #00693E;">Chọn ghế cho từng hành khách</h3>
+            <h3 style="margin-bottom: 15px; color: #00693E;">Chọn ghế cho từng hành khách (Chuyến về)</h3>
 
             <div class="passenger-tabs" id="passengerTabs">
                 <div th:each="passenger, iterStat : ${bookingSession.passengers}"
@@ -280,13 +291,13 @@
                 <span id="currentSeatSelection">Vui lòng chọn ghế bên dưới</span>
                 <br/>
                 <div style="margin-top: 10px; padding-top: 10px; border-top: 2px solid #00693E;">
-                    <strong style="font-size: 16px; color: #00693E;">Tổng chi phí hiện tại:</strong>
-                    <div style="font-size: 24px; font-weight: bold; color: #00693E; margin-top: 5px;" id="totalPrice">
+                    <strong style="font-size: 18px; color: #00693E;">TỔNG CHI PHÍ (CẢ 2 CHUYẾN):</strong>
+                    <div style="font-size: 32px; font-weight: bold; color: #00693E; margin-top: 8px; margin-bottom: 15px;" id="totalPrice">
                         0 ₫
                     </div>
-                    <small id="priceBreakdown" style="color: #666; display: block; margin-top: 5px;">
-                        (Giá vé cơ bản cho <span id="passengerCountDisplay">0</span> hành khách)
-                    </small>
+                    <div id="priceBreakdown" style="color: #555; font-size: 14px; line-height: 1.8; white-space: pre-line; background-color: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 4px solid #00693E;">
+                        <!-- Chi tiết giá sẽ được cập nhật bởi JavaScript -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -318,11 +329,11 @@
 
         <!-- Seat Map -->
         <form th:if="${!#lists.isEmpty(seats)}"
-              th:action="@{/booking/services/seats/submit}"
+              th:action="@{/booking/services/seats-return/submit}"
               method="post"
               id="seatForm">
 
-            <input type="hidden" name="flightId" th:value="${flightId}" />
+            <input type="hidden" name="returnFlightId" th:value="${returnFlightId}" />
 
             <div class="seat-map">
                 <div class="column-labels">
@@ -336,7 +347,7 @@
                     <div>F</div>
                 </div>
 
-                <!-- Render all rows (up to 40 to handle large airplanes) -->
+                <!-- Render all rows -->
                 <div th:each="rowNum : ${#numbers.sequence(1, 40)}">
                     <div class="seat-row">
                         <div class="row-number" th:text="${rowNum}">1</div>
@@ -425,29 +436,14 @@
                 </div>
             </div>
 
-            <!-- Hidden inputs container - will be populated dynamically on submit -->
+            <!-- Hidden inputs container -->
             <div id="hiddenInputsContainer"></div>
 
             <div class="action-buttons">
-                <!-- ✅ FIX: Quay về form_booking với đúng tham số -->
-                <th:block th:if="${bookingSession != null}">
-                    <!-- Nếu là vé khứ hồi -->
-                    <a th:if="${bookingSession.roundTrip}"
-                       th:href="@{/booking/passenger-info(outboundFlightId=${bookingSession.flightId},returnFlightId=${bookingSession.returnFlightId})}"
-                       class="btn btn-secondary">
-                        ⬅ Quay lại
-                    </a>
-                    <!-- Nếu là vé 1 chiều -->
-                    <a th:unless="${bookingSession.roundTrip}"
-                       th:href="@{/booking/passenger-info(flightId=${bookingSession.flightId})}"
-                       class="btn btn-secondary">
-                        ⬅ Quay lại
-                    </a>
-                </th:block>
-                <!-- Fallback nếu không có session -->
-                <button th:if="${bookingSession == null}" type="button" class="btn btn-secondary" onclick="history.back()">
+                <a th:href="@{/booking/services/extras(flightId=${bookingSession.flightId})}"
+                   class="btn btn-secondary">
                     ⬅ Quay lại
-                </button>
+                </a>
                 <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
                     Tiếp tục ➡
                 </button>
@@ -462,88 +458,235 @@
         let passengerSeats = new Array(passengerCount).fill(null);
         let selectedSeatIds = new Set();
 
-        // ✅ Get flight base price and business surcharge
-        const basePrice = /*[[${flight != null ? flight.basePrice : 0}]]*/ 0;
-        const businessSurcharge = 1800000; // 1.8 million VND
+        const basePrice = /*[[${returnFlight != null ? returnFlight.basePrice : 0}]]*/ 0;
+        const businessSurcharge = 1800000;
 
-        console.log('📊 Dữ liệu khởi tạo:');
+        // ✅ LẤY THÔNG TIN CHUYẾN ĐI TỪ CONTROLLER (không gọi repository)
+        const outboundBasePrice = /*[[${outboundFlight != null ? outboundFlight.basePrice : 0}]]*/ 0;
+
+        console.log('📊 Dữ liệu khởi tạo (Chuyến về):');
         console.log('- Số hành khách:', passengerCount);
-        console.log('- Giá vé gốc:', basePrice);
+        console.log('- Giá vé chuyến đi:', outboundBasePrice);
+        console.log('- Giá vé chuyến về:', basePrice);
         console.log('- Phụ thu Business:', businessSurcharge);
 
-        // ✅ Create a map of seat IDs to seat classes for quick lookup
+        // ✅ Map loại ghế chuyến đi từ controller
+        const outboundSeatClassMap = new Map();
+        /*[# th:if="${outboundSeats != null}"]*/
+        /*[# th:each="s : ${outboundSeats}"]*/
+        outboundSeatClassMap.set(/*[[${s.seatId}]]*/ '', /*[[${s.seatClass}]]*/ '');
+        /*[/]*/
+        /*[/]*/
+
         const seatClassMap = new Map();
         /*[# th:each="s : ${seats}"]*/
         seatClassMap.set(/*[[${s.seatId}]]*/ '', /*[[${s.seatClass}]]*/ '');
         /*[/]*/
 
-        console.log('- Tổng số loại ghế:', seatClassMap.size);
-        console.log('- Nội dung seatClassMap:', Array.from(seatClassMap.entries()).slice(0, 5)); // Log 5 ghế đầu tiên
+        console.log('- Tổng số loại ghế chuyến đi:', outboundSeatClassMap.size);
+        console.log('- Tổng số loại ghế chuyến về:', seatClassMap.size);
 
-        // ✅ Function to calculate total price
+        // ✅ Parse giá dịch vụ (cần cho tính toán chuyến đi)
+        const luggagePriceMap = new Map();
+        /*[# th:if="${baggageOptions != null}"]*/
+        /*[# th:each="luggage : ${baggageOptions}"]*/
+        luggagePriceMap.set(/*[[${luggage.id}]]*/ 0, /*[[${luggage.price}]]*/ 0);
+        /*[/]*/
+        /*[/]*/
+
+        const mealPriceMap = new Map();
+        /*[# th:if="${mealOptions != null}"]*/
+        /*[# th:each="meal : ${mealOptions}"]*/
+        mealPriceMap.set(/*[[${meal.id}]]*/ 0, /*[[${meal.price}]]*/ 0);
+        /*[/]*/
+        /*[/]*/
+
+        console.log('- Map giá hành lý:', luggagePriceMap.size, 'items');
+        console.log('- Map giá suất ăn:', mealPriceMap.size, 'items');
+
+        // ✅ DEBUG: Log chi tiết các map để kiểm tra
+        console.log('\n🔍 DEBUG - Luggage Price Map:');
+        luggagePriceMap.forEach((price, id) => {
+            console.log(`   Luggage ID ${id}: ${price.toLocaleString('vi-VN')} ₫`);
+        });
+
+        console.log('\n🔍 DEBUG - Meal Price Map:');
+        mealPriceMap.forEach((price, id) => {
+            console.log(`   Meal ID ${id}: ${price.toLocaleString('vi-VN')} ₫`);
+        });
+
         function calculateTotalPrice() {
-            let seatSurcharge = 0;
-            let businessCount = 0;
-            let economyCount = 0;
+            // ✅ TÍNH TIỀN CHUYẾN ĐI
+            let outboundTotal = outboundBasePrice * passengerCount;
+            let outboundBusinessCount = 0;
+            let outboundLuggageTotal = 0;
+            let outboundMealTotal = 0;
+
+            // Đếm ghế Business và dịch vụ đã chọn ở chuyến đi
+            /*[# th:if="${bookingSession != null and bookingSession.passengers != null}"]*/
+            /*[# th:each="passenger : ${bookingSession.passengers}"]*/
+            (function() {
+                const seatId = /*[[${passenger.seatId}]]*/ '';
+                if (seatId && outboundSeatClassMap.get(seatId) === 'Business') {
+                    outboundTotal += businessSurcharge;
+                    outboundBusinessCount++;
+                }
+
+                // Thêm giá hành lý chuyến đi
+                const luggageId = /*[[${passenger.luggageId}]]*/ null;
+                console.log('🔍 Outbound Luggage ID:', luggageId, 'Type:', typeof luggageId);
+                if (luggageId) {
+                    const luggagePrice = luggagePriceMap.get(parseInt(luggageId));
+                    console.log('   - Price from map:', luggagePrice);
+                    if (luggagePrice) {
+                        outboundLuggageTotal += luggagePrice;
+                        outboundTotal += luggagePrice;
+                        console.log('   - ✅ Added luggage:', luggagePrice);
+                    }
+                }
+
+                // Thêm giá suất ăn chuyến đi
+                const mealId = /*[[${passenger.mealId}]]*/ null;
+                console.log('🔍 Outbound Meal ID:', mealId, 'Type:', typeof mealId);
+                if (mealId) {
+                    const mealPrice = mealPriceMap.get(parseInt(mealId));
+                    console.log('   - Price from map:', mealPrice);
+                    if (mealPrice) {
+                        outboundMealTotal += mealPrice;
+                        outboundTotal += mealPrice;
+                        console.log('   - ✅ Added meal:', mealPrice);
+                    }
+                }
+            })();
+            /*[/]*/
+            /*[/]*/
+
+            // ✅ TÍNH TIỀN CHUYẾN VỀ
+            let returnSeatSurcharge = 0;
+            let returnBusinessCount = 0;
+            let returnLuggageTotal = 0;
+            let returnMealTotal = 0;
+
+            // ✅ Parse return luggage and meal from session (generated by Thymeleaf)
+            const returnLuggageArray = [];
+            const returnMealArray = [];
+
+            /*[# th:if="${bookingSession != null and bookingSession.passengers != null}"]*/
+            /*[# th:each="passenger, iterStat : ${bookingSession.passengers}"]*/
+            (function() {
+                const returnLuggageId = /*[[${passenger.returnLuggageId}]]*/ null;
+                const returnMealId = /*[[${passenger.returnMealId}]]*/ null;
+                returnLuggageArray.push(returnLuggageId);
+                returnMealArray.push(returnMealId);
+            })();
+            /*[/]*/
+            /*[/]*/
 
             for (let i = 0; i < passengerCount; i++) {
                 if (passengerSeats[i] !== null) {
                     const seatId = passengerSeats[i].seatId;
                     const seatClass = seatClassMap.get(seatId);
 
-                    console.log('Ghế hành khách', i, ':', seatId, '- Loại:', seatClass);
-
                     if (seatClass === 'Business') {
-                        seatSurcharge += businessSurcharge;
-                        businessCount++;
-                    } else {
-                        economyCount++;
+                        returnSeatSurcharge += businessSurcharge;
+                        returnBusinessCount++;
+                    }
+                }
+
+                // ✅ THÊM: Tính giá dịch vụ chuyến về
+                if (i < returnLuggageArray.length) {
+                    const returnLuggageId = returnLuggageArray[i];
+                    if (returnLuggageId) {
+                        const luggagePrice = luggagePriceMap.get(parseInt(returnLuggageId));
+                        if (luggagePrice) {
+                            returnLuggageTotal += luggagePrice;
+                        }
+                    }
+                }
+
+                if (i < returnMealArray.length) {
+                    const returnMealId = returnMealArray[i];
+                    if (returnMealId) {
+                        const mealPrice = mealPriceMap.get(parseInt(returnMealId));
+                        if (mealPrice) {
+                            returnMealTotal += mealPrice;
+                        }
                     }
                 }
             }
 
-            // ✅ TỔNG = (Giá vé gốc × Số hành khách) + Phụ thu ghế Thương Gia
-            const baseTicketTotal = basePrice * passengerCount;
-            const total = baseTicketTotal + seatSurcharge;
+            const returnBaseTotal = basePrice * passengerCount;
+            const returnTotal = returnBaseTotal + returnSeatSurcharge + returnLuggageTotal + returnMealTotal;
 
-            console.log('💰 Tính giá:');
-            console.log('- Vé gốc:', baseTicketTotal, '(', passengerCount, '×', basePrice, ')');
-            console.log('- Phụ thu Business:', seatSurcharge, '(', businessCount, 'ghế )');
-            console.log('- TỔNG:', total);
+            // ✅ TỔNG CỘNG
+            const grandTotal = outboundTotal + returnTotal;
 
-            return { total, baseTicketTotal, seatSurcharge, businessCount, economyCount };
+            return {
+                grandTotal,
+                outboundTotal,
+                outboundBaseTotal: outboundBasePrice * passengerCount,
+                outboundBusinessCount,
+                outboundLuggageTotal,
+                outboundMealTotal,
+                returnTotal,
+                returnBaseTotal,
+                returnSeatSurcharge,
+                returnBusinessCount,
+                returnLuggageTotal,
+                returnMealTotal
+            };
         }
 
-        // ✅ Function to update price display
         function updatePriceDisplay() {
             const priceInfo = calculateTotalPrice();
             const totalPriceElement = document.getElementById('totalPrice');
             const priceBreakdownElement = document.getElementById('priceBreakdown');
 
             if (totalPriceElement) {
-                totalPriceElement.textContent = priceInfo.total.toLocaleString('vi-VN') + ' ₫';
+                totalPriceElement.textContent = priceInfo.grandTotal.toLocaleString('vi-VN') + ' ₫';
             }
 
             if (priceBreakdownElement) {
-                let breakdown = 'Vé máy bay: ' + priceInfo.baseTicketTotal.toLocaleString('vi-VN') + ' ₫';
+                let breakdown = '📌 Chi tiết:\n\n';
 
-                if (priceInfo.businessCount > 0) {
-                    breakdown += ' + Phụ thu Thương Gia: +' + priceInfo.seatSurcharge.toLocaleString('vi-VN') + ' ₫';
+                // Chuyến đi
+                breakdown += '✈️ Chuyến đi:\n';
+                breakdown += '  • Vé máy bay: ' + priceInfo.outboundBaseTotal.toLocaleString('vi-VN') + ' ₫';
+                if (priceInfo.outboundBusinessCount > 0) {
+                    breakdown += '\n  • Phụ thu Thương Gia: +' + (priceInfo.outboundBusinessCount * businessSurcharge).toLocaleString('vi-VN') + ' ₫';
                 }
+                if (priceInfo.outboundLuggageTotal > 0) {
+                    breakdown += '\n  • Hành lý: +' + priceInfo.outboundLuggageTotal.toLocaleString('vi-VN') + ' ₫';
+                }
+                if (priceInfo.outboundMealTotal > 0) {
+                    breakdown += '\n  • Suất ăn: +' + priceInfo.outboundMealTotal.toLocaleString('vi-VN') + ' ₫';
+                }
+                breakdown += '\n  ➜ Tổng chuyến đi: ' + priceInfo.outboundTotal.toLocaleString('vi-VN') + ' ₫\n\n';
 
-                priceBreakdownElement.innerHTML = '<small style="color: #666;">(' + breakdown + ')</small>';
+                // Chuyến về
+                breakdown += '✈️ Chuyến về:\n';
+                breakdown += '  • Vé máy bay: ' + priceInfo.returnBaseTotal.toLocaleString('vi-VN') + ' ₫';
+                if (priceInfo.returnBusinessCount > 0) {
+                    breakdown += '\n  • Phụ thu Thương Gia: +' + priceInfo.returnSeatSurcharge.toLocaleString('vi-VN') + ' ₫';
+                }
+                if (priceInfo.returnLuggageTotal > 0) {
+                    breakdown += '\n  • Hành lý: +' + priceInfo.returnLuggageTotal.toLocaleString('vi-VN') + ' ₫';
+                }
+                if (priceInfo.returnMealTotal > 0) {
+                    breakdown += '\n  • Suất ăn: +' + priceInfo.returnMealTotal.toLocaleString('vi-VN') + ' ₫';
+                }
+                breakdown += '\n  ➜ Tổng chuyến về: ' + priceInfo.returnTotal.toLocaleString('vi-VN') + ' ₫';
+
+                priceBreakdownElement.textContent = breakdown;
             }
-
-            console.log('✅ Đã cập nhật giá lên giao diện');
         }
 
-        // ✅ Load previously selected seats from session (if any)
         /*[# th:if="${bookingSession != null and bookingSession.passengers != null}"]*/
         /*[# th:each="passenger, iterStat : ${bookingSession.passengers}"]*/
-        /*[# th:if="${passenger.seatId != null and !#strings.isEmpty(passenger.seatId)}"]*/
+        /*[# th:if="${passenger.returnSeatId != null and !#strings.isEmpty(passenger.returnSeatId)}"]*/
         (function() {
             const index = /*[[${iterStat.index}]]*/ 0;
-            const seatId = /*[[${passenger.seatId}]]*/ '';
+            const seatId = /*[[${passenger.returnSeatId}]]*/ '';
             const seatNumber = getSeatNumberFromId(seatId);
 
             if (seatId && seatNumber) {
@@ -552,27 +695,25 @@
                     seatNumber: seatNumber
                 };
                 selectedSeatIds.add(seatId);
-                console.log('✅ Loaded saved seat for passenger', index, ':', seatNumber);
+                console.log('✅ Loaded saved return seat for passenger', index, ':', seatNumber);
             }
         })();
         /*[/]*/
         /*[/]*/
         /*[/]*/
 
-        // Helper function to get seat number from seat ID
         function getSeatNumberFromId(seatId) {
             const radio = document.querySelector(`input[value="${seatId}"]`);
             return radio ? radio.dataset.seatNumber : seatId;
         }
 
-        // Function to save seat selection to server session
         async function saveSeatToSession(passengerIndex, seatId) {
             try {
                 const formData = new URLSearchParams();
                 formData.append('passengerIndex', passengerIndex);
                 formData.append('seatId', seatId || '');
 
-                const response = await fetch('/booking/services/seats/save-to-session', {
+                const response = await fetch('/booking/services/seats-return/save-to-session', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
@@ -582,41 +723,29 @@
 
                 const result = await response.json();
                 if (result.success) {
-                    console.log('✅ Seat saved to server session:', seatId);
+                    console.log('✅ Return seat saved to server session:', seatId);
                 } else {
-                    console.error('❌ Failed to save seat to session:', result.message);
+                    console.error('❌ Failed to save return seat to session:', result.message);
                 }
             } catch (error) {
-                console.error('❌ Error saving seat to session:', error);
+                console.error('❌ Error saving return seat to session:', error);
             }
         }
 
         function selectPassenger(index) {
-            console.log('=== Switching to passenger:', index, '===');
-            console.log('Current passenger before switch:', currentPassengerIndex);
-            console.log('passengerSeats before switch:', passengerSeats);
-
-            // ✅ IMPORTANT: Save current passenger's selection BEFORE switching
-            // This ensures auto-switch doesn't lose the selection
             const currentRadio = document.querySelector('input[name="currentPassengerSeat"]:checked');
             if (currentRadio && currentPassengerIndex >= 0 && currentPassengerIndex < passengerCount) {
                 if (passengerSeats[currentPassengerIndex] === null) {
-                    // Save the selection
                     passengerSeats[currentPassengerIndex] = {
                         seatId: currentRadio.value,
                         seatNumber: currentRadio.dataset.seatNumber
                     };
                     selectedSeatIds.add(currentRadio.value);
-                    console.log('✅ Saved selection for passenger', currentPassengerIndex, ':', currentRadio.dataset.seatNumber);
                 }
             }
 
-            // Switch to new passenger
             currentPassengerIndex = index;
-            console.log('Switched to passenger:', currentPassengerIndex);
-            console.log('passengerSeats after switch:', passengerSeats);
 
-            // Update tabs
             document.querySelectorAll('.passenger-tab').forEach((tab, i) => {
                 tab.classList.remove('active');
                 if (i === index) {
@@ -628,49 +757,30 @@
                 }
             });
 
-            // Update current passenger name
             const passengerTab = document.getElementById('passengerTab' + index);
             document.getElementById('currentPassengerName').textContent = passengerTab.querySelector('strong').textContent + ': ' + passengerTab.querySelector('span').textContent;
 
-            // Reset all seats to their original state
             document.querySelectorAll('input[name="currentPassengerSeat"]').forEach(radio => {
                 radio.checked = false;
-
-                // Get original disabled state (from database is_available field)
                 const originalDisabled = radio.hasAttribute('data-original-disabled');
-
-                // Get seat ID
                 const seatId = radio.value;
-
-                // Check if this seat is selected by ANOTHER passenger (not current one)
                 const isSelectedByOther = selectedSeatIds.has(seatId) &&
                                          (passengerSeats[index] === null || passengerSeats[index].seatId !== seatId);
 
-
-                // Only disable if originally disabled OR selected by another passenger
                 radio.disabled = originalDisabled || isSelectedByOther;
-
-                // Update visual state - remove occupied class first
                 radio.parentElement.classList.remove('occupied');
                 radio.nextElementSibling.classList.remove('disabled');
 
-                // Then add back only if truly occupied
-                if (isSelectedByOther) {
-                    radio.parentElement.classList.add('occupied');
-                    radio.nextElementSibling.classList.add('disabled');
-                } else if (originalDisabled) {
-                    // If originally disabled (from database), also show as occupied
+                if (isSelectedByOther || originalDisabled) {
                     radio.parentElement.classList.add('occupied');
                     radio.nextElementSibling.classList.add('disabled');
                 }
             });
 
-            // Restore this passenger's selection if exists
             if (passengerSeats[index] !== null) {
                 const radio = document.querySelector(`input[value="${passengerSeats[index].seatId}"]`);
                 if (radio) {
                     radio.checked = true;
-                    // ✅ Make sure to enable it for the current passenger even if it was marked as occupied
                     radio.disabled = false;
                     radio.parentElement.classList.remove('occupied');
                     radio.nextElementSibling.classList.remove('disabled');
@@ -681,42 +791,33 @@
             }
 
             checkAllSeatsSelected();
-            updatePriceDisplay(); // ✅ Update price when switching passengers
+            updatePriceDisplay();
         }
 
         function updateSeatSelection(radio) {
             const seatNumber = radio.dataset.seatNumber;
             const seatId = radio.value;
 
-            // Check if clicking on already selected seat (to deselect)
             if (passengerSeats[currentPassengerIndex] !== null &&
                 passengerSeats[currentPassengerIndex].seatId === seatId) {
-                // Deselect - uncheck the radio
                 radio.checked = false;
-
-                // Remove from selected seats
                 selectedSeatIds.delete(seatId);
                 passengerSeats[currentPassengerIndex] = null;
-
-                // ✅ Save deselection to server session
                 saveSeatToSession(currentPassengerIndex, null);
 
-                // Update display
                 document.getElementById('currentSeatSelection').textContent = 'Vui lòng chọn ghế bên dưới';
                 document.getElementById('seatInfo' + currentPassengerIndex).textContent = 'Chưa chọn ghế';
                 document.getElementById('passengerTab' + currentPassengerIndex).classList.remove('completed');
 
                 checkAllSeatsSelected();
-                updatePriceDisplay(); // ✅ Update price after deselection
+                updatePriceDisplay();
                 return;
             }
 
-            // Remove old selection for this passenger if exists
             if (passengerSeats[currentPassengerIndex] !== null) {
                 const oldSeatId = passengerSeats[currentPassengerIndex].seatId;
                 selectedSeatIds.delete(oldSeatId);
 
-                // Re-enable the old seat for others
                 const oldRadio = document.querySelector(`input[value="${oldSeatId}"]`);
                 if (oldRadio && !oldRadio.hasAttribute('data-original-disabled')) {
                     oldRadio.disabled = false;
@@ -725,22 +826,17 @@
                 }
             }
 
-            // Save new selection
             passengerSeats[currentPassengerIndex] = {
                 seatId: seatId,
                 seatNumber: seatNumber
             };
             selectedSeatIds.add(seatId);
-
-            // ✅ Save to server session immediately
             saveSeatToSession(currentPassengerIndex, seatId);
 
-            // Update display
             document.getElementById('currentSeatSelection').textContent = 'Đã chọn: Ghế ' + seatNumber;
             document.getElementById('seatInfo' + currentPassengerIndex).textContent = 'Ghế: ' + seatNumber;
             document.getElementById('passengerTab' + currentPassengerIndex).classList.add('completed');
 
-            // Disable this seat for other passengers
             document.querySelectorAll(`input[value="${seatId}"]`).forEach(r => {
                 if (r !== radio) {
                     r.disabled = true;
@@ -749,11 +845,9 @@
                 }
             });
 
-            // Check and enable submit button
             checkAllSeatsSelected();
-            updatePriceDisplay(); // ✅ Update price after selection
+            updatePriceDisplay();
 
-            // Auto-switch to next passenger if exists and not yet selected
             if (currentPassengerIndex < passengerCount - 1 && passengerSeats[currentPassengerIndex + 1] === null) {
                 setTimeout(() => selectPassenger(currentPassengerIndex + 1), 500);
             }
@@ -762,59 +856,39 @@
         function checkAllSeatsSelected() {
             const allSelected = passengerSeats.every(seat => seat !== null);
             const submitBtn = document.getElementById('submitBtn');
-
-            console.log('=== Check All Seats ===');
-            console.log('passengerSeats:', passengerSeats);
-            console.log('allSelected:', allSelected);
-
             submitBtn.disabled = !allSelected;
         }
 
-        // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Mark originally disabled seats
             document.querySelectorAll('input[name="currentPassengerSeat"]').forEach(radio => {
                 if (radio.disabled) {
                     radio.setAttribute('data-original-disabled', 'true');
                 }
 
-                // Add mousedown handler to detect deselect BEFORE radio changes
                 let wasChecked = false;
                 radio.addEventListener('mousedown', function(e) {
                     wasChecked = this.checked;
                 });
 
-                // Add click handler to allow deselection
                 radio.addEventListener('click', function(e) {
-                    // If it was already checked before this click, this is a deselect action
                     if (wasChecked && passengerSeats[currentPassengerIndex] !== null &&
                         passengerSeats[currentPassengerIndex].seatId === this.value) {
-                        // Uncheck it
                         this.checked = false;
-                        // Trigger deselect logic
                         updateSeatSelection(this);
-                        // Prevent change event from firing
                         e.preventDefault();
                         e.stopPropagation();
                     }
                 });
             });
 
-            // ✅ Restore previously selected seats from session
-            console.log('=== Restoring seats from session ===');
-            console.log('passengerSeats after load:', passengerSeats);
-
-            // Mark seats as checked and update UI for all passengers with saved selections
             for (let i = 0; i < passengerCount; i++) {
                 if (passengerSeats[i] !== null) {
                     const seatId = passengerSeats[i].seatId;
                     const radio = document.querySelector(`input[value="${seatId}"]`);
 
                     if (radio && !radio.disabled) {
-                        // Check the radio button
-                        radio.checked = false; // First uncheck to ensure change event fires
+                        radio.checked = false;
 
-                        // Update UI for this passenger tab
                         const passengerTab = document.getElementById('passengerTab' + i);
                         const seatInfoElement = document.getElementById('seatInfo' + i);
 
@@ -823,33 +897,19 @@
                             seatInfoElement.textContent = 'Ghế: ' + passengerSeats[i].seatNumber;
                         }
 
-                        // Disable this seat for others
                         document.querySelectorAll(`input[value="${seatId}"]`).forEach(r => {
-                            if (r.disabled && !r.hasAttribute('data-original-disabled')) {
-                                // Skip - already disabled for other reason
-                            } else {
-                                r.parentElement.classList.add('occupied');
-                                r.nextElementSibling.classList.add('disabled');
-                            }
+                            r.parentElement.classList.add('occupied');
+                            r.nextElementSibling.classList.add('disabled');
                         });
-
-                        console.log('✅ Restored seat', passengerSeats[i].seatNumber, 'for passenger', i);
-                    } else {
-                        console.warn('⚠️ Seat', seatId, 'not found or disabled for passenger', i);
                     }
                 }
             }
 
-            // Add form submit handler to ensure all seats are saved
             const form = document.getElementById('seatForm');
             if (form) {
                 form.addEventListener('submit', function(e) {
-                    e.preventDefault(); // Prevent default submit first
+                    e.preventDefault();
 
-                    console.log('=== Form Submit Handler ===');
-                    console.log('passengerSeats:', passengerSeats);
-
-                    // Save current passenger's selection if any
                     const currentRadio = document.querySelector('input[name="currentPassengerSeat"]:checked');
                     if (currentRadio && currentPassengerIndex >= 0 && currentPassengerIndex < passengerCount) {
                         if (passengerSeats[currentPassengerIndex] === null) {
@@ -857,49 +917,34 @@
                                 seatId: currentRadio.value,
                                 seatNumber: currentRadio.dataset.seatNumber
                             };
-                            console.log('✅ Saved current selection before submit:', currentRadio.dataset.seatNumber);
                         }
                     }
 
-                    // Check if all seats are selected
                     const allSelected = passengerSeats.every(seat => seat !== null);
                     if (!allSelected) {
                         alert('Vui lòng chọn ghế cho tất cả hành khách!');
                         return false;
                     }
 
-                    // Dynamically create hidden inputs with actual values
                     const container = document.getElementById('hiddenInputsContainer');
-                    container.innerHTML = ''; // Clear any existing inputs
+                    container.innerHTML = '';
 
                     for (let i = 0; i < passengerCount; i++) {
                         if (passengerSeats[i] !== null) {
                             const input = document.createElement('input');
                             input.type = 'hidden';
-                            input.name = 'selectedSeats';
+                            input.name = 'selectedReturnSeats';
                             input.value = passengerSeats[i].seatId;
                             container.appendChild(input);
-                            console.log('✓ Created hidden input for P' + i + ':', passengerSeats[i].seatId);
-                        } else {
-                            console.warn('⚠ No seat selected for passenger ' + i);
                         }
                     }
 
-                    // Log all hidden input values before submission
-                    const allHiddenInputs = container.querySelectorAll('input[name="selectedSeats"]');
-                    console.log('Total hidden inputs created:', allHiddenInputs.length);
-                    allHiddenInputs.forEach((input, idx) => {
-                        console.log('Hidden input ' + idx + ' value:', input.value);
-                    });
-
-                    // Now submit the form
-                    console.log('✅ Submitting form with', allHiddenInputs.length, 'seats');
                     form.submit();
                 });
             }
 
             selectPassenger(0);
-            updatePriceDisplay(); // ✅ Initial price display
+            updatePriceDisplay();
         });
         /*]]>*/
     </script>

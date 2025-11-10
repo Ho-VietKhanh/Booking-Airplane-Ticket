@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chọn hành lý và suất ăn - Bamboo Airways</title>
+    <title>Chọn hành lý và suất ăn (Chuyến về) - Bamboo Airways</title>
     <style>
         * {
             margin: 0;
@@ -35,6 +35,16 @@
             font-size: 24px;
             font-weight: bold;
             color: #00693E;
+        }
+
+        .return-flight-badge {
+            background-color: #FF6B6B;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            margin-right: 15px;
         }
 
         .container {
@@ -241,36 +251,37 @@
     <div class="header">
         <div class="header-content">
             <div class="logo">🛫 BAMBOO AIRWAYS</div>
-            <div>Lựa chọn dịch vụ bổ sung</div>
+            <div>
+                <span class="return-flight-badge">✈ CHUYẾN VỀ</span>
+                <span>Lựa chọn dịch vụ bổ sung</span>
+            </div>
         </div>
     </div>
 
     <div class="container">
         <div class="flight-info">
-            <h3>Thông tin chuyến bay</h3>
-            <p>Mã chuyến bay: <strong th:text="${flightId}">FL-001</strong></p>
+            <h3>Thông tin chuyến bay (Chuyến về)</h3>
+            <p>Mã chuyến bay: <strong th:text="${returnFlightId}">FL-002</strong></p>
             <p>Số hành khách: <strong th:text="${passengerCount}">1</strong></p>
 
-            <!-- ✅ THÊM PHẦN HIỂN THỊ TỔNG TIỀN -->
             <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #00693E;">
-                <h4 style="color: #00693E; margin-bottom: 10px;">Tổng chi phí hiện tại:</h4>
-                <div style="font-size: 28px; font-weight: bold; color: #00693E; margin-bottom: 10px;" id="totalPrice">
+                <h4 style="color: #00693E; font-size: 18px; margin-bottom: 10px;">TỔNG CHI PHÍ (CẢ 2 CHUYẾN):</h4>
+                <div style="font-size: 32px; font-weight: bold; color: #00693E; margin-bottom: 15px;" id="totalPrice">
                     0 ₫
                 </div>
-                <div id="priceBreakdown" style="font-size: 14px; color: #666;">
-                    <div id="seatPriceInfo"></div>
-                    <div id="extrasPriceInfo"></div>
+                <div id="priceBreakdown" style="font-size: 14px; color: #555; line-height: 1.8; background-color: #f9f9f9; padding: 15px; border-radius: 8px; white-space: pre-line; border-left: 4px solid #00693E;">
+                    <!-- Chi tiết giá sẽ được cập nhật bởi JavaScript -->
                 </div>
             </div>
         </div>
 
         <div class="title">
-            <h1>Lựa chọn dịch vụ bổ sung</h1>
+            <h1>Lựa chọn dịch vụ bổ sung (Chuyến về)</h1>
             <p>Chọn hành lý và suất ăn cho từng hành khách</p>
         </div>
 
-        <form th:action="@{/booking/services/extras/submit}" method="post" id="extrasForm">
-            <input type="hidden" name="flightId" th:value="${flightId}" />
+        <form th:action="@{/booking/services/extras-return/submit}" method="post" id="extrasForm">
+            <input type="hidden" name="returnFlightId" th:value="${returnFlightId}" />
 
             <!-- Loop through passengers from session -->
             <div th:if="${session.bookingSession != null and session.bookingSession.passengers != null}">
@@ -287,7 +298,7 @@
                             <!-- No luggage option -->
                             <label class="service-item no-service-option">
                                 <input type="radio"
-                                       th:name="'passenger_' + ${iterStat.index} + '_luggage'"
+                                       th:name="'passenger_' + ${iterStat.index} + '_luggage_return'"
                                        value=""
                                        checked />
                                 <div class="radio-indicator"></div>
@@ -303,7 +314,7 @@
                             <!-- Luggage options from database -->
                             <label class="service-item" th:each="luggage : ${baggageOptions}">
                                 <input type="radio"
-                                       th:name="'passenger_' + ${iterStat.index} + '_luggage'"
+                                       th:name="'passenger_' + ${iterStat.index} + '_luggage_return'"
                                        th:value="${luggage.id}" />
                                 <div class="radio-indicator"></div>
                                 <div class="service-content">
@@ -328,7 +339,7 @@
                             <!-- No meal option -->
                             <label class="service-item no-service-option">
                                 <input type="radio"
-                                       th:name="'passenger_' + ${iterStat.index} + '_meal'"
+                                       th:name="'passenger_' + ${iterStat.index} + '_meal_return'"
                                        value=""
                                        checked />
                                 <div class="radio-indicator"></div>
@@ -344,7 +355,7 @@
                             <!-- Meal options from database -->
                             <label class="service-item" th:each="meal : ${mealOptions}">
                                 <input type="radio"
-                                       th:name="'passenger_' + ${iterStat.index} + '_meal'"
+                                       th:name="'passenger_' + ${iterStat.index} + '_meal_return'"
                                        th:value="${meal.id}" />
                                 <div class="radio-indicator"></div>
                                 <div class="service-content">
@@ -365,7 +376,7 @@
             </div>
 
             <div class="action-buttons">
-                <a th:href="@{/booking/services/seats(flightId=${flightId})}"
+                <a th:href="@{/booking/services/seats-return(returnFlightId=${returnFlightId})}"
                    class="btn btn-secondary">Quay lại</a>
                 <button type="submit" class="btn btn-primary">
                     Xác nhận và tiếp tục
@@ -377,52 +388,99 @@
     <!-- Hidden data elements for JavaScript -->
     <div id="serverData" style="display: none;"
          th:attr="data-passenger-count=${passengerCount},
-                  data-base-price=${flight != null ? flight.basePrice : 0},
-                  data-passenger-seats=${session.bookingSession != null and session.bookingSession.passengers != null ? #strings.arrayJoin(session.bookingSession.passengers.![seatId ?: ''], ',') : ''},
-                  data-seat-class-map=${seats != null ? #strings.arrayJoin(seats.![seatId + ':' + seatClass], '|') : ''},
+                  data-return-base-price=${returnFlight != null ? returnFlight.basePrice : 0},
+                  data-outbound-base-price=${outboundFlight != null ? outboundFlight.basePrice : 0},
+                  data-outbound-seats=${session.bookingSession != null and session.bookingSession.passengers != null ? #strings.arrayJoin(session.bookingSession.passengers.![seatId ?: ''], ',') : ''},
+                  data-return-seats=${session.bookingSession != null and session.bookingSession.passengers != null ? #strings.arrayJoin(session.bookingSession.passengers.![returnSeatId ?: ''], ',') : ''},
+                  data-outbound-seat-class-map=${outboundSeats != null ? #strings.arrayJoin(outboundSeats.![seatId + ':' + seatClass], '|') : ''},
+                  data-return-seat-class-map=${seats != null ? #strings.arrayJoin(seats.![seatId + ':' + seatClass], '|') : ''},
+                  data-outbound-luggage=${session.bookingSession != null and session.bookingSession.passengers != null ? #strings.arrayJoin(session.bookingSession.passengers.![luggageId ?: ''], ',') : ''},
+                  data-outbound-meal=${session.bookingSession != null and session.bookingSession.passengers != null ? #strings.arrayJoin(session.bookingSession.passengers.![mealId ?: ''], ',') : ''},
                   data-luggage-prices=${baggageOptions != null ? #strings.arrayJoin(baggageOptions.![id + ':' + price], '|') : ''},
                   data-meal-prices=${mealOptions != null ? #strings.arrayJoin(mealOptions.![id + ':' + price], '|') : ''}">
     </div>
 
     <script>
-        // ✅ Lấy dữ liệu từ server qua data attributes
+        // ✅ LẤY DỮ LIỆU TỪ SERVER
         var serverData = document.getElementById('serverData');
         var passengerCount = parseInt(serverData.getAttribute('data-passenger-count') || '1');
         var businessSurcharge = 1800000; // 1.8 triệu VND
-        var basePrice = parseInt(serverData.getAttribute('data-base-price') || '0');
 
-        console.log('📊 Dữ liệu từ server:');
+        // Giá vé
+        var outboundBasePrice = parseInt(serverData.getAttribute('data-outbound-base-price') || '0');
+        var returnBasePrice = parseInt(serverData.getAttribute('data-return-base-price') || '0');
+
+        console.log('📊 Dữ liệu khởi tạo (Extras - Chuyến về):');
         console.log('- Số hành khách:', passengerCount);
-        console.log('- Giá vé gốc:', basePrice);
+        console.log('- Giá vé chuyến đi:', outboundBasePrice);
+        console.log('- Giá vé chuyến về:', returnBasePrice);
         console.log('- Phụ thu Business:', businessSurcharge);
 
-        // ✅ Parse passenger seats
-        var passengerSeats = [];
-        var seatsStr = serverData.getAttribute('data-passenger-seats') || '';
-        if (seatsStr) {
-            passengerSeats = seatsStr.split(',');
+        // Parse ghế chuyến đi
+        var outboundSeats = [];
+        var outboundSeatsStr = serverData.getAttribute('data-outbound-seats') || '';
+        if (outboundSeatsStr) {
+            outboundSeats = outboundSeatsStr.split(',');
         }
 
-        console.log('- Ghế đã chọn:', passengerSeats);
+        // Parse ghế chuyến về
+        var returnSeats = [];
+        var returnSeatsStr = serverData.getAttribute('data-return-seats') || '';
+        if (returnSeatsStr) {
+            returnSeats = returnSeatsStr.split(',');
+        }
 
-        // ✅ Parse seat class map
-        var seatClassMap = {};
-        var seatClassStr = serverData.getAttribute('data-seat-class-map') || '';
-        if (seatClassStr) {
-            seatClassStr.split('|').forEach(function(item) {
+        console.log('- Ghế chuyến đi:', outboundSeats);
+        console.log('- Ghế chuyến về:', returnSeats);
+
+        // Parse loại ghế chuyến đi
+        var outboundSeatClassMap = {};
+        var outboundSeatClassStr = serverData.getAttribute('data-outbound-seat-class-map') || '';
+        if (outboundSeatClassStr) {
+            outboundSeatClassStr.split('|').forEach(function(item) {
                 if (item) {
                     var parts = item.split(':');
                     if (parts.length === 2) {
-                        seatClassMap[parts[0]] = parts[1];
+                        outboundSeatClassMap[parts[0]] = parts[1];
                     }
                 }
             });
         }
 
-        console.log('- Map loại ghế:', seatClassMap);
-        console.log('- Nội dung seatClassMap (5 ghế đầu):', Object.entries(seatClassMap).slice(0, 5));
+        // Parse loại ghế chuyến về
+        var returnSeatClassMap = {};
+        var returnSeatClassStr = serverData.getAttribute('data-return-seat-class-map') || '';
+        if (returnSeatClassStr) {
+            returnSeatClassStr.split('|').forEach(function(item) {
+                if (item) {
+                    var parts = item.split(':');
+                    if (parts.length === 2) {
+                        returnSeatClassMap[parts[0]] = parts[1];
+                    }
+                }
+            });
+        }
 
-        // ✅ Parse luggage prices
+        console.log('- Map loại ghế chuyến đi:', outboundSeatClassMap);
+        console.log('- Map loại ghế chuyến về:', returnSeatClassMap);
+
+        // Parse hành lý & suất ăn chuyến đi
+        var outboundLuggage = [];
+        var outboundLuggageStr = serverData.getAttribute('data-outbound-luggage') || '';
+        if (outboundLuggageStr) {
+            outboundLuggage = outboundLuggageStr.split(',');
+        }
+
+        var outboundMeal = [];
+        var outboundMealStr = serverData.getAttribute('data-outbound-meal') || '';
+        if (outboundMealStr) {
+            outboundMeal = outboundMealStr.split(',');
+        }
+
+        console.log('- Hành lý chuyến đi:', outboundLuggage);
+        console.log('- Suất ăn chuyến đi:', outboundMeal);
+
+        // Parse giá dịch vụ
         var luggagePriceMap = {};
         var luggagePricesStr = serverData.getAttribute('data-luggage-prices') || '';
         if (luggagePricesStr) {
@@ -436,7 +494,6 @@
             });
         }
 
-        // ✅ Parse meal prices
         var mealPriceMap = {};
         var mealPricesStr = serverData.getAttribute('data-meal-prices') || '';
         if (mealPricesStr) {
@@ -453,112 +510,182 @@
         console.log('- Map giá hành lý:', luggagePriceMap);
         console.log('- Map giá suất ăn:', mealPriceMap);
 
-        // ✅ Hàm tính tổng tiền
+        // ✅ HÀM TÍNH TỔNG TIỀN (CẢ 2 CHUYẾN)
         function calculateTotalPrice() {
-            var seatSurcharge = 0;
-            var businessCount = 0;
-            var economyCount = 0;
+            // ========== CHUYẾN ĐI ==========
+            var outboundTicketTotal = outboundBasePrice * passengerCount;
+            var outboundSeatSurcharge = 0;
+            var outboundBusinessCount = 0;
+            var outboundLuggageTotal = 0;
+            var outboundMealTotal = 0;
 
-            // Tính phụ thu ghế Thương Gia
-            for (var i = 0; i < passengerSeats.length; i++) {
-                var seatId = passengerSeats[i];
+            // Tính phụ thu ghế Business chuyến đi
+            for (var i = 0; i < outboundSeats.length; i++) {
+                var seatId = outboundSeats[i];
                 if (seatId && seatId !== '' && seatId !== 'null') {
-                    var seatClass = seatClassMap[seatId];
-                    console.log('Ghế hành khách', i, ':', seatId, '- Loại:', seatClass);
-
+                    var seatClass = outboundSeatClassMap[seatId];
                     if (seatClass === 'Business') {
-                        seatSurcharge += businessSurcharge;
-                        businessCount++;
-                    } else {
-                        economyCount++;
+                        outboundSeatSurcharge += businessSurcharge;
+                        outboundBusinessCount++;
                     }
                 }
             }
 
-            // Tính tiền dịch vụ bổ sung
-            var luggageTotal = 0;
-            var mealTotal = 0;
-
+            // Tính dịch vụ chuyến đi
             for (var i = 0; i < passengerCount; i++) {
-                // Luggage
-                var luggageRadio = document.querySelector('input[name="passenger_' + i + '_luggage"]:checked');
+                // Hành lý
+                var luggageId = outboundLuggage[i];
+                if (luggageId && luggageId !== '' && luggageId !== 'null') {
+                    var price = luggagePriceMap[parseInt(luggageId)];
+                    if (price) outboundLuggageTotal += price;
+                }
+
+                // Suất ăn
+                var mealId = outboundMeal[i];
+                if (mealId && mealId !== '' && mealId !== 'null') {
+                    var price = mealPriceMap[parseInt(mealId)];
+                    if (price) outboundMealTotal += price;
+                }
+            }
+
+            var outboundTotal = outboundTicketTotal + outboundSeatSurcharge + outboundLuggageTotal + outboundMealTotal;
+
+            // ========== CHUYẾN VỀ ==========
+            var returnTicketTotal = returnBasePrice * passengerCount;
+            var returnSeatSurcharge = 0;
+            var returnBusinessCount = 0;
+            var returnLuggageTotal = 0;
+            var returnMealTotal = 0;
+
+            // Tính phụ thu ghế Business chuyến về
+            for (var i = 0; i < returnSeats.length; i++) {
+                var seatId = returnSeats[i];
+                if (seatId && seatId !== '' && seatId !== 'null') {
+                    var seatClass = returnSeatClassMap[seatId];
+                    if (seatClass === 'Business') {
+                        returnSeatSurcharge += businessSurcharge;
+                        returnBusinessCount++;
+                    }
+                }
+            }
+
+            // Tính dịch vụ chuyến về (từ form hiện tại)
+            for (var i = 0; i < passengerCount; i++) {
+                // Hành lý
+                var luggageRadio = document.querySelector('input[name="passenger_' + i + '_luggage_return"]:checked');
                 if (luggageRadio && luggageRadio.value && luggageRadio.value !== '') {
                     var luggageId = parseInt(luggageRadio.value);
                     var price = luggagePriceMap[luggageId];
-                    if (price) luggageTotal += price;
+                    if (price) returnLuggageTotal += price;
                 }
 
-                // Meal
-                var mealRadio = document.querySelector('input[name="passenger_' + i + '_meal"]:checked');
+                // Suất ăn
+                var mealRadio = document.querySelector('input[name="passenger_' + i + '_meal_return"]:checked');
                 if (mealRadio && mealRadio.value && mealRadio.value !== '') {
                     var mealId = parseInt(mealRadio.value);
                     var price = mealPriceMap[mealId];
-                    if (price) mealTotal += price;
+                    if (price) returnMealTotal += price;
                 }
             }
 
-            // ✅ TỔNG = (Giá vé gốc × số hành khách) + Phụ thu ghế Thương Gia + Dịch vụ
-            var baseTicketTotal = basePrice * passengerCount;
-            var total = baseTicketTotal + seatSurcharge + luggageTotal + mealTotal;
+            var returnTotal = returnTicketTotal + returnSeatSurcharge + returnLuggageTotal + returnMealTotal;
 
-            console.log('💰 Tính toán giá:');
-            console.log('- Tiền vé gốc:', baseTicketTotal, '(' + passengerCount + ' × ' + basePrice + ')');
-            console.log('- Phụ thu Business:', seatSurcharge, '(' + businessCount + ' ghế)');
-            console.log('- Hành lý:', luggageTotal);
-            console.log('- Suất ăn:', mealTotal);
-            console.log('- TỔNG:', total);
+            // ========== TỔNG CỘNG ==========
+            var grandTotal = outboundTotal + returnTotal;
+
+            console.log('💰 Chi tiết tính giá:');
+            console.log('📍 Chuyến đi:', outboundTotal, '₫');
+            console.log('  - Vé:', outboundTicketTotal, '₫');
+            console.log('  - Ghế Business:', outboundSeatSurcharge, '₫');
+            console.log('  - Hành lý:', outboundLuggageTotal, '₫');
+            console.log('  - Suất ăn:', outboundMealTotal, '₫');
+            console.log('📍 Chuyến về:', returnTotal, '₫');
+            console.log('  - Vé:', returnTicketTotal, '₫');
+            console.log('  - Ghế Business:', returnSeatSurcharge, '₫');
+            console.log('  - Hành lý:', returnLuggageTotal, '₫');
+            console.log('  - Suất ăn:', returnMealTotal, '₫');
+            console.log('💰 TỔNG CỘNG:', grandTotal, '₫');
 
             return {
-                baseTicketTotal: baseTicketTotal,
-                seatSurcharge: seatSurcharge,
-                businessCount: businessCount,
-                economyCount: economyCount,
-                luggageTotal: luggageTotal,
-                mealTotal: mealTotal,
-                total: total
+                // Tổng
+                grandTotal: grandTotal,
+
+                // Chuyến đi
+                outboundTotal: outboundTotal,
+                outboundTicketTotal: outboundTicketTotal,
+                outboundSeatSurcharge: outboundSeatSurcharge,
+                outboundBusinessCount: outboundBusinessCount,
+                outboundLuggageTotal: outboundLuggageTotal,
+                outboundMealTotal: outboundMealTotal,
+
+                // Chuyến về
+                returnTotal: returnTotal,
+                returnTicketTotal: returnTicketTotal,
+                returnSeatSurcharge: returnSeatSurcharge,
+                returnBusinessCount: returnBusinessCount,
+                returnLuggageTotal: returnLuggageTotal,
+                returnMealTotal: returnMealTotal
             };
         }
 
-        // ✅ Hàm cập nhật hiển thị giá
+        // ✅ HÀM CẬP NHẬT HIỂN THỊ GIÁ
         function updatePriceDisplay() {
             var priceInfo = calculateTotalPrice();
 
+            // Cập nhật tổng tiền
             var totalPriceElement = document.getElementById('totalPrice');
             if (totalPriceElement) {
-                totalPriceElement.textContent = priceInfo.total.toLocaleString('vi-VN') + ' ₫';
+                totalPriceElement.textContent = priceInfo.grandTotal.toLocaleString('vi-VN') + ' ₫';
             }
 
-            // Hiển thị chi tiết
-            var seatPriceInfo = document.getElementById('seatPriceInfo');
-            if (seatPriceInfo) {
-                var seatText = '• Vé máy bay: ' + priceInfo.baseTicketTotal.toLocaleString('vi-VN') + ' ₫\n';
+            // Cập nhật chi tiết
+            var priceBreakdownElement = document.getElementById('priceBreakdown');
+            if (priceBreakdownElement) {
+                var breakdown = '📌 Chi tiết:\n\n';
 
-                if (priceInfo.businessCount > 0) {
-                    seatText += '• Phụ thu ghế Thương Gia: +' + priceInfo.seatSurcharge.toLocaleString('vi-VN') + ' ₫\n';
+                // ===== CHUYẾN ĐI =====
+                breakdown += '✈️ CHUYẾN ĐI:\n';
+                breakdown += '  • Vé máy bay: ' + priceInfo.outboundTicketTotal.toLocaleString('vi-VN') + ' ₫\n';
+
+                if (priceInfo.outboundBusinessCount > 0) {
+                    breakdown += '  • Phụ thu Thương Gia: +' + priceInfo.outboundSeatSurcharge.toLocaleString('vi-VN') + ' ₫\n';
                 }
 
-                seatPriceInfo.textContent = seatText;
-                seatPriceInfo.style.whiteSpace = 'pre-line';
-            }
+                if (priceInfo.outboundLuggageTotal > 0) {
+                    breakdown += '  • Hành lý: +' + priceInfo.outboundLuggageTotal.toLocaleString('vi-VN') + ' ₫\n';
+                }
 
-            var extrasPriceInfo = document.getElementById('extrasPriceInfo');
-            if (extrasPriceInfo) {
-                var extrasText = '';
-                if (priceInfo.luggageTotal > 0) {
-                    extrasText += '• Hành lý: +' + priceInfo.luggageTotal.toLocaleString('vi-VN') + ' ₫';
+                if (priceInfo.outboundMealTotal > 0) {
+                    breakdown += '  • Suất ăn: +' + priceInfo.outboundMealTotal.toLocaleString('vi-VN') + ' ₫\n';
                 }
-                if (priceInfo.mealTotal > 0) {
-                    if (extrasText) extrasText += '\n';
-                    extrasText += '• Suất ăn: +' + priceInfo.mealTotal.toLocaleString('vi-VN') + ' ₫';
+
+                breakdown += '  ➜ Tổng chuyến đi: ' + priceInfo.outboundTotal.toLocaleString('vi-VN') + ' ₫\n\n';
+
+                // ===== CHUYẾN VỀ =====
+                breakdown += '✈️ CHUYẾN VỀ:\n';
+                breakdown += '  • Vé máy bay: ' + priceInfo.returnTicketTotal.toLocaleString('vi-VN') + ' ₫\n';
+
+                if (priceInfo.returnBusinessCount > 0) {
+                    breakdown += '  • Phụ thu Thương Gia: +' + priceInfo.returnSeatSurcharge.toLocaleString('vi-VN') + ' ₫\n';
                 }
-                extrasPriceInfo.textContent = extrasText;
-                extrasPriceInfo.style.whiteSpace = 'pre-line';
+
+                if (priceInfo.returnLuggageTotal > 0) {
+                    breakdown += '  • Hành lý: +' + priceInfo.returnLuggageTotal.toLocaleString('vi-VN') + ' ₫\n';
+                }
+
+                if (priceInfo.returnMealTotal > 0) {
+                    breakdown += '  • Suất ăn: +' + priceInfo.returnMealTotal.toLocaleString('vi-VN') + ' ₫\n';
+                }
+
+                breakdown += '  ➜ Tổng chuyến về: ' + priceInfo.returnTotal.toLocaleString('vi-VN') + ' ₫';
+
+                priceBreakdownElement.textContent = breakdown;
             }
 
             console.log('✅ Đã cập nhật giá lên giao diện');
         }
 
-        // ✅ Lắng nghe sự kiện thay đổi
+        // ✅ LẮNG NGHE SỰ KIỆN THAY ĐỔI
         document.addEventListener('DOMContentLoaded', function() {
             console.log('✅ Trang đã load xong, bắt đầu tính giá...');
 

@@ -22,10 +22,15 @@ public class PassengerInfoDTO {
     private String sdt;
     private String email;
 
-    // Booking details (selected in other pages)
+    // Booking details for outbound flight
     private String seatId;
     private Integer mealId;
     private Integer luggageId;
+
+    // Booking details for return flight (for round trip)
+    private String returnSeatId;
+    private Integer returnMealId;
+    private Integer returnLuggageId;
 
     // Price calculation
     private BigDecimal price = BigDecimal.ZERO;
@@ -33,4 +38,3 @@ public class PassengerInfoDTO {
     // Status
     private String status = "PENDING";
 }
-

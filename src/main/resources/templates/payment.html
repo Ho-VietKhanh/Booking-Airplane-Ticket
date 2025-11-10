@@ -360,15 +360,20 @@
       <div class="booking-info">
         <div class="info-row">
           <span class="info-label">📋 Mã đặt chỗ</span>
-          <span class="info-value" th:text="${booking.bookingId}">BK-0001</span>
+          <span class="info-value" th:text="${booking != null ? booking.bookingId : 'Đang xử lý...'}">BK-0001</span>
         </div>
         <div class="info-row">
           <span class="info-label">👤 Hành khách</span>
-          <span class="info-value" th:text="${booking.tickets != null ? booking.tickets.size() : 0}">1</span>
+          <span class="info-value" th:text="${booking != null and booking.tickets != null ? booking.tickets.size() : (bookingSession != null ? bookingSession.passengerCount : 0)}">1</span>
         </div>
-        <div class="info-row" th:if="${booking.tickets != null and !booking.tickets.isEmpty()}">
+        <div class="info-row">
           <span class="info-label">✈️ Chuyến bay</span>
-          <span class="info-value" th:text="${booking.tickets[0].flight != null ? booking.tickets[0].flight.flightId : '-'}">FL-001</span>
+          <th:block th:if="${booking != null and booking.tickets != null and !booking.tickets.isEmpty()}">
+            <span class="info-value" th:text="${booking.tickets[0].flight != null ? booking.tickets[0].flight.flightId : '-'}">FL-001</span>
+          </th:block>
+          <th:block th:if="${booking == null or booking.tickets == null or booking.tickets.isEmpty()}">
+            <span class="info-value" th:text="${bookingSession != null ? (bookingSession.roundTrip ? 'Khứ hồi' : 'Một chiều') : '-'}">-</span>
+          </th:block>
         </div>
         <div class="info-row">
           <span class="info-label">💰 Tổng thanh toán</span>
@@ -377,7 +382,9 @@
       </div>
 
       <form th:action="@{/booking/payment/confirm}" method="post">
-        <input type="hidden" name="bookingId" th:value="${booking.bookingId}" />
+        <!-- ✅ FIX: bookingId là optional vì có thể tạo từ session -->
+        <input th:if="${booking != null and booking.bookingId != null}"
+               type="hidden" name="bookingId" th:value="${booking.bookingId}" />
 
         <div class="section">
           <h2>Phương thức thanh toán</h2>
@@ -408,7 +415,50 @@
         </div>
 
         <div class="actions">
-          <a class="btn btn-secondary" th:href="@{/}" role="button">← Quay lại</a>
+          <!-- ✅ FIX: Xử lý nút Quay lại cho cả trường hợp có booking và chỉ có bookingSession -->
+
+          <!-- Trường hợp 1: Có booking với tickets (booking đã được tạo) -->
+          <th:block th:if="${booking != null and booking.tickets != null and !booking.tickets.isEmpty()}">
+            <th:block th:with="uniqueFlights=${#sets.toSet(booking.tickets.![flight.flightId])}">
+              <!-- Vé khứ hồi - quay về extras-return -->
+              <th:block th:if="${#sets.size(uniqueFlights) > 1}">
+                <th:block th:with="returnFlightId=${booking.tickets[0] != null and booking.tickets[0].flight != null ? booking.tickets[0].flight.flightId : ''}">
+                  <a class="btn btn-secondary"
+                     th:href="@{/booking/services/extras-return(returnFlightId=${returnFlightId})}"
+                     role="button">← Quay lại</a>
+                </th:block>
+              </th:block>
+              <!-- Vé một chiều - quay về extras -->
+              <th:block th:if="${#sets.size(uniqueFlights) == 1}">
+                <th:block th:with="flightId=${booking.tickets[0] != null and booking.tickets[0].flight != null ? booking.tickets[0].flight.flightId : ''}">
+                  <a class="btn btn-secondary"
+                     th:href="@{/booking/services/extras(flightId=${flightId})}"
+                     role="button">← Quay lại</a>
+                </th:block>
+              </th:block>
+            </th:block>
+          </th:block>
+
+          <!-- Trường hợp 2: Chưa có booking, chỉ có bookingSession (từ payment-preview) -->
+          <th:block th:if="${(booking == null or booking.tickets == null or booking.tickets.isEmpty()) and bookingSession != null}">
+            <!-- Vé khứ hồi - quay về extras-return -->
+            <a th:if="${bookingSession.roundTrip}"
+               class="btn btn-secondary"
+               th:href="@{/booking/services/extras-return(returnFlightId=${bookingSession.returnFlightId})}"
+               role="button">← Quay lại</a>
+            <!-- Vé một chiều - quay về extras -->
+            <a th:unless="${bookingSession.roundTrip}"
+               class="btn btn-secondary"
+               th:href="@{/booking/services/extras(flightId=${bookingSession.flightId})}"
+               role="button">← Quay lại</a>
+          </th:block>
+
+          <!-- Fallback cuối cùng nếu không có gì -->
+          <a th:if="${(booking == null or booking.tickets == null or booking.tickets.isEmpty()) and bookingSession == null}"
+             class="btn btn-secondary"
+             th:href="@{/}"
+             role="button">← Quay lại</a>
+
           <button type="submit" class="btn btn-primary">Tiến hành thanh toán →</button>
         </div>
       </form>
@@ -417,41 +467,201 @@
     <div class="sidebar">
       <h2>📊 Chi tiết thanh toán</h2>
 
-      <!-- Giá vé cơ bản -->
-      <div class="summary-item" th:if="${booking.tickets != null and !booking.tickets.isEmpty() and booking.tickets[0].flight != null}">
-        <span class="summary-label">Giá vé cơ bản</span>
-        <span class="summary-value" th:text="${#numbers.formatDecimal(booking.tickets[0].flight.basePrice * booking.tickets.size(), 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
-      </div>
+      <!-- ✅ TRƯỜNG HỢP 1: Đã có booking với tickets -->
+      <th:block th:if="${booking != null and booking.tickets != null and !booking.tickets.isEmpty()}">
+        <!-- Đếm số chuyến bay khác nhau -->
+        <th:block th:with="uniqueFlights=${#sets.toSet(booking.tickets.![flight.flightId])}">
+          <th:block th:if="${#sets.size(uniqueFlights) > 1}">
+            <!-- VÉ KHỨ HỒI - Hiển thị tách biệt cho từng chuyến -->
+            <div style="background: #e8f5e9; padding: 12px; border-radius: 6px; margin-bottom: 16px; text-align: center;">
+              <strong style="color: #00693E;">✈️ Vé Khứ Hồi</strong>
+            </div>
 
-      <!-- Phụ thu ghế Thương Gia -->
-      <th:block th:if="${booking.tickets != null}">
-        <th:block th:with="businessCount=${#lists.size(booking.tickets.?[seat != null and seat.seatClass == 'Business'])}">
-          <div class="summary-item" th:if="${businessCount > 0}">
+            <!-- Lấy danh sách chuyến bay duy nhất -->
+            <th:block th:each="currentFlightId, iterStat : ${uniqueFlights}">
+              <th:block th:with="
+                flightTickets=${booking.tickets.?[flight.flightId == #vars.currentFlightId]},
+                flight=${!flightTickets.isEmpty() ? flightTickets[0].flight : null},
+                businessCount=${#lists.size(flightTickets.?[seat != null and seat.seatClass == 'Business'])},
+                luggageTotal=${#aggregates.sum(flightTickets.![luggage != null ? luggage.price : 0])},
+                mealTotal=${#aggregates.sum(flightTickets.![meal != null ? meal.price : 0])}">
+
+                <!-- Tiêu đề chuyến bay -->
+                <div style="background: #f9fdf9; padding: 8px 12px; margin: 12px 0 8px 0; border-radius: 4px; border-left: 3px solid #00693E;">
+                  <strong th:text="${iterStat.index == 0 ? 'Chuyến đi' : 'Chuyến về'}">Chuyến đi</strong>
+                  <div style="font-size: 12px; color: #6b7280;" th:if="${flight != null}" th:text="${flight.flightId}">FL-001</div>
+                </div>
+
+                <!-- Giá vé cơ bản -->
+                <div class="summary-item" th:if="${flight != null}">
+                  <span class="summary-label">Giá vé cơ bản</span>
+                  <span class="summary-value" th:text="${#numbers.formatDecimal(flight.basePrice * flightTickets.size(), 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+                </div>
+
+                <!-- Phụ thu ghế Thương Gia -->
+                <div class="summary-item" th:if="${businessCount > 0}">
+                  <span class="summary-label">
+                    Phụ thu Thương Gia
+                    <span style="font-size: 12px; color: #00693E;">([[${businessCount}]] ghế)</span>
+                  </span>
+                  <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(businessCount * 1800000, 0, 'COMMA', 0, 'POINT')} + ' ₫'">+1,800,000 ₫</span>
+                </div>
+
+                <!-- Hành lý -->
+                <div class="summary-item" th:if="${luggageTotal > 0}">
+                  <span class="summary-label">Hành lý ký gửi</span>
+                  <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(luggageTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+                </div>
+
+                <!-- Suất ăn -->
+                <div class="summary-item" th:if="${mealTotal > 0}">
+                  <span class="summary-label">Suất ăn</span>
+                  <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(mealTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+                </div>
+              </th:block>
+            </th:block>
+          </th:block>
+
+          <!-- VÉ MỘT CHIỀU - Hiển thị bình thường -->
+          <th:block th:if="${#sets.size(uniqueFlights) == 1}">
+            <!-- Giá vé cơ bản -->
+            <div class="summary-item" th:if="${booking.tickets[0].flight != null}">
+              <span class="summary-label">Giá vé cơ bản</span>
+              <span class="summary-value" th:text="${#numbers.formatDecimal(booking.tickets[0].flight.basePrice * booking.tickets.size(), 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+            </div>
+
+            <!-- Phụ thu ghế Thương Gia -->
+            <th:block th:with="businessCount=${#lists.size(booking.tickets.?[seat != null and seat.seatClass == 'Business'])}">
+              <div class="summary-item" th:if="${businessCount > 0}">
+                <span class="summary-label">
+                  Phụ thu ghế Thương Gia
+                  <span style="font-size: 12px; color: #00693E;">([[${businessCount}]] ghế)</span>
+                </span>
+                <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(businessCount * 1800000, 0, 'COMMA', 0, 'POINT')} + ' ₫'">+1,800,000 ₫</span>
+              </div>
+            </th:block>
+
+            <!-- Dịch vụ hành lý -->
+            <th:block th:with="luggageTotal=${#aggregates.sum(booking.tickets.![luggage != null ? luggage.price : 0])}">
+              <div class="summary-item" th:if="${luggageTotal > 0}">
+                <span class="summary-label">Hành lý ký gửi</span>
+                <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(luggageTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+              </div>
+            </th:block>
+
+            <!-- Dịch vụ suất ăn -->
+            <th:block th:with="mealTotal=${#aggregates.sum(booking.tickets.![meal != null ? meal.price : 0])}">
+              <div class="summary-item" th:if="${mealTotal > 0}">
+                <span class="summary-label">Suất ăn</span>
+                <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(mealTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+              </div>
+            </th:block>
+          </th:block>
+        </th:block>
+      </th:block>
+
+      <!-- ✅ TRƯỜNG HỢP 2: Chưa có booking, chỉ có bookingSession (từ payment-preview) -->
+      <th:block th:if="${(booking == null or booking.tickets == null or booking.tickets.isEmpty()) and bookingSession != null}">
+        <!-- Kiểm tra vé khứ hồi -->
+        <th:block th:if="${bookingSession.roundTrip != null and bookingSession.roundTrip}">
+          <!-- VÉ KHỨ HỒI -->
+          <div style="background: #e8f5e9; padding: 12px; border-radius: 6px; margin-bottom: 16px; text-align: center;">
+            <strong style="color: #00693E;">✈️ Vé Khứ Hồi</strong>
+          </div>
+
+          <!-- CHUYẾN ĐI -->
+          <div style="background: #f9fdf9; padding: 8px 12px; margin: 12px 0 8px 0; border-radius: 4px; border-left: 3px solid #00693E;">
+            <strong>Chuyến đi</strong>
+            <div style="font-size: 12px; color: #6b7280;" th:text="${bookingSession.flightId}">FL-001</div>
+          </div>
+
+          <!-- Giá vé chuyến đi -->
+          <div class="summary-item" th:if="${outboundFlight != null}">
+            <span class="summary-label">Giá vé cơ bản</span>
+            <span class="summary-value" th:text="${#numbers.formatDecimal(outboundFlight.basePrice * bookingSession.passengerCount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+          </div>
+
+          <!-- Phụ thu ghế Business chuyến đi -->
+          <div class="summary-item" th:if="${outboundBusinessCount != null and outboundBusinessCount > 0}">
             <span class="summary-label">
-              Phụ thu ghế Thương Gia
-              <span style="font-size: 12px; color: #00693E;">([[${businessCount}]] ghế)</span>
+              Phụ thu Thương Gia
+              <span style="font-size: 12px; color: #00693E;">([[${outboundBusinessCount}]] ghế)</span>
             </span>
-            <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(businessCount * 1800000, 0, 'COMMA', 0, 'POINT')} + ' ₫'">+1,800,000 ₫</span>
+            <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(outboundBusinessCount * 1800000, 0, 'COMMA', 0, 'POINT')} + ' ₫'">+1,800,000 ₫</span>
           </div>
-        </th:block>
-      </th:block>
 
-      <!-- Dịch vụ hành lý -->
-      <th:block th:if="${booking.tickets != null}">
-        <th:block th:with="luggageTotal=${#aggregates.sum(booking.tickets.![luggage != null ? luggage.price : 0])}">
-          <div class="summary-item" th:if="${luggageTotal > 0}">
+          <!-- Hành lý chuyến đi -->
+          <div class="summary-item" th:if="${outboundLuggageTotal != null and outboundLuggageTotal > 0}">
             <span class="summary-label">Hành lý ký gửi</span>
-            <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(luggageTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+            <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(outboundLuggageTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+          </div>
+
+          <!-- Suất ăn chuyến đi -->
+          <div class="summary-item" th:if="${outboundMealTotal != null and outboundMealTotal > 0}">
+            <span class="summary-label">Suất ăn</span>
+            <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(outboundMealTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+          </div>
+
+          <!-- CHUYẾN VỀ -->
+          <div style="background: #f9fdf9; padding: 8px 12px; margin: 12px 0 8px 0; border-radius: 4px; border-left: 3px solid #00693E;">
+            <strong>Chuyến về</strong>
+            <div style="font-size: 12px; color: #6b7280;" th:text="${bookingSession.returnFlightId}">FL-002</div>
+          </div>
+
+          <!-- Giá vé chuyến về -->
+          <div class="summary-item" th:if="${returnFlight != null}">
+            <span class="summary-label">Giá vé cơ bản</span>
+            <span class="summary-value" th:text="${#numbers.formatDecimal(returnFlight.basePrice * bookingSession.passengerCount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+          </div>
+
+          <!-- Phụ thu ghế Business chuyến về -->
+          <div class="summary-item" th:if="${returnBusinessCount != null and returnBusinessCount > 0}">
+            <span class="summary-label">
+              Phụ thu Thương Gia
+              <span style="font-size: 12px; color: #00693E;">([[${returnBusinessCount}]] ghế)</span>
+            </span>
+            <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(returnBusinessCount * 1800000, 0, 'COMMA', 0, 'POINT')} + ' ₫'">+1,800,000 ₫</span>
+          </div>
+
+          <!-- Hành lý chuyến về -->
+          <div class="summary-item" th:if="${returnLuggageTotal != null and returnLuggageTotal > 0}">
+            <span class="summary-label">Hành lý ký gửi</span>
+            <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(returnLuggageTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+          </div>
+
+          <!-- Suất ăn chuyến về -->
+          <div class="summary-item" th:if="${returnMealTotal != null and returnMealTotal > 0}">
+            <span class="summary-label">Suất ăn</span>
+            <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(returnMealTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
           </div>
         </th:block>
-      </th:block>
 
-      <!-- Dịch vụ suất ăn -->
-      <th:block th:if="${booking.tickets != null}">
-        <th:block th:with="mealTotal=${#aggregates.sum(booking.tickets.![meal != null ? meal.price : 0])}">
-          <div class="summary-item" th:if="${mealTotal > 0}">
+        <!-- VÉ MỘT CHIỀU -->
+        <th:block th:if="${bookingSession.roundTrip == null or !bookingSession.roundTrip}">
+          <div class="summary-item" th:if="${outboundFlight != null}">
+            <span class="summary-label">Giá vé cơ bản</span>
+            <span class="summary-value" th:text="${#numbers.formatDecimal(outboundFlight.basePrice * bookingSession.passengerCount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+          </div>
+
+          <!-- Phụ thu ghế Business -->
+          <div class="summary-item" th:if="${outboundBusinessCount != null and outboundBusinessCount > 0}">
+            <span class="summary-label">
+              Phụ thu Thương Gia
+              <span style="font-size: 12px; color: #00693E;">([[${outboundBusinessCount}]] ghế)</span>
+            </span>
+            <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(outboundBusinessCount * 1800000, 0, 'COMMA', 0, 'POINT')} + ' ₫'">+1,800,000 ₫</span>
+          </div>
+
+          <!-- Hành lý -->
+          <div class="summary-item" th:if="${outboundLuggageTotal != null and outboundLuggageTotal > 0}">
+            <span class="summary-label">Hành lý ký gửi</span>
+            <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(outboundLuggageTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+          </div>
+
+          <!-- Suất ăn -->
+          <div class="summary-item" th:if="${outboundMealTotal != null and outboundMealTotal > 0}">
             <span class="summary-label">Suất ăn</span>
-            <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(mealTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
+            <span class="summary-value" style="color: #00693E;" th:text="'+' + ${#numbers.formatDecimal(outboundMealTotal, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</span>
           </div>
         </th:block>
       </th:block>
@@ -480,6 +690,7 @@
   </div>
 
   <script>
+
     document.querySelectorAll('.method').forEach(label => {
       label.addEventListener('click', (e) => {
         const radio = label.querySelector('input[type=radio]');

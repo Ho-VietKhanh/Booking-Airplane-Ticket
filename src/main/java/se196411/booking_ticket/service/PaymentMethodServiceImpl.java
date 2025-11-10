@@ -4,10 +4,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import se196411.booking_ticket.model.entity.PaymentMethodEntity;
 import se196411.booking_ticket.repository.PaymentMethodRepository;
+import se196411.booking_ticket.utils.RandomId;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -22,7 +22,7 @@ public class PaymentMethodServiceImpl implements PaymentMethodService {
     @Override
     public PaymentMethodEntity createPaymentMethod(PaymentMethodEntity paymentMethod) {
         if (paymentMethod.getPaymentMethodId() == null || paymentMethod.getPaymentMethodId().isBlank()) {
-            paymentMethod.setPaymentMethodId(UUID.randomUUID().toString());
+            paymentMethod.setPaymentMethodId("PM-" + RandomId.generateRandomId(2, 3)); // PM-AB123
         }
         return paymentMethodRepository.save(paymentMethod);
     }

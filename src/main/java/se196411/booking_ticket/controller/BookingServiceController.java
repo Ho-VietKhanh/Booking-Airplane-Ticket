@@ -10,6 +10,7 @@ import se196411.booking_ticket.model.dto.BookingSessionDTO;
 import se196411.booking_ticket.model.dto.PassengerInfoDTO;
 import se196411.booking_ticket.model.entity.*;
 import se196411.booking_ticket.service.*;
+import se196411.booking_ticket.utils.RandomId;
 
 import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
@@ -17,7 +18,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 @Controller
 @RequestMapping("/booking")
@@ -411,7 +411,7 @@ public class BookingServiceController {
 
             // Create a pending payment first (required for booking)
             PaymentEntity payment = new PaymentEntity();
-            payment.setPaymentId(UUID.randomUUID().toString());
+            payment.setPaymentId("PAY-" + RandomId.generateRandomId(2, 4)); // PAY-AB1234
             payment.setCreatedAt(LocalDateTime.now());
             payment.setStatus("PENDING");
             payment.setAmount(BigDecimal.ZERO); // Will be updated later
@@ -448,7 +448,7 @@ public class BookingServiceController {
 
             // Create booking
             BookingEntity booking = new BookingEntity();
-            booking.setBookingId(UUID.randomUUID().toString());
+            booking.setBookingId("BK-" + RandomId.generateRandomId(3, 3)); // BK-ABC123
             booking.setBookingTime(LocalDateTime.now());
             booking.setStatus("PENDING_PAYMENT");
             booking.setUser(currentUser); // ✅ Set user if logged in, null if guest
@@ -470,7 +470,7 @@ public class BookingServiceController {
 
             for (PassengerInfoDTO passengerDTO : bookingSession.getPassengers()) {
                 TicketEntity ticket = new TicketEntity();
-                ticket.setTicketId(UUID.randomUUID().toString());
+                ticket.setTicketId("TK-" + RandomId.generateRandomId(2, 4)); // TK-AB1234
                 ticket.setFlight(flight);
                 ticket.setBooking(savedBooking); // ✅ Use savedBooking (already persisted)
 

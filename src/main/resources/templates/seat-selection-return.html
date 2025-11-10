@@ -490,14 +490,14 @@
         const luggagePriceMap = new Map();
         /*[# th:if="${baggageOptions != null}"]*/
         /*[# th:each="luggage : ${baggageOptions}"]*/
-        luggagePriceMap.set(/*[[${luggage.id}]]*/ 0, /*[[${luggage.price}]]*/ 0);
+        luggagePriceMap.set(parseInt(/*[[${luggage.id}]]*/ 0), /*[[${luggage.price}]]*/ 0);
         /*[/]*/
         /*[/]*/
 
         const mealPriceMap = new Map();
         /*[# th:if="${mealOptions != null}"]*/
         /*[# th:each="meal : ${mealOptions}"]*/
-        mealPriceMap.set(/*[[${meal.id}]]*/ 0, /*[[${meal.price}]]*/ 0);
+        mealPriceMap.set(parseInt(/*[[${meal.id}]]*/ 0), /*[[${meal.price}]]*/ 0);
         /*[/]*/
         /*[/]*/
 

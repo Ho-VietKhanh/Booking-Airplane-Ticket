@@ -352,6 +352,42 @@
             </div>
         </div>
 
+        <!-- Return Flight Information (for round trip) -->
+        <div class="flight-info" th:if="${isRoundTrip and returnFlight != null}" style="background-color: #FFF3E0; border-left-color: #FF9800;">
+            <h2>✈️ Thông Tin Chuyến Bay Về</h2>
+            <div class="flight-details">
+                <div class="flight-item">
+                    <label>Mã chuyến bay:</label>
+                    <span th:text="${returnFlight.flightId}">VJ124</span>
+                </div>
+                <div class="flight-item">
+                    <label>Hành trình:</label>
+                    <span th:if="${returnFlight.flightRoute != null and returnFlight.flightRoute.startedAirport != null and returnFlight.flightRoute.endedAirport != null}"
+                          th:text="${returnFlight.flightRoute.startedAirport.place} + ' (' + ${returnFlight.flightRoute.startedAirport.code} + ') → ' + ${returnFlight.flightRoute.endedAirport.place} + ' (' + ${returnFlight.flightRoute.endedAirport.code} + ')'">TP. Hồ Chí Minh → Hà Nội</span>
+                </div>
+                <div class="flight-item">
+                    <label>Máy bay:</label>
+                    <span th:if="${returnFlight.airplane != null}" th:text="${returnFlight.airplane.model + ' - ' + returnFlight.airplane.airline}">Boeing 787</span>
+                </div>
+                <div class="flight-item">
+                    <label>Ngày bay:</label>
+                    <span th:text="${#temporals.format(returnFlight.startedTime, 'dd/MM/yyyy')}">05/11/2025</span>
+                </div>
+                <div class="flight-item">
+                    <label>Giờ khởi hành:</label>
+                    <span th:text="${#temporals.format(returnFlight.startedTime, 'HH:mm')}">18:00</span>
+                </div>
+                <div class="flight-item">
+                    <label>Giờ đến:</label>
+                    <span th:text="${#temporals.format(returnFlight.endedTime, 'HH:mm')}">20:15</span>
+                </div>
+                <div class="flight-item">
+                    <label>Giá vé cơ bản:</label>
+                    <span th:text="${#numbers.formatDecimal(returnFlight.basePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">1.500.000 VNĐ</span>
+                </div>
+            </div>
+        </div>
+
         <form id="bookingForm" th:action="@{/booking/passenger-info}" method="POST">
             <!-- Hidden field to pass flightId -->
             <input type="hidden" name="flightId" th:value="${flightId}" />
@@ -378,78 +414,8 @@
             <div class="form-section">
                 <h2>Thông Tin Hành Khách</h2>
 
-                <div class="passenger-card">
-                    <h3>👤 Hành khách 1 (Người lớn)</h3>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Danh xưng <span class="required">*</span></label>
-                            <select name="passenger1_title" required>
-                                <option value="">-- Chọn danh xưng --</option>
-                                <option value="Mr">Ông (Mr.)</option>
-                                <option value="Mrs">Bà (Mrs.)</option>
-                                <option value="Ms">Cô/Chị (Ms.)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Họ và tên đệm <span class="required">*</span></label>
-                            <input type="text" name="passenger1_lastName" placeholder="vd: NGUYEN VAN" required pattern="[A-Za-z\s]+" title="Chỉ nhập chữ cái">
-                        </div>
-                        <div class="form-group">
-                            <label>Tên <span class="required">*</span></label>
-                            <input type="text" name="passenger1_firstName" placeholder="vd: A" required pattern="[A-Za-z\s]+" title="Chỉ nhập chữ cái">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Ngày sinh <span class="required">*</span></label>
-                            <input type="date" name="passenger1_dob" required max="2025-11-03">
-                        </div>
-                        <div class="form-group">
-                            <label>Giới tính <span class="required">*</span></label>
-                            <div class="radio-group">
-                                <div class="radio-option">
-                                    <input type="radio" id="p1_male" name="passenger1_gender" value="male" required>
-                                    <label for="p1_male">Nam</label>
-                                </div>
-                                <div class="radio-option">
-                                    <input type="radio" id="p1_female" name="passenger1_gender" value="female">
-                                    <label for="p1_female">Nữ</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Số CMND/CCCD/Hộ chiếu</label>
-                            <input type="text" name="passenger1_idCard" placeholder="vd: 001234567890">
-                        </div>
-                        <div class="form-group">
-                            <label>Quốc tịch</label>
-                            <select name="passenger1_nationality">
-                                <option value="VN" selected>Việt Nam</option>
-                                <option value="US">Hoa Kỳ</option>
-                                <option value="UK">Anh</option>
-                                <option value="JP">Nhật Bản</option>
-                                <option value="KR">Hàn Quốc</option>
-                                <option value="CN">Trung Quốc</option>
-                                <option value="TH">Thái Lan</option>
-                                <option value="SG">Singapore</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Add more passengers button -->
-                <div style="text-align: center; margin-top: 20px;">
-                    <button type="button" class="btn btn-secondary" onclick="addPassenger(); return false;" style="cursor: pointer;">
-                        ➕ Thêm hành khách
-                    </button>
+                <div id="passengersContainer">
+                    <!-- Passengers will be dynamically generated here -->
                 </div>
             </div>
 
@@ -475,62 +441,32 @@
         </form>
     </div>
 
-    <script>
+    <script th:inline="javascript">
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing form');
 
-            let passengerCount = 1;
+            // Get passenger counts from Thymeleaf
+            const numAdults = /*[[${numAdults}]]*/ 1;
+            const numChildren = /*[[${numChildren}]]*/ 0;
 
-            // Make addPassenger global so onclick can access it
-            window.addPassenger = function() {
-                console.log('addPassenger called, current count:', passengerCount);
-                passengerCount++;
+            console.log('Number of adults:', numAdults);
+            console.log('Number of children:', numChildren);
 
-                // Try multiple ways to find the container
-                let container = document.querySelector('.passenger-card:last-of-type');
+            let passengerCount = 0;
 
-                if (!container) {
-                    // Fallback: find all passenger-card elements
-                    const allCards = document.querySelectorAll('.passenger-card');
-                    console.log('Found passenger cards:', allCards.length);
-                    if (allCards.length > 0) {
-                        container = allCards[allCards.length - 1];
-                      }
-                }
-
-                if (!container) {
-                    // Final fallback: insert after the last h3 containing "Hành khách"
-                    const h3Elements = document.querySelectorAll('h3');
-                    for (let i = h3Elements.length - 1; i >= 0; i--) {
-                        if (h3Elements[i].textContent.includes('Hành khách')) {
-                            container = h3Elements[i].closest('.passenger-card') || h3Elements[i].parentElement;
-                            break;
-                        }
-                    }
-                }
-
-                console.log('Found container:', container);
-
-                if (!container) {
-                    alert('Không tìm thấy passenger card! Vui lòng liên hệ hỗ trợ.');
-                    console.error('Cannot find passenger card container');
-                    return;
-                }
+            // Function to add an adult passenger form
+            function addAdultPassenger(index) {
+                const container = document.getElementById('passengersContainer');
+                const isFirst = index === 1;
 
                 const passengerHTML = `
-                <div class="passenger-card" id="passenger${passengerCount}">
-                    <h3>👤 Hành khách ${passengerCount} (Người lớn)
-                        <button type="button" onclick="removePassenger(${passengerCount})"
-                                style="float: right; background: #e74c3c; color: white; border: none;
-                                       padding: 5px 15px; border-radius: 5px; cursor: pointer;">
-                            ✕ Xóa
-                        </button>
-                    </h3>
+                <div class="passenger-card" id="passenger${index}">
+                    <h3>👤 Hành khách ${index} (Người lớn)</h3>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label>Danh xưng <span class="required">*</span></label>
-                            <select name="passenger${passengerCount}_title" required>
+                            <select name="passenger${index}_title" required>
                                 <option value="">-- Chọn danh xưng --</option>
                                 <option value="Mr">Ông (Mr.)</option>
                                 <option value="Mrs">Bà (Mrs.)</option>
@@ -542,29 +478,29 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Họ và tên đệm <span class="required">*</span></label>
-                            <input type="text" name="passenger${passengerCount}_lastName" placeholder="vd: NGUYEN VAN" required>
+                            <input type="text" name="passenger${index}_lastName" placeholder="vd: NGUYEN VAN" required pattern="[A-Za-z\\s]+" title="Chỉ nhập chữ cái">
                         </div>
                         <div class="form-group">
                             <label>Tên <span class="required">*</span></label>
-                            <input type="text" name="passenger${passengerCount}_firstName" placeholder="vd: A" required>
+                            <input type="text" name="passenger${index}_firstName" placeholder="vd: A" required pattern="[A-Za-z\\s]+" title="Chỉ nhập chữ cái">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label>Ngày sinh <span class="required">*</span></label>
-                            <input type="date" name="passenger${passengerCount}_dob" required max="2025-11-03">
+                            <input type="date" name="passenger${index}_dob" required max="2013-11-09">
                         </div>
                         <div class="form-group">
                             <label>Giới tính <span class="required">*</span></label>
                             <div class="radio-group">
                                 <div class="radio-option">
-                                    <input type="radio" id="p${passengerCount}_male" name="passenger${passengerCount}_gender" value="male" required>
-                                    <label for="p${passengerCount}_male">Nam</label>
+                                    <input type="radio" id="p${index}_male" name="passenger${index}_gender" value="male" required>
+                                    <label for="p${index}_male">Nam</label>
                                 </div>
                                 <div class="radio-option">
-                                    <input type="radio" id="p${passengerCount}_female" name="passenger${passengerCount}_gender" value="female">
-                                    <label for="p${passengerCount}_female">Nữ</label>
+                                    <input type="radio" id="p${index}_female" name="passenger${index}_gender" value="female">
+                                    <label for="p${index}_female">Nữ</label>
                                 </div>
                             </div>
                         </div>
@@ -573,11 +509,11 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Số CMND/CCCD/Hộ chiếu</label>
-                            <input type="text" name="passenger${passengerCount}_idCard" placeholder="vd: 001234567890">
+                            <input type="text" name="passenger${index}_idCard" placeholder="vd: 001234567890">
                         </div>
                         <div class="form-group">
                             <label>Quốc tịch</label>
-                            <select name="passenger${passengerCount}_nationality">
+                            <select name="passenger${index}_nationality">
                                 <option value="VN" selected>Việt Nam</option>
                                 <option value="US">Hoa Kỳ</option>
                                 <option value="UK">Anh</option>
@@ -590,74 +526,127 @@
                         </div>
                     </div>
                 </div>
-            `;
+                `;
 
-            container.insertAdjacentHTML('afterend', passengerHTML);
+                container.insertAdjacentHTML('beforeend', passengerHTML);
 
-            // Apply uppercase formatting to new name inputs
-            document.querySelectorAll(`[name="passenger${passengerCount}_lastName"], [name="passenger${passengerCount}_firstName"]`).forEach(input => {
-                input.addEventListener('input', function() {
-                    this.value = this.value.toUpperCase();
+                // Apply uppercase formatting
+                document.querySelectorAll(`[name="passenger${index}_lastName"], [name="passenger${index}_firstName"]`).forEach(input => {
+                    input.addEventListener('input', function() {
+                        this.value = this.value.toUpperCase();
+                    });
                 });
-            });
-
-            console.log('Added passenger ' + passengerCount);
-            alert('Đã thêm hành khách ' + passengerCount);
-        }
-
-        window.removePassenger = function(id) {
-            const passenger = document.getElementById(`passenger${id}`);
-            if (passenger) {
-                passenger.remove();
-                console.log('Removed passenger ' + id);
             }
-        }
 
-        // Form validation before submit
-        document.getElementById('bookingForm').addEventListener('submit', function(e) {
-            // Validate all required fields
-            const requiredFields = this.querySelectorAll('[required]');
-            let isValid = true;
+            // Function to add a child passenger form (simplified)
+            function addChildPassenger(index) {
+                const container = document.getElementById('passengersContainer');
 
-            requiredFields.forEach(field => {
-                if (!field.value && field.type !== 'radio') {
-                    isValid = false;
-                    field.style.borderColor = '#e74c3c';
-                } else if (field.type === 'radio') {
-                    const radioGroup = this.querySelectorAll(`[name="${field.name}"]`);
-                    const checked = Array.from(radioGroup).some(r => r.checked);
-                    if (!checked) {
+                const passengerHTML = `
+                <div class="passenger-card" id="passenger${index}" style="background: #fff3e0; border-color: #ff9800;">
+                    <h3>👶 Hành khách ${index} (Trẻ em từ 2 đến 11 tuổi)</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Họ và tên đệm <span class="required">*</span></label>
+                            <input type="text" name="passenger${index}_lastName" placeholder="vd: NGUYEN VAN" required pattern="[A-Za-z\\s]+" title="Chỉ nhập chữ cái">
+                        </div>
+                        <div class="form-group">
+                            <label>Tên <span class="required">*</span></label>
+                            <input type="text" name="passenger${index}_firstName" placeholder="vd: B" required pattern="[A-Za-z\\s]+" title="Chỉ nhập chữ cái">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Ngày sinh <span class="required">*</span></label>
+                            <input type="date" name="passenger${index}_dob" required min="2014-11-09" max="2023-11-09">
+                        </div>
+                        <div class="form-group">
+                            <label>Giới tính <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="p${index}_male" name="passenger${index}_gender" value="male" required>
+                                    <label for="p${index}_male">Nam</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="p${index}_female" name="passenger${index}_gender" value="female">
+                                    <label for="p${index}_female">Nữ</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="passenger${index}_title" value="Master">
+                    <input type="hidden" name="passenger${index}_idCard" value="">
+                    <input type="hidden" name="passenger${index}_nationality" value="VN">
+                </div>
+                `;
+
+                container.insertAdjacentHTML('beforeend', passengerHTML);
+
+                // Apply uppercase formatting
+                document.querySelectorAll(`[name="passenger${index}_lastName"], [name="passenger${index}_firstName"]`).forEach(input => {
+                    input.addEventListener('input', function() {
+                        this.value = this.value.toUpperCase();
+                    });
+                });
+            }
+
+            // Generate forms for all adults
+            for (let i = 1; i <= numAdults; i++) {
+                addAdultPassenger(i);
+                passengerCount = i;
+            }
+
+            // Generate forms for all children
+            for (let i = 1; i <= numChildren; i++) {
+                passengerCount++;
+                addChildPassenger(passengerCount);
+            }
+
+            console.log('Generated ' + passengerCount + ' passenger forms');
+
+            // Form validation before submit
+            document.getElementById('bookingForm').addEventListener('submit', function(e) {
+                const requiredFields = this.querySelectorAll('[required]');
+                let isValid = true;
+
+                requiredFields.forEach(field => {
+                    if (!field.value && field.type !== 'radio') {
                         isValid = false;
+                        field.style.borderColor = '#e74c3c';
+                    } else if (field.type === 'radio') {
+                        const radioGroup = this.querySelectorAll(`[name="${field.name}"]`);
+                        const checked = Array.from(radioGroup).some(r => r.checked);
+                        if (!checked) {
+                            isValid = false;
+                        }
+                    } else {
+                        field.style.borderColor = '#e0e0e0';
                     }
-                } else {
-                    field.style.borderColor = '#e0e0e0';
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+                    return;
+                }
+
+                if (!document.getElementById('terms').checked) {
+                    e.preventDefault();
+                    alert('Vui lòng đồng ý với điều khoản và điều kiện!');
+                    return;
                 }
             });
 
-            if (!isValid) {
-                e.preventDefault();
-                alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
-                return;
+            // Format phone input
+            const phoneInput = document.querySelector('input[name="phone"]');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function(e) {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
             }
-
-            if (!document.getElementById('terms').checked) {
-                e.preventDefault();
-                alert('Vui lòng đồng ý với điều khoản và điều kiện!');
-                return;
-            }
-        });
-
-        // Format phone input
-        document.querySelector('input[name="phone"]').addEventListener('input', function(e) {
-            this.value = this.value.replace(/[^0-9]/g, '');
-        });
-
-        // Convert name to uppercase
-        document.querySelectorAll('input[name*="_lastName"], input[name*="_firstName"]').forEach(input => {
-            input.addEventListener('input', function() {
-                this.value = this.value.toUpperCase();
-            });
-        });
 
         }); // End of DOMContentLoaded
     </script>

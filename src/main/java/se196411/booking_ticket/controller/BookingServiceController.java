@@ -62,13 +62,43 @@ public class BookingServiceController {
     // Screen 0: Passenger Information Form
     @GetMapping("/passenger-info")
     public String showPassengerInfoForm(@RequestParam(required = false) String flightId,
+                                        @RequestParam(required = false) String outboundFlightId,
+                                        @RequestParam(required = false) String returnFlightId,
+                                        @RequestParam(defaultValue = "1") int adults,
+                                        @RequestParam(defaultValue = "0") int children,
                                         Model model) {
-        String actualFlightId = flightId != null ? flightId : "FL-001";
+        // Determine if this is a round trip or one way
+        boolean isRoundTrip = (outboundFlightId != null && returnFlightId != null);
+
+        String actualFlightId;
+        if (isRoundTrip) {
+            actualFlightId = outboundFlightId;
+            model.addAttribute("outboundFlightId", outboundFlightId);
+            model.addAttribute("returnFlightId", returnFlightId);
+            model.addAttribute("isRoundTrip", true);
+
+            // Load return flight info
+            try {
+                se196411.booking_ticket.model.entity.FlightsEntity returnFlight =
+                    flightsRepository.findById(returnFlightId).orElse(null);
+                model.addAttribute("returnFlight", returnFlight);
+            } catch (Exception e) {
+                System.err.println("Error loading return flight: " + e.getMessage());
+                model.addAttribute("returnFlight", null);
+            }
+        } else {
+            actualFlightId = flightId != null ? flightId : "FL-001";
+            model.addAttribute("isRoundTrip", false);
+        }
+
         model.addAttribute("flightId", actualFlightId);
+        model.addAttribute("numAdults", adults);
+        model.addAttribute("numChildren", children);
 
         // Load flight entity with full nested information (flightRoute, airports, airplane)
         try {
-            se196411.booking_ticket.model.entity.FlightsEntity flight = flightsRepository.findById(actualFlightId).orElse(null);
+            se196411.booking_ticket.model.entity.FlightsEntity flight =
+                flightsRepository.findById(actualFlightId).orElse(null);
             if (flight != null) {
                 model.addAttribute("flight", flight);
             } else {

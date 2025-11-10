@@ -726,6 +726,42 @@
                             </label>
                             <input type="date" class="form-control" name="returnDate" id="returnDate">
                         </div>
+
+                        <!-- Number of Adults -->
+                        <div class="col-md-6">
+                            <label for="numAdults" class="form-label">
+                                <i class="fas fa-user"></i> Số người lớn (≥12 tuổi)
+                            </label>
+                            <select class="form-select" name="numAdults" id="numAdults" required>
+                                <option value="1" selected>1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                            </select>
+                        </div>
+
+                        <!-- Number of Children -->
+                        <div class="col-md-6">
+                            <label for="numChildren" class="form-label">
+                                <i class="fas fa-child"></i> Số trẻ em (2-11 tuổi)
+                            </label>
+                            <select class="form-select" name="numChildren" id="numChildren" required>
+                                <option value="0" selected>0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="text-center mt-4">
@@ -973,9 +1009,108 @@
         return new Intl.NumberFormat('vi-VN').format(price);
     }
 
+    // State for selected flights (for round trip)
+    let selectedFlights = {
+        outbound: null,
+        return: null,
+        tripType: 'oneWay'
+    };
+
+    // Initialize passenger counts with default values
+    window.passengerCounts = {
+        adults: 1,
+        children: 0
+    };
+
+    // Function to select outbound flight
+    function selectOutboundFlight(flightId) {
+        selectedFlights.outbound = flightId;
+        console.log('Selected outbound flight:', flightId);
+
+        // Get current passenger counts from form or use defaults
+        const adults = window.passengerCounts?.adults || document.getElementById('numAdults')?.value || 1;
+        const children = window.passengerCounts?.children || document.getElementById('numChildren')?.value || 0;
+
+        // Highlight selected card
+        document.querySelectorAll('#outboundFlightsList .flight-card').forEach(card => {
+            card.style.border = '2px solid #e0e0e0';
+        });
+        const selectedCard = document.getElementById('outbound-' + flightId);
+        if (selectedCard) {
+            selectedCard.style.border = '3px solid var(--bamboo-green)';
+        }
+
+        // If one way, proceed directly
+        if (selectedFlights.tripType === 'oneWay') {
+            console.log('One way trip - redirecting...');
+            const url = `/booking/passenger-info?flightId=${flightId}&adults=${adults}&children=${children}`;
+            console.log('Redirect URL:', url);
+            window.location.href = url;
+        } else {
+            // Round trip - check if return flight is also selected
+            console.log('Round trip - checking if both flights selected');
+            checkAndProceed();
+        }
+    }
+
+    // Function to select return flight
+    function selectReturnFlight(flightId) {
+        selectedFlights.return = flightId;
+        console.log('Selected return flight:', flightId);
+
+        // Highlight selected card
+        document.querySelectorAll('#returnFlightsList .flight-card').forEach(card => {
+            card.style.border = '2px solid #e0e0e0';
+        });
+        const selectedCard = document.getElementById('return-' + flightId);
+        if (selectedCard) {
+            selectedCard.style.border = '3px solid var(--bamboo-green)';
+        }
+
+        // Check if both flights are selected
+        checkAndProceed();
+    }
+
+    // Function to check if both flights selected and proceed
+    function checkAndProceed() {
+        console.log('Checking flights - outbound:', selectedFlights.outbound, 'return:', selectedFlights.return);
+
+        // Get current passenger counts from form or use defaults
+        const adults = window.passengerCounts?.adults || document.getElementById('numAdults')?.value || 1;
+        const children = window.passengerCounts?.children || document.getElementById('numChildren')?.value || 0;
+
+        if (selectedFlights.outbound && selectedFlights.return) {
+            // Both flights selected, proceed immediately without confirm popup
+            const url = `/booking/passenger-info?outboundFlightId=${selectedFlights.outbound}&returnFlightId=${selectedFlights.return}&adults=${adults}&children=${children}`;
+            console.log('Redirecting to:', url);
+
+            // Use try-catch to handle any redirect errors
+            try {
+                window.location.href = url;
+            } catch (error) {
+                console.error('Redirect error:', error);
+                alert('Có lỗi xảy ra khi chuyển trang. Vui lòng thử lại.');
+            }
+        } else if (selectedFlights.tripType === 'roundTrip') {
+            // Show message to select both flights
+            if (!selectedFlights.outbound) {
+                alert('Vui lòng chọn chuyến bay đi');
+            } else if (!selectedFlights.return) {
+                alert('Vui lòng chọn chuyến bay về');
+            }
+        }
+    }
+
     // AJAX form submission
     document.getElementById('searchForm').addEventListener('submit', function(e) {
         e.preventDefault();
+
+        // Reset selected flights
+        selectedFlights = {
+            outbound: null,
+            return: null,
+            tripType: document.querySelector('input[name="tripType"]:checked').value
+        };
 
         // Show results container and loading spinner
         const resultsContainer = document.getElementById('resultsContainer');
@@ -989,6 +1124,12 @@
 
         // Get form data
         const formData = new FormData(this);
+
+        // Store passenger counts for later use
+        window.passengerCounts = {
+            adults: formData.get('numAdults'),
+            children: formData.get('numChildren')
+        };
 
         // Send AJAX request
         fetch('/dashboard/search', {
@@ -1009,7 +1150,7 @@
                 document.getElementById('outboundResults').style.display = 'block';
                 data.outboundFlights.forEach(flight => {
                     const flightHTML = `
-                        <div class="flight-card">
+                        <div class="flight-card" id="outbound-${flight.flightId}" style="cursor: default;">
                             <div class="row align-items-center">
                                 <div class="col-md-8">
                                     <div class="d-flex align-items-center mb-3">
@@ -1053,10 +1194,10 @@
                                 <div class="col-md-4 text-end">
                                     <div class="price-badge">${formatPrice(flight.basePrice)} VNĐ</div>
                                     <div class="text-muted mb-3">Giá vé / khách</div>
-                                    <a href="/booking/passenger-info?flightId=${flight.flightId}"
-                                       class="btn btn-book">
+                                    <button onclick="selectOutboundFlight('${flight.flightId}'); event.stopPropagation();"
+                                            class="btn btn-book" style="cursor: pointer;">
                                         <i class="fas fa-ticket-alt"></i> Đặt vé ngay
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -1072,7 +1213,7 @@
                 document.getElementById('returnResults').style.display = 'block';
                 data.returnFlights.forEach(flight => {
                     const flightHTML = `
-                        <div class="flight-card">
+                        <div class="flight-card" id="return-${flight.flightId}" style="cursor: default;">
                             <div class="row align-items-center">
                                 <div class="col-md-8">
                                     <div class="d-flex align-items-center mb-3">
@@ -1116,10 +1257,10 @@
                                 <div class="col-md-4 text-end">
                                     <div class="price-badge">${formatPrice(flight.basePrice)} VNĐ</div>
                                     <div class="text-muted mb-3">Giá vé / khách</div>
-                                    <a href="/booking/passenger-info?flightId=${flight.flightId}"
-                                       class="btn btn-book">
+                                    <button onclick="selectReturnFlight('${flight.flightId}'); event.stopPropagation();"
+                                            class="btn btn-book" style="cursor: pointer;">
                                         <i class="fas fa-ticket-alt"></i> Đặt vé ngay
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
                         </div>

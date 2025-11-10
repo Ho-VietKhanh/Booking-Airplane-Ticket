@@ -452,9 +452,9 @@
             <div id="hiddenInputsContainer"></div>
 
             <div class="action-buttons">
-                <button type="button" class="btn btn-secondary" onclick="history.back()">
+                <a th:href="@{/booking/passenger-info(flightId=${flightId})}" class="btn btn-secondary">
                     ⬅ Quay lại
-                </button>
+                </a>
                 <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
                     Tiếp tục ➡
                 </button>

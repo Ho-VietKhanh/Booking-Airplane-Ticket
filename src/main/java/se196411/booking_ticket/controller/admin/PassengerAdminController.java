@@ -32,6 +32,17 @@ public class PassengerAdminController {
             tickets = ticketRepository.findAllWithDetails();
         }
 
+        // Sort tickets by booking time descending (newest first)
+        if (tickets != null) {
+            tickets.sort((t1, t2) -> {
+                if (t1.getBooking() != null && t2.getBooking() != null &&
+                    t1.getBooking().getBookingTime() != null && t2.getBooking().getBookingTime() != null) {
+                    return t2.getBooking().getBookingTime().compareTo(t1.getBooking().getBookingTime());
+                }
+                return 0;
+            });
+        }
+
         // Count tickets by status (add null check)
         long bookedCount = 0;
         long heldCount = 0;

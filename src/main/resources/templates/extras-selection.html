@@ -250,6 +250,18 @@
             <h3>Thông tin chuyến bay</h3>
             <p>Mã chuyến bay: <strong th:text="${flightId}">FL-001</strong></p>
             <p>Số hành khách: <strong th:text="${passengerCount}">1</strong></p>
+
+            <!-- ✅ THÊM PHẦN HIỂN THỊ TỔNG TIỀN -->
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #00693E;">
+                <h4 style="color: #00693E; margin-bottom: 10px;">Tổng chi phí hiện tại:</h4>
+                <div style="font-size: 28px; font-weight: bold; color: #00693E; margin-bottom: 10px;" id="totalPrice">
+                    0 ₫
+                </div>
+                <div id="priceBreakdown" style="font-size: 14px; color: #666;">
+                    <div id="seatPriceInfo"></div>
+                    <div id="extrasPriceInfo"></div>
+                </div>
+            </div>
         </div>
 
         <div class="title">
@@ -257,7 +269,7 @@
             <p>Chọn hành lý và suất ăn cho từng hành khách</p>
         </div>
 
-        <form th:action="@{/booking/services/extras/submit}" method="post">
+        <form th:action="@{/booking/services/extras/submit}" method="post" id="extrasForm">
             <input type="hidden" name="flightId" th:value="${flightId}" />
 
             <!-- Loop through passengers from session -->
@@ -361,6 +373,207 @@
             </div>
         </form>
     </div>
+
+    <!-- Hidden data elements for JavaScript -->
+    <div id="serverData" style="display: none;"
+         th:attr="data-passenger-count=${passengerCount},
+                  data-base-price=${flight != null ? flight.basePrice : 0},
+                  data-passenger-seats=${session.bookingSession != null and session.bookingSession.passengers != null ? #strings.arrayJoin(session.bookingSession.passengers.![seatId ?: ''], ',') : ''},
+                  data-seat-class-map=${seats != null ? #strings.arrayJoin(seats.![seatId + ':' + seatClass], '|') : ''},
+                  data-luggage-prices=${baggageOptions != null ? #strings.arrayJoin(baggageOptions.![id + ':' + price], '|') : ''},
+                  data-meal-prices=${mealOptions != null ? #strings.arrayJoin(mealOptions.![id + ':' + price], '|') : ''}">
+    </div>
+
+    <script>
+        // ✅ Lấy dữ liệu từ server qua data attributes
+        var serverData = document.getElementById('serverData');
+        var passengerCount = parseInt(serverData.getAttribute('data-passenger-count') || '1');
+        var businessSurcharge = 1800000; // 1.8 triệu VND
+        var basePrice = parseInt(serverData.getAttribute('data-base-price') || '0');
+
+        console.log('📊 Dữ liệu từ server:');
+        console.log('- Số hành khách:', passengerCount);
+        console.log('- Giá vé gốc:', basePrice);
+        console.log('- Phụ thu Business:', businessSurcharge);
+
+        // ✅ Parse passenger seats
+        var passengerSeats = [];
+        var seatsStr = serverData.getAttribute('data-passenger-seats') || '';
+        if (seatsStr) {
+            passengerSeats = seatsStr.split(',');
+        }
+
+        console.log('- Ghế đã chọn:', passengerSeats);
+
+        // ✅ Parse seat class map
+        var seatClassMap = {};
+        var seatClassStr = serverData.getAttribute('data-seat-class-map') || '';
+        if (seatClassStr) {
+            seatClassStr.split('|').forEach(function(item) {
+                if (item) {
+                    var parts = item.split(':');
+                    if (parts.length === 2) {
+                        seatClassMap[parts[0]] = parts[1];
+                    }
+                }
+            });
+        }
+
+        console.log('- Map loại ghế:', seatClassMap);
+        console.log('- Nội dung seatClassMap (5 ghế đầu):', Object.entries(seatClassMap).slice(0, 5));
+
+        // ✅ Parse luggage prices
+        var luggagePriceMap = {};
+        var luggagePricesStr = serverData.getAttribute('data-luggage-prices') || '';
+        if (luggagePricesStr) {
+            luggagePricesStr.split('|').forEach(function(item) {
+                if (item) {
+                    var parts = item.split(':');
+                    if (parts.length === 2) {
+                        luggagePriceMap[parseInt(parts[0])] = parseFloat(parts[1]);
+                    }
+                }
+            });
+        }
+
+        // ✅ Parse meal prices
+        var mealPriceMap = {};
+        var mealPricesStr = serverData.getAttribute('data-meal-prices') || '';
+        if (mealPricesStr) {
+            mealPricesStr.split('|').forEach(function(item) {
+                if (item) {
+                    var parts = item.split(':');
+                    if (parts.length === 2) {
+                        mealPriceMap[parseInt(parts[0])] = parseFloat(parts[1]);
+                    }
+                }
+            });
+        }
+
+        console.log('- Map giá hành lý:', luggagePriceMap);
+        console.log('- Map giá suất ăn:', mealPriceMap);
+
+        // ✅ Hàm tính tổng tiền
+        function calculateTotalPrice() {
+            var seatSurcharge = 0;
+            var businessCount = 0;
+            var economyCount = 0;
+
+            // Tính phụ thu ghế Thương Gia
+            for (var i = 0; i < passengerSeats.length; i++) {
+                var seatId = passengerSeats[i];
+                if (seatId && seatId !== '' && seatId !== 'null') {
+                    var seatClass = seatClassMap[seatId];
+                    console.log('Ghế hành khách', i, ':', seatId, '- Loại:', seatClass);
+
+                    if (seatClass === 'Business') {
+                        seatSurcharge += businessSurcharge;
+                        businessCount++;
+                    } else {
+                        economyCount++;
+                    }
+                }
+            }
+
+            // Tính tiền dịch vụ bổ sung
+            var luggageTotal = 0;
+            var mealTotal = 0;
+
+            for (var i = 0; i < passengerCount; i++) {
+                // Luggage
+                var luggageRadio = document.querySelector('input[name="passenger_' + i + '_luggage"]:checked');
+                if (luggageRadio && luggageRadio.value && luggageRadio.value !== '') {
+                    var luggageId = parseInt(luggageRadio.value);
+                    var price = luggagePriceMap[luggageId];
+                    if (price) luggageTotal += price;
+                }
+
+                // Meal
+                var mealRadio = document.querySelector('input[name="passenger_' + i + '_meal"]:checked');
+                if (mealRadio && mealRadio.value && mealRadio.value !== '') {
+                    var mealId = parseInt(mealRadio.value);
+                    var price = mealPriceMap[mealId];
+                    if (price) mealTotal += price;
+                }
+            }
+
+            // ✅ TỔNG = (Giá vé gốc × số hành khách) + Phụ thu ghế Thương Gia + Dịch vụ
+            var baseTicketTotal = basePrice * passengerCount;
+            var total = baseTicketTotal + seatSurcharge + luggageTotal + mealTotal;
+
+            console.log('💰 Tính toán giá:');
+            console.log('- Tiền vé gốc:', baseTicketTotal, '(' + passengerCount + ' × ' + basePrice + ')');
+            console.log('- Phụ thu Business:', seatSurcharge, '(' + businessCount + ' ghế)');
+            console.log('- Hành lý:', luggageTotal);
+            console.log('- Suất ăn:', mealTotal);
+            console.log('- TỔNG:', total);
+
+            return {
+                baseTicketTotal: baseTicketTotal,
+                seatSurcharge: seatSurcharge,
+                businessCount: businessCount,
+                economyCount: economyCount,
+                luggageTotal: luggageTotal,
+                mealTotal: mealTotal,
+                total: total
+            };
+        }
+
+        // ✅ Hàm cập nhật hiển thị giá
+        function updatePriceDisplay() {
+            var priceInfo = calculateTotalPrice();
+
+            var totalPriceElement = document.getElementById('totalPrice');
+            if (totalPriceElement) {
+                totalPriceElement.textContent = priceInfo.total.toLocaleString('vi-VN') + ' ₫';
+            }
+
+            // Hiển thị chi tiết
+            var seatPriceInfo = document.getElementById('seatPriceInfo');
+            if (seatPriceInfo) {
+                var seatText = '• Vé máy bay: ' + passengerCount + ' × ' + basePrice.toLocaleString('vi-VN') + ' ₫ = ' + priceInfo.baseTicketTotal.toLocaleString('vi-VN') + ' ₫\n';
+
+                if (priceInfo.businessCount > 0) {
+                    seatText += '• Phụ thu ghế Thương Gia: ' + priceInfo.businessCount + ' × 1,800,000 ₫ = +' + priceInfo.seatSurcharge.toLocaleString('vi-VN') + ' ₫\n';
+                }
+
+                seatPriceInfo.textContent = seatText;
+                seatPriceInfo.style.whiteSpace = 'pre-line';
+            }
+
+            var extrasPriceInfo = document.getElementById('extrasPriceInfo');
+            if (extrasPriceInfo) {
+                var extrasText = '';
+                if (priceInfo.luggageTotal > 0) {
+                    extrasText += '• Hành lý: +' + priceInfo.luggageTotal.toLocaleString('vi-VN') + ' ₫';
+                }
+                if (priceInfo.mealTotal > 0) {
+                    if (extrasText) extrasText += '\n';
+                    extrasText += '• Suất ăn: +' + priceInfo.mealTotal.toLocaleString('vi-VN') + ' ₫';
+                }
+                extrasPriceInfo.textContent = extrasText;
+                extrasPriceInfo.style.whiteSpace = 'pre-line';
+            }
+
+            console.log('✅ Đã cập nhật giá lên giao diện');
+        }
+
+        // ✅ Lắng nghe sự kiện thay đổi
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ Trang đã load xong, bắt đầu tính giá...');
+
+            // Lắng nghe tất cả radio buttons
+            var allRadios = document.querySelectorAll('input[type="radio"]');
+            allRadios.forEach(function(radio) {
+                radio.addEventListener('change', function() {
+                    console.log('🔄 Người dùng thay đổi lựa chọn, cập nhật giá...');
+                    updatePriceDisplay();
+                });
+            });
+
+            // Hiển thị giá ban đầu
+            updatePriceDisplay();
+        });
+    </script>
 </body>
 </html>
-

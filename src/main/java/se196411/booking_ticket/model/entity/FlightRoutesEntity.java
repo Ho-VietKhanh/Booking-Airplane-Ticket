@@ -16,10 +16,10 @@ public class FlightRoutesEntity {
     @Id
     @Column(name = "flight_routes_id", nullable = false)
     String flightRoutesId;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "started_airport_id", nullable = false)
     private AirportsEntity startedAirport;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ended_airport_id", nullable = false)
     private AirportsEntity endedAirport;
     @OneToMany(mappedBy = "flightRoute")

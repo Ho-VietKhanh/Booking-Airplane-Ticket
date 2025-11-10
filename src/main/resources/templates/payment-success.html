@@ -4,32 +4,403 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Payment Success</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán thành công - Bamboo Airways</title>
     <style>
-        body{font-family:Arial, sans-serif;background:#f5f5f5;}
-        .box{max-width:800px;margin:80px auto;background:#fff;padding:28px;border-radius:8px;text-align:left;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
-        .ok{color:#00693E;font-weight:bold;}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+        }
+
+        .success-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 48px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, #00693E, #0a8f52);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: white;
+            box-shadow: 0 8px 24px rgba(0,105,62,0.3);
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #00693E;
+            margin-bottom: 12px;
+        }
+
+        .success-subtitle {
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 32px;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, #00693E, transparent);
+            margin: 32px 0;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin: 32px 0;
+            text-align: left;
+        }
+
+        .info-card {
+            background: #f9fdf9;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #c8e6c9;
+        }
+
+        .info-label {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 18px;
+            color: #1f2933;
+            font-weight: 700;
+        }
+
+        .amount-highlight {
+            color: #00693E;
+            font-size: 28px;
+        }
+
+        .details-section {
+            background: #fff;
+            border: 2px solid #e8f5e9;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 24px 0;
+            text-align: left;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #00693E;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e6e9ea;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .detail-value {
+            color: #1f2933;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 32px;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #00693E;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0,105,62,0.3);
+        }
+
+        .btn-primary:hover {
+            background: #005030;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,105,62,0.4);
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #00693E;
+            border: 2px solid #00693E;
+        }
+
+        .btn-secondary:hover {
+            background: #f9fdf9;
+        }
+
+        .notice-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin: 24px 0;
+            text-align: left;
+        }
+
+        .notice-title {
+            font-weight: 700;
+            color: #856404;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notice-text {
+            font-size: 14px;
+            color: #856404;
+            line-height: 1.6;
+        }
+
+        .qr-section {
+            background: #f9fdf9;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 24px 0;
+            border: 2px dashed #00693E;
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            background: white;
+            border: 4px solid #00693E;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+        }
+
+        .qr-label {
+            text-align: center;
+            margin-top: 16px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .success-card {
+                padding: 32px 20px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
-<div class="box">
-    <h2 class="ok">Payment completed successfully</h2>
+    <div class="container">
+        <div class="success-card">
+            <div class="success-icon">✓</div>
 
-    <div th:if="${payment != null}">
-        <p>Payment ID: <strong th:text="${payment.paymentId}">-</strong></p>
-        <p>Amount: <strong th:text="${#numbers.formatDecimal(payment.amount,0,'COMMA',0,'POINT')} + ' VND'">0 VND</strong></p>
-        <p>Method: <strong th:text="${payment.paymentMethod.paymentMethodName}">-</strong></p>
-        <p>Paid at: <strong th:text="${payment.paidAt}">-</strong></p>
+            <h1 class="success-title">Thanh toán thành công!</h1>
+            <p class="success-subtitle">
+                Cảm ơn bạn đã đặt vé với Bamboo Airways. Thông tin đặt chỗ đã được gửi đến email của bạn.
+            </p>
+
+            <div class="divider"></div>
+
+            <!-- Payment Information -->
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-label">Mã thanh toán</div>
+                    <div class="info-value" th:text="${payment != null ? payment.paymentId : '-'}">PAY-001</div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-label">Số tiền</div>
+                    <div class="info-value amount-highlight"
+                         th:text="${payment != null ? #numbers.formatDecimal(payment.amount, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">
+                        8,008,000 ₫
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-label">Phương thức</div>
+                    <div class="info-value" th:text="${payment != null and payment.paymentMethod != null ? payment.paymentMethod.paymentMethodName : '-'}">
+                        VNPay
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-label">Thời gian</div>
+                    <div class="info-value" th:text="${payment != null and payment.paidAt != null ? #temporals.format(payment.paidAt, 'dd/MM/yyyy HH:mm') : '-'}">
+                        10/11/2025 20:15
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Details -->
+            <div class="details-section" th:if="${booking != null}">
+                <div class="section-title">
+                    Thông tin đặt chỗ
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Mã đặt chỗ</span>
+                    <span class="detail-value" th:text="${booking.bookingId}">BK-001</span>
+                </div>
+
+                <div class="detail-row" th:if="${booking.tickets != null and !booking.tickets.isEmpty() and booking.tickets[0].flight != null}">
+                    <span class="detail-label">Chuyến bay</span>
+                    <span class="detail-value" th:text="${booking.tickets[0].flight.flightId}">FL-001</span>
+                </div>
+
+                <div class="detail-row" th:if="${booking.tickets != null and !booking.tickets.isEmpty() and booking.tickets[0].flight != null and booking.tickets[0].flight.flightRoute != null}">
+                    <span class="detail-label">Hành trình</span>
+                    <span class="detail-value" th:text="${booking.tickets[0].flight.flightRoute.startedAirport.code + ' → ' + booking.tickets[0].flight.flightRoute.endedAirport.code}">
+                        HAN → SGN
+                    </span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Số hành khách</span>
+                    <span class="detail-value" th:text="${booking.tickets != null ? booking.tickets.size() : 0}">1</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Trạng thái</span>
+                    <span class="detail-value" style="color: #00693E; font-weight: 700;">
+                        <span th:text="${booking.status}">CONFIRMED</span> ✓
+                    </span>
+                </div>
+            </div>
+
+            <!-- QR Code for Boarding Pass -->
+            <div class="qr-section">
+                <div class="section-title" style="text-align: center; justify-content: center; margin-bottom: 16px;">
+                    Mã QR lên máy bay
+                </div>
+                <div class="qr-code">
+                    🎫
+                </div>
+                <p class="qr-label">
+                    Vui lòng xuất trình mã này tại quầy check-in hoặc cổng lên máy bay
+                </p>
+            </div>
+
+            <!-- Important Notice -->
+            <div class="notice-box">
+                <div class="notice-title">
+                    Lưu ý quan trọng
+                </div>
+                <div class="notice-text">
+                    • Vui lòng có mặt tại sân bay trước giờ bay ít nhất 2 tiếng<br>
+                    • Mang theo giấy tờ tùy thân hợp lệ (CMND/CCCD/Hộ chiếu)<br>
+                    • Kiểm tra kỹ hành lý theo quy định của hãng<br>
+                    • Liên hệ hotline: <strong>1900 1166</strong> nếu cần hỗ trợ
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="actions">
+                <a th:href="@{/dashboard}" class="btn btn-primary">
+                    Về trang chủ
+                </a>
+                <a th:href="@{/booking/history}" class="btn btn-secondary">
+                    Xem lịch sử đặt vé
+                </a>
+            </div>
+
+            <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e6e9ea;">
+                <p style="font-size: 13px; color: #6b7280;">
+                    Bạn sẽ nhận được email xác nhận trong vài phút tới.<br>
+                    Nếu có thắc mắc, vui lòng liên hệ <a href="mailto:support@bambooairways.com" style="color: #00693E; font-weight: 600;">support@bambooairways.com</a>
+                </p>
+            </div>
+        </div>
     </div>
 
-    <div th:if="${booking != null}" style="margin-top:12px;">
-        <p>Booking ID: <strong th:text="${booking.bookingId}">-</strong></p>
-        <p>Status: <strong th:text="${booking.status}">-</strong></p>
-    </div>
+    <script>
+        // Add animation on load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Confetti effect (simple version)
+            console.log('✈️ Thanh toán thành công!');
 
-    <div style="margin-top:18px;">
-        <a th:href="@{/}" style="color:#00693E">Back to home</a>
-    </div>
-</div>
+            // Auto scroll to top
+            window.scrollTo(0, 0);
+        });
+    </script>
 </body>
 </html>

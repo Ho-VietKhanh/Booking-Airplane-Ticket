@@ -26,7 +26,7 @@ public class BookingEntity {
     private String status;
 
     // Relationships
-    @OneToMany(mappedBy = "booking")
+    @OneToMany(mappedBy = "booking", fetch = FetchType.EAGER)
     private List<TicketEntity> tickets;
 
     @ManyToOne

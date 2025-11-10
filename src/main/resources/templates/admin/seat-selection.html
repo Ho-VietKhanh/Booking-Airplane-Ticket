@@ -492,8 +492,8 @@
                     <div class="column-label">F</div>
                 </div>
 
-                <!-- Render rows 1..30 -->
-                <div th:each="rowNum : ${#numbers.sequence(1,30)}">
+                <!-- Render rows 1..40 (increased from 30 to handle larger airplanes) -->
+                <div th:each="rowNum : ${#numbers.sequence(1,40)}">
                     <div class="seat-row">
                         <div class="row-number" th:text="${rowNum}">1</div>
 

@@ -245,9 +245,13 @@ public class BookingServiceController {
 
         var seats = seatService.getSeatsByFlightId(actualFlightId);
 
+        // ✅ Get flight info to pass base price to template
+        FlightsEntity flight = flightsRepository.findById(actualFlightId).orElse(null);
+
         model.addAttribute("seats", seats);
         model.addAttribute("flightId", actualFlightId);
         model.addAttribute("passengerCount", passengerCount);
+        model.addAttribute("flight", flight); // ✅ Add flight with basePrice
 
         return "seat-selection";
     }
@@ -275,11 +279,19 @@ public class BookingServiceController {
         var baggageOptions = additionalServiceService.getAllBaggageOptions();
         var mealOptions = additionalServiceService.getAllMealOptions();
 
+        // ✅ Get flight info to pass base price to template
+        FlightsEntity flight = flightsRepository.findById(actualFlightId).orElse(null);
+
+        // ✅ Get seats to pass seat class information
+        var seats = seatService.getSeatsByFlightId(actualFlightId);
+
         model.addAttribute("flightId", actualFlightId);
         model.addAttribute("passengerCount", passengerCount);
         model.addAttribute("baggageOptions", baggageOptions);
         model.addAttribute("mealOptions", mealOptions);
         model.addAttribute("selectedSeats", selectedSeats != null ? selectedSeats : "");
+        model.addAttribute("flight", flight); // ✅ Add flight with basePrice
+        model.addAttribute("seats", seats); // ✅ Add seats for class info
 
         return "extras-selection";
     }
@@ -538,6 +550,11 @@ public class BookingServiceController {
 
                 // Calculate ticket price
                 BigDecimal ticketPrice = flight.getBasePrice();
+
+                // ✅ Add surcharge for Business class seats (1.8 million VND more expensive)
+                if (seat != null && "Business".equalsIgnoreCase(seat.getSeatClass())) {
+                    ticketPrice = ticketPrice.add(new BigDecimal("1800000"));
+                }
 
                 // Add meal price if selected
                 if (passengerDTO.getMealId() != null) {

@@ -1,45 +1,560 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking Details</title>
+    <title>Chi Tiết Đặt Vé - Bamboo Airways</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bamboo-green: #00613A;
+            --bamboo-green-dark: #004129;
+            --bamboo-gold: #D4AF37;
+            --bamboo-light: #F7F7F7;
+            --bamboo-gray: #E5E5E5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bamboo-light);
+            padding-top: 80px;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: white !important;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            padding: 12px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .bamboo-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bamboo-logo-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--bamboo-green) 0%, var(--bamboo-green-dark) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 97, 58, 0.3);
+        }
+
+        .bamboo-logo-icon i {
+            font-size: 24px;
+            color: white;
+        }
+
+        .bamboo-logo-text .brand-name {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--bamboo-green);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .bamboo-logo-text .brand-tagline {
+            font-size: 10px;
+            color: var(--bamboo-gold);
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, var(--bamboo-green), var(--bamboo-green-dark));
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .page-header h1 {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        /* Back Button */
+        .btn-back {
+            background: white;
+            color: var(--bamboo-green);
+            border: 2px solid var(--bamboo-green);
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .btn-back:hover {
+            background: var(--bamboo-green);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 97, 58, 0.3);
+        }
+
+        /* Booking Info Card */
+        .booking-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-left: 5px solid var(--bamboo-green);
+        }
+
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--bamboo-gray);
+        }
+
+        .booking-id {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--bamboo-green);
+        }
+
+        .booking-status {
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .status-CONFIRMED, .status-COMPLETED {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-PENDING, .status-PENDING_PAYMENT {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .status-CANCELLED {
+            background: #dc3545;
+            color: white;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .info-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--bamboo-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bamboo-green);
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .info-content h6 {
+            margin: 0;
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-content p {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .total-amount {
+            background: linear-gradient(135deg, var(--bamboo-green), var(--bamboo-green-dark));
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .total-amount h5 {
+            font-size: 14px;
+            margin-bottom: 5px;
+            opacity: 0.9;
+        }
+
+        .total-amount .amount {
+            font-size: 36px;
+            font-weight: 800;
+        }
+
+        /* Tickets Section */
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--bamboo-green);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ticket-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 1px solid var(--bamboo-gray);
+        }
+
+        .ticket-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(0, 97, 58, 0.15);
+            border-color: var(--bamboo-green);
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--bamboo-gray);
+        }
+
+        .ticket-id {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--bamboo-green);
+        }
+
+        .ticket-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--bamboo-gold);
+        }
+
+        .ticket-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .ticket-info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ticket-info-item label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        .ticket-info-item span {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .badge {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .badge-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+        }
+
+        .empty-state i {
+            font-size: 60px;
+            color: var(--bamboo-gray);
+            margin-bottom: 15px;
+        }
+
+        .empty-state h4 {
+            color: #666;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bamboo-green);
+            color: white;
+            padding: 40px 0 20px;
+            margin-top: 80px;
+        }
+
+        .footer h5 {
+            color: var(--bamboo-gold);
+            margin-bottom: 15px;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .footer a:hover {
+            color: var(--bamboo-gold);
+        }
+
+        @media (max-width: 768px) {
+            .booking-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ticket-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Booking Details</h1>
-        <button class="btn" onclick="window.location.href='/booking/list'">Back to List</button>
 
-        <div class="booking-info">
-            <div class="info-row"><span class="label">Booking ID:</span> <span th:text="${booking.bookingId}"></span></div>
-            <div class="info-row"><span class="label">Booking Time:</span> <span th:text="${#temporals.format(booking.bookingTime, 'yyyy-MM-dd HH:mm:ss')}"></span></div>
-            <div class="info-row"><span class="label">Total Amount:</span> <span th:text="${'$' + #numbers.formatDecimal(booking.totalAmount, 1, 2)}"></span></div>
-            <div class="info-row"><span class="label">Status:</span> <span th:text="${booking.status}"></span></div>
-            <div class="info-row"><span class="label">Payment ID:</span> <span th:text="${booking.paymentId}"></span></div>
-            <div class="info-row"><span class="label">User ID:</span> <span th:text="${booking.userId}"></span></div>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/dashboard}">
+            <div class="bamboo-logo">
+                <div class="bamboo-logo-icon">
+                    <i class="fas fa-plane"></i>
+                </div>
+                <div class="bamboo-logo-text">
+                    <span class="brand-name">Bamboo Airways</span>
+                    <span class="brand-tagline">Bay Xanh Bay Xa</span>
+                </div>
+            </div>
+        </a>
+    </div>
+</nav>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-ticket-alt"></i> Chi Tiết Đặt Vé</h1>
+        <p>Xem thông tin chi tiết về booking và vé máy bay của bạn</p>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container mb-5">
+    <!-- Back Button -->
+    <a th:href="@{/booking/history}" class="btn-back">
+        <i class="fas fa-arrow-left"></i> Quay lại lịch sử
+    </a>
+
+    <!-- Booking Information -->
+    <div class="booking-card">
+        <div class="booking-header">
+            <div>
+                <div class="booking-id">
+                    <i class="fas fa-bookmark"></i> Mã đặt vé: <span th:text="${booking.bookingId}">BK001</span>
+                </div>
+            </div>
+            <div>
+                <span class="booking-status"
+                      th:classappend="${'status-' + booking.status}"
+                      th:text="${booking.status}">
+                    PENDING
+                </span>
+            </div>
         </div>
 
-        <h2>Tickets</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Ticket ID</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                    <th>Flight ID</th>
-                    <th>Seat ID</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="ticket : ${tickets}">
-                    <td th:text="${ticket.ticketId}"></td>
-                    <td th:text="${'$' + #numbers.formatDecimal(ticket.price, 1, 2)}"></td>
-                    <td th:text="${ticket.status}"></td>
-                    <td th:text="${ticket.flightId}"></td>
-                    <td th:text="${ticket.seatId}"></td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-icon">
+                    <i class="far fa-calendar-alt"></i>
+                </div>
+                <div class="info-content">
+                    <h6>Ngày đặt</h6>
+                    <p th:text="${#temporals.format(booking.bookingTime, 'dd/MM/yyyy HH:mm')}">10/11/2025 14:30</p>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-icon">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div class="info-content">
+                    <h6>Mã thanh toán</h6>
+                    <p th:text="${booking.paymentId != null ? booking.paymentId : 'Chưa có'}">PAY001</p>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="info-content">
+                    <h6>Mã khách hàng</h6>
+                    <p th:text="${booking.userId != null ? booking.userId : 'Khách vãng lai'}">USER001</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="total-amount">
+            <h5>Tổng tiền thanh toán</h5>
+            <div class="amount">
+                <span th:text="${#numbers.formatDecimal(booking.totalAmount, 0, 'COMMA', 0, 'POINT')}">2,500,000</span> VNĐ
+            </div>
+        </div>
     </div>
+
+    <!-- Tickets Section -->
+    <div class="section-title">
+        <i class="fas fa-plane-departure"></i> Danh Sách Vé
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" th:if="${tickets == null || tickets.isEmpty()}">
+        <i class="fas fa-inbox"></i>
+        <h4>Không có vé nào</h4>
+        <p class="text-muted">Chưa có thông tin vé cho booking này</p>
+    </div>
+
+    <!-- Tickets List -->
+    <div th:if="${tickets != null && !tickets.isEmpty()}">
+        <div class="ticket-card" th:each="ticket : ${tickets}">
+            <div class="ticket-header">
+                <div class="ticket-id">
+                    <i class="fas fa-ticket-alt"></i> Vé: <span th:text="${ticket.ticketId}">TK001</span>
+                </div>
+                <div class="ticket-price">
+                    <span th:text="${#numbers.formatDecimal(ticket.price, 0, 'COMMA', 0, 'POINT')}">1,200,000</span> VNĐ
+                </div>
+            </div>
+
+            <div class="ticket-info">
+                <div class="ticket-info-item">
+                    <label>Trạng thái</label>
+                    <span>
+                        <span class="badge"
+                              th:classappend="${ticket.status == 'CONFIRMED' || ticket.status == 'COMPLETED' ? 'badge-success' :
+                                               (ticket.status == 'PENDING' ? 'badge-warning' : 'badge-danger')}"
+                              th:text="${ticket.status}">
+                            PENDING
+                        </span>
+                    </span>
+                </div>
+
+                <div class="ticket-info-item">
+                    <label>Mã chuyến bay</label>
+                    <span th:text="${ticket.flightId != null ? ticket.flightId : 'N/A'}">FL-001</span>
+                </div>
+
+                <div class="ticket-info-item">
+                    <label>Mã ghế</label>
+                    <span th:text="${ticket.seatId != null ? ticket.seatId : 'Chưa chọn'}">A1</span>
+                </div>
+
+                <div class="ticket-info-item">
+                    <label>Giá vé</label>
+                    <span th:text="${#numbers.formatDecimal(ticket.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">1,200,000 VNĐ</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="alert alert-info mt-4" th:if="${tickets != null && !tickets.isEmpty()}">
+        <i class="fas fa-info-circle"></i>
+        <strong>Tổng số vé:</strong> <span th:text="${tickets.size()}">0</span> vé
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <h5><i class="fas fa-plane-departure"></i> BAMBOO AIRWAYS</h5>
+                <p>Hãng hàng không 5 sao đầu tiên của Việt Nam</p>
+            </div>
+            <div class="col-md-4 mb-4">
+                <h5>Liên Hệ</h5>
+                <p><i class="fas fa-phone"></i> Hotline: 1900 1166</p>
+                <p><i class="fas fa-envelope"></i> Email: info@bambooairways.com</p>
+            </div>
+            <div class="col-md-4 mb-4">
+                <h5>Thông Tin</h5>
+                <a href="#">Về chúng tôi</a>
+                <a href="#">Điều khoản sử dụng</a>
+                <a href="#">Chính sách bảo mật</a>
+            </div>
+        </div>
+        <div class="text-center pt-3 border-top border-secondary">
+            <p>&copy; 2025 Bamboo Airways. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
